@@ -1,0 +1,64 @@
+#!/usr/bin/bash
+
+# https://ccache.dev
+
+declare -r reset="\033[0m"
+declare -r red="\033[0;31m"
+declare -r green="\033[0;32m"
+
+__usage()
+{
+  echo "Usage: $(basename "${BASH_SOURCE[0]}") <version>"
+  exit 2
+}
+
+__success() {
+  echo -e "${green}Success: $*${reset}"
+}
+
+__error() {
+  echo -e "${red}Error: $*${reset}" 1>&2
+  exit 1
+}
+
+declare -r version=${1#v}
+
+if [[ -z $version ]]
+then
+  __usage
+fi
+
+# https://manpages.debian.org/gpg
+if ! gpg --list-public-keys '5A939A71A46792CF57866A51996DDA075594ADB8' > /dev/null 2>&1
+then
+  gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys '5A939A71A46792CF57866A51996DDA075594ADB8'
+fi
+
+declare -r binary="ccache-$version-linux-x86_64.tar.xz"
+declare -r binary_uri="https://github.com/ccache/ccache/releases/download/v$version/$binary"
+declare -r binary_output="$HOME/tmp/$binary"
+
+declare -r signature="ccache-$version-linux-x86_64.tar.xz.asc"
+declare -r signature_uri="https://github.com/ccache/ccache/releases/download/v$version/$signature"
+declare -r signature_output="$HOME/tmp/$signature"
+
+# https://manpages.debian.org/curl
+curl --location \
+  --output "$signature_output" "$signature_uri" \
+  --output "$binary_output" "$binary_uri"
+
+if ! gpg --verify "$signature_output" "$binary_output"
+then
+  __error "Signature verification failed"
+fi
+
+# https://manpages.debian.org/tar
+tar --extract --xz --file "$binary_output" --directory "$HOME/tmp"
+
+declare -r executable="${binary_output%.tar.xz}/ccache"
+declare -r executable_output="$HOME/.local/bin"
+
+# https://manpages.debian.org/mv
+mv --verbose "$executable" "$executable_output"
+
+__success "Installed $executable to $executable_output"
