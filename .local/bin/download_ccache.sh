@@ -16,8 +16,7 @@ declare -r version=${1#v}
 output_dir=$(mktemp --directory)
 declare -r output_dir
 
-__usage()
-{
+__usage() {
   echo "Usage: $(basename "${BASH_SOURCE[0]}") <version>"
   exit 2
 }
@@ -31,8 +30,7 @@ __error() {
   exit 1
 }
 
-__cleanup ()
-{
+__cleanup () {
   echo "Cleaning up temporary directory: $output_dir"
   # https://manpages.debian.org/rm
   rm --recursive "$output_dir"
