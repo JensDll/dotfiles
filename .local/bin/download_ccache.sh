@@ -1,5 +1,9 @@
 #!/usr/bin/bash
 
+# To run directly from GitHub, use the following command
+# and replace <version> with the ccache version:
+# bash -s - <version> <<< "$(curl --location https://raw.githubusercontent.com/JensDll/dotfiles/main/.local/bin/download_ccache.sh)"
+
 # https://ccache.dev
 
 declare -r reset="\033[0m"
