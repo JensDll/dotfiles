@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 # To run directly from source, use the following command and replace <version> with the ccache version:
 # bash -s <version> < <(curl --location --fail --silent --show-error https://raw.githubusercontent.com/JensDll/dotfiles/main/.local/bin/install_ccache.sh)
