@@ -89,4 +89,5 @@ if [[ -d $PYENV_ROOT ]]; then
   eval "$(pyenv init -)"
 fi
 
-[[ -s "/home/jens/.gvm/scripts/gvm" ]] && source "/home/jens/.gvm/scripts/gvm"
+export GVM_DIR="$HOME/.gvm"
+[[ -s "$GVM_DIR/scripts/gvm" ]] && source "$GVM_DIR/scripts/gvm"
