@@ -1,8 +1,7 @@
 #!/usr/bin/bash
 
-# To run directly from source, use the following command
-# and replace <version> with the ccache version:
-# bash -s - <version> <<< "$(curl --location --fail --silent --show-error https://raw.githubusercontent.com/JensDll/dotfiles/main/.local/bin/download_ccache.sh)"
+# To run directly from source, use the following command and replace <version> with the ccache version:
+# bash -s <version> < <(curl --location --fail --silent --show-error https://raw.githubusercontent.com/JensDll/dotfiles/main/.local/bin/download_ccache.sh)
 
 # https://ccache.dev
 
