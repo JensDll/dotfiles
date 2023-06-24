@@ -9,7 +9,6 @@ indent_size = 2
 tab_width = 2
 
 [{*.sh,.bash_aliases,.bash_logout,.bashrc,.profile}]
-shell_variant = bash
 binary_next_line = true
 switch_case_indent = false
 space_redirects = true
