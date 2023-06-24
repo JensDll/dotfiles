@@ -28,11 +28,11 @@ shopt -s checkwinsize
 
 # https://manpages.debian.org/tput
 # https://manpages.debian.org/terminfo
-[[ -x /usr/bin/tput ]] && tput setaf 1>/dev/null 2>&1 && color_prompt=yes
+[[ -x /usr/bin/tput ]] && tput setaf 1> /dev/null 2>&1 && color_prompt=yes
 
 __git_branchname() {
   local branch
-  branch=$(git branch --show-current 2>/dev/null)
+  branch=$(git branch --show-current 2> /dev/null)
 
   if [[ -n $branch ]]; then
     echo "($branch)"
