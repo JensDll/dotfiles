@@ -44,12 +44,18 @@ __cleanup() {
 }
 
 __check_option() {
-  [[ -z $1 ]] && __error "Missing value for option $2" && __usage
+  if [[ -z $1 ]]; then
+    __error "Missing value for option $2"
+    __usage
+  fi
 }
 
 ############ ARGUMENTS ############
 declare -r version=${1#v}
-[[ -z $version ]] && __error "Missing value for argument <version>" && __usage
+if [[ -z $version ]]; then
+  __error "Missing value for argument <version>"
+  __usage
+fi
 ############ ARGUMENTS ############
 
 ############ OPTIONS ############
