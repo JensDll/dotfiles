@@ -18,7 +18,11 @@ Options: [defaults in brackets after descriptions]
   --help|-h|-?      print this message
   --install-dir     directory in which to install   [$HOME/.local/bin]
 EOF
-  exit 2
+
+  if [[ $1 != --no-exit ]]
+  then
+    exit 2
+  fi
 }
 
 __success() {
@@ -28,6 +32,11 @@ __success() {
 
 __error() {
   echo -e "${red}Error: $*${reset}" 1>&2
+}
+
+__error_and_exit() {
+  echo -e "${red}Error: $*${reset}" 1>&2
+  exit 1
 }
 
 __cleanup () {
@@ -54,7 +63,8 @@ do
 
   case "$option" in
   -\?|-help|-h)
-    __usage
+    __usage --no-exit
+    exit 0
     ;;
   -install-dir)
     shift
@@ -99,12 +109,12 @@ if ! curl --location --fail --fail-early \
   --output "$signature_output" "$signature_uri" \
   --output "$binary_output" "$binary_uri"
 then
-  __error "Failed to download ccache binary release and signature"
+  __error_and_exit "Failed to download ccache binary and signature"
 fi
 
 if ! gpg --verify "$signature_output" "$binary_output"
 then
-  __error "Signature verification failed"
+  __error_and_exit "Signature verification failed"
 fi
 
 # https://manpages.debian.org/tar/tar
