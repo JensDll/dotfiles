@@ -4,8 +4,8 @@
 
 # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Is-this-Shell-Interactive_003f
 if [[ -z $PS1 ]]; then
-	# Skip when running non-interactive
-	return
+  # Skip when running non-interactive
+  return
 fi
 
 # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-HISTCONTROL
@@ -31,12 +31,12 @@ shopt -s checkwinsize
 [[ -x /usr/bin/tput ]] && tput setaf 1>/dev/null 2>&1 && color_prompt=yes
 
 __git_branchname() {
-	local branch
-	branch=$(git branch --show-current 2>/dev/null)
+  local branch
+  branch=$(git branch --show-current 2>/dev/null)
 
-	if [[ -n $branch ]]; then
-		echo "($branch)"
-	fi
+  if [[ -n $branch ]]; then
+    echo "($branch)"
+  fi
 }
 
 # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-PS1
@@ -48,9 +48,9 @@ __git_branchname() {
 #   \]  End a sequence of non-printing characters
 # See https://stackoverflow.com/a/33206814/13332128 for information about the ANSI color syntax
 if [[ $color_prompt = yes ]]; then
-	PS1='${debian_chroot:+($debian_chroot)}\[\033[1;32m\]\u@\h\[\033[00m\]:\[\033[1;34m\]\w\[\033[36m\]$(__git_branchname)\[\033[00m\]\$ '
+  PS1='${debian_chroot:+($debian_chroot)}\[\033[1;32m\]\u@\h\[\033[00m\]:\[\033[1;34m\]\w\[\033[36m\]$(__git_branchname)\[\033[00m\]\$ '
 else
-	PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+  PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
 
 [[ $TERM = xterm* || $TERM = rxvt* ]] && PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
@@ -58,25 +58,25 @@ fi
 unset color_prompt
 
 if [[ -x /usr/bin/dircolors ]]; then
-	# https://manpages.debian.org/dircolors
-	if [[ -r $HOME/.dircolors ]]; then
-		eval "$(dircolors --bourne-shell "$HOME/.dircolors")"
-	else
-		eval "$(dircolors --bourne-shell)"
-	fi
+  # https://manpages.debian.org/dircolors
+  if [[ -r $HOME/.dircolors ]]; then
+    eval "$(dircolors --bourne-shell "$HOME/.dircolors")"
+  else
+    eval "$(dircolors --bourne-shell)"
+  fi
 fi
 
 # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-shopt
 if ! shopt -oq posix; then
-	if [[ -f /usr/share/bash-completion/bash_completion ]]; then
-		source /usr/share/bash-completion/bash_completion
-	elif [[ -f /etc/bash_completion ]]; then
-		source /etc/bash_completion
-	fi
+  if [[ -f /usr/share/bash-completion/bash_completion ]]; then
+    source /usr/share/bash-completion/bash_completion
+  elif [[ -f /etc/bash_completion ]]; then
+    source /etc/bash_completion
+  fi
 fi
 
 if [[ -f $HOME/.bash_aliases ]]; then
-	source "$HOME/.bash_aliases"
+  source "$HOME/.bash_aliases"
 fi
 
 export NVM_DIR="$HOME/.nvm"
@@ -85,8 +85,8 @@ export NVM_DIR="$HOME/.nvm"
 
 export PYENV_ROOT="$HOME/.pyenv"
 if [[ -d $PYENV_ROOT ]]; then
-	export PATH="$PYENV_ROOT/bin:$PATH"
-	eval "$(pyenv init -)"
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init -)"
 fi
 
 [[ -s "/home/jens/.gvm/scripts/gvm" ]] && source "/home/jens/.gvm/scripts/gvm"

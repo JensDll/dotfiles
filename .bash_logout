@@ -4,5 +4,5 @@
 
 # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-SHLVL
 if [[ "$SHLVL" = 1 ]]; then
-	[[ -x /usr/bin/clear_console ]] && /usr/bin/clear_console -q
+  [[ -x /usr/bin/clear_console ]] && /usr/bin/clear_console -q
 fi
