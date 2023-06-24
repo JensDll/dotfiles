@@ -70,6 +70,10 @@ while [[ $# -gt 0 ]]; do
   -install-dir=*)
     install_dir="${option#*=}"
     ;;
+  -*)
+    __error "Unknown option $1"
+    __usage
+    ;;
   esac
 
   shift
