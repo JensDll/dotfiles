@@ -1,11 +1,11 @@
 [user]
-	# https://git-scm.com/docs/git-config#Documentation/git-config.txt-username
-	name = jens
-	# https://git-scm.com/docs/git-config#Documentation/git-config.txt-useremail
-	email = jens@doellmann.com
+# https://git-scm.com/docs/git-config#Documentation/git-config.txt-username
+name = jens
+# https://git-scm.com/docs/git-config#Documentation/git-config.txt-useremail
+email = jens@doellmann.com
 [core]
-	# https://git-scm.com/docs/git-config#Documentation/git-config.txt-coreeditor
-	editor = code --wait
+# https://git-scm.com/docs/git-config#Documentation/git-config.txt-coreeditor
+editor = code --wait
 [init]
-	# https://git-scm.com/docs/git-config#Documentation/git-config.txt-initdefaultBranch
-	defaultBranch = main
+# https://git-scm.com/docs/git-config#Documentation/git-config.txt-initdefaultBranch
+defaultBranch = main

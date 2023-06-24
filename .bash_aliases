@@ -18,21 +18,18 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 
 # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-type
 
-if [[ $(type -t kubectl) = file ]]
-then
-  alias k=kubectl
-  source <(kubectl completion bash)
-  complete -F __start_kubectl k
+if [[ $(type -t kubectl) = file ]]; then
+	alias k=kubectl
+	source <(kubectl completion bash)
+	complete -F __start_kubectl k
 fi
 
-if [[ $(type -t helm) = file ]]
-then
-  alias h=helm
-  source <(helm completion bash)
-  complete -F __start_helm h
+if [[ $(type -t helm) = file ]]; then
+	alias h=helm
+	source <(helm completion bash)
+	complete -F __start_helm h
 fi
 
-if [[ $(type -t linode-cli) = file ]]
-then
-  source <(linode-cli completion bash)
+if [[ $(type -t linode-cli) = file ]]; then
+	source <(linode-cli completion bash)
 fi
