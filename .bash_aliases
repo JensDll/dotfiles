@@ -7,6 +7,9 @@ alias ls='ls --color=auto -F'
 alias ll='ls --all -l'
 alias la='ls --almost-all'
 
+# https://manpages.debian.org/tree
+alias lt='tree --dirsfirst -C -L 1 -a'
+
 # https://manpages.debian.org/grep
 alias grep='grep --color=auto'
 

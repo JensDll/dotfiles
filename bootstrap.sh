@@ -12,10 +12,10 @@ __bootstrap() {
     --exclude '.git/' \
     --exclude 'bootstrap.sh' \
     --exclude 'scripts/' \
-    "$source" "$HOME"
+    "$source" "$HOME";
 }
 
-if [[ $1 == --force || $1 == -f ]]; then
+if [[ $1 == --yes || $1 == -y ]]; then
   __bootstrap
 else
   # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-read
