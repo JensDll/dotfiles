@@ -10,12 +10,13 @@ __bootstrap() {
   # https://manpages.debian.org/rsync/rsync
   rsync --no-perms --archive --verbose --human-readable \
     --exclude '.git/' \
-    --exclude 'bootstrap.sh' \
+    --exclude '.github/' \
     --exclude 'scripts/' \
+    --exclude 'bootstrap.sh' \
     "$source" "$HOME";
 }
 
-if [[ $1 == --yes || $1 == -y ]]; then
+if [[ $1 = --yes || $1 = -y ]]; then
   __bootstrap
 else
   # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-read
