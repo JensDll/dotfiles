@@ -1,0 +1,21 @@
+name: Analysis
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  linting:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: scripts
+    steps:
+      - name: Checking out the repository
+        uses: actions/checkout@v3.5.3
+
+      - name: Running ShellCheck
+        run: ./lint.sh
