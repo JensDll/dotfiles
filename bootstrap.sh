@@ -13,7 +13,7 @@ __bootstrap() {
     --exclude '.github/' \
     --exclude 'scripts/' \
     --exclude 'bootstrap.sh' \
-    "$source" "$HOME";
+    "$source" "$HOME"
 }
 
 if [[ $1 = --yes || $1 = -y ]]; then
