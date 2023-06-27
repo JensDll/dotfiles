@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # To run directly from source, use the following command and replace <version> with the ccache version:
-# bash -s <version> < <(curl --location --fail --silent --show-error https://raw.githubusercontent.com/JensDll/dotfiles/main/.local/bin/install_ccache.sh)
+# bash -s <version> < <(curl --location --fail --silent --show-error https://raw.githubusercontent.com/JensDll/dotfiles/main/.local/bin/install-ccache.sh)
 
 # https://ccache.dev
 
@@ -14,11 +14,13 @@ __usage() {
   cat << EOF
 Usage: $(basename "${BASH_SOURCE[0]}") <version> [options]
 Options: [defaults in brackets after descriptions]
-  --help|-h|-?      print this message
-  --install-dir     directory in which to install   [$HOME/.local/bin]
+  --help -h -?    print this message
+  --prefix        directory in which to install    [$HOME/.local/bin]
 EOF
 
-  if [[ $1 != --no-exit ]]; then
+  if [[ $1 == --success ]]; then
+    exit 0
+  else
     exit 2
   fi
 }
@@ -43,52 +45,58 @@ __cleanup() {
   rm --recursive "$1"
 }
 
-__check_option() {
+__check_argument() {
   if [[ -z $1 ]]; then
-    __error "Missing value for option $2"
+    __error "Missing value for argument <$2>"
     __usage
   fi
 }
 
-############ ARGUMENTS ############
-declare -r version=${1#v}
-if [[ -z $version ]]; then
-  __error "Missing value for argument <version>"
-  __usage
-fi
-############ ARGUMENTS ############
-
-############ OPTIONS ############
-install_dir="$HOME/.local/bin"
-
-while [[ $# -gt 0 ]]; do
-  declare -l option="${1/#--/-}"
-
-  case "$option" in
-  -\? | -help | -h)
-    __usage --no-exit
-    exit 0
-    ;;
-  -install-dir)
-    shift
-    install_dir="$1"
-    ;;
-  -install-dir=*)
-    install_dir="${option#*=}"
-    ;;
-  -*)
-    __error "Unknown option $1"
+__check_option() {
+  if [[ -z $1 ]]; then
+    __error "Missing value for option --$2"
     __usage
-    ;;
-  esac
+  fi
+}
 
-  shift
-done
+__parse_parameters() {
+  local -a arguments
 
-declare -r install_dir
+  while [[ $# -gt 0 ]]; do
+    local -l option="${1/#--/-}"
 
-__check_option "$install_dir" '--install-dir'
-############ OPTIONS ############
+    case "$option" in
+    -\? | -help | -h)
+      __usage --success
+      ;;
+    -prefix)
+      shift
+      prefix="$1"
+      ;;
+    -prefix=*)
+      prefix="${option#*=}"
+      ;;
+    -*)
+      __error "Unknown option $1"
+      __usage
+      ;;
+    *)
+      arguments+=("$1")
+      ;;
+    esac
+
+    shift
+  done
+
+  version=${arguments[0]#v}
+
+  __check_argument "$version" version
+
+  __check_option "$prefix" prefix
+}
+
+__parse_parameters "$@"
+declare -r version prefix
 
 # https://manpages.debian.org/coreutils/mktemp
 temp_dir=$(mktemp --directory)
@@ -127,8 +135,8 @@ tar --extract --xz --file "$binary_output" --directory "$temp_dir"
 declare -r executable="${binary_output%.tar.xz}/ccache"
 
 # https://manpages.debian.org/coreutils/mkdir
-mkdir --parents "$install_dir"
+mkdir --parents "$prefix"
 # https://manpages.debian.org/coreutils/mv
-mv --target-directory="$install_dir" "$executable"
+mv --target-directory="$prefix" "$executable"
 
-__success "Installed $executable to $install_dir"
+__success "Installed $executable to $prefix"
