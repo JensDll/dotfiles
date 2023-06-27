@@ -62,6 +62,8 @@ __check_option() {
 __parse_parameters() {
   local -a arguments
 
+  prefix="$HOME/.local/bin"
+
   while [[ $# -gt 0 ]]; do
     local -l option="${1/#--/-}"
 
