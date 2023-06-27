@@ -76,7 +76,7 @@ __parse_parameters() {
       prefix="$1"
       ;;
     -prefix=*)
-      prefix="${option#*=}"
+      prefix="${option:8}"
       ;;
     -*)
       __error "Unknown option $1"
