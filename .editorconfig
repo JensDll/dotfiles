@@ -6,7 +6,6 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 indent_style = space
 indent_size = 2
-tab_width = 2
 
 [{*.sh,.bash_aliases,.bash_logout,.bashrc,.profile}]
 binary_next_line = true
@@ -14,3 +13,6 @@ switch_case_indent = false
 space_redirects = true
 keep_padding = true
 function_next_line = false
+
+[*.py]
+indent_size = 4
