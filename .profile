@@ -16,4 +16,4 @@ if [ -d "$HOME/.local/bin" ]; then
   PATH="$HOME/.local/bin:$PATH"
 fi
 
-export PATH="$PATH:/home/jens/.local/share/JetBrains/Toolbox/scripts"
+PATH="/opt/texlive/2023/bin/x86_64-linux:$PATH:/home/jens/.local/share/JetBrains/Toolbox/scripts"
