@@ -30,15 +30,6 @@ shopt -s checkwinsize
 # https://manpages.debian.org/terminfo
 [[ -x /usr/bin/tput ]] && tput setaf 1> /dev/null 2>&1 && color_prompt=yes
 
-__git_branchname() {
-  local branch
-  branch=$(git branch --show-current 2> /dev/null)
-
-  if [[ -n $branch ]]; then
-    echo "($branch)"
-  fi
-}
-
 # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-PS1
 # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Controlling-the-Prompt
 #   \u  The username of the current user
@@ -48,7 +39,7 @@ __git_branchname() {
 #   \]  End a sequence of non-printing characters
 # See https://stackoverflow.com/a/33206814/13332128 for information about the ANSI color syntax
 if [[ $color_prompt = yes ]]; then
-  PS1='${debian_chroot:+($debian_chroot)}\[\033[1;32m\]\u@\h\[\033[00m\]:\[\033[1;34m\]\w\[\033[36m\]$(__git_branchname)\[\033[00m\]\$ '
+  PS1='${debian_chroot:+($debian_chroot)}\[\033[1;32m\]\u@\h\[\033[00m\]:\[\033[1;34m\]\w\[\033[36m\]$(__git_ps1 "(%s)")\[\033[00m\]\$ '
 else
   PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
