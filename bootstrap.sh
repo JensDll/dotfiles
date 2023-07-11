@@ -6,7 +6,17 @@ source="$(
 )/"
 declare -r source
 
+shopt -s expand_aliases
+
+# shellcheck source=/dev/null
+source "$source/.bash_aliases"
+
 __bootstrap() {
+  if type -f nvim > /dev/null 2>&1; then
+    nvim_config=$(nvim --noplugin --headless -c "call writefile([stdpath('config')], '/dev/stdout', 'b') | q")
+    echo "Nvim config: $nvim_config"
+  fi
+
   # https://manpages.debian.org/rsync/rsync
   rsync --no-perms --archive --verbose --human-readable \
     --exclude '.git/' \

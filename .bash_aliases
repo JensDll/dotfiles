@@ -16,6 +16,13 @@ alias grep='grep --color=auto'
 # https://manpages.debian.org/clear
 alias cls='clear'
 
+# https://neovim.io/doc/user
+if flatpak list --app --columns=application | grep io.neovim.nvim > /dev/null; then
+  alias vi='flatpak run io.neovim.nvim'
+  alias vim='flatpak run io.neovim.nvim'
+  alias nvim='flatpak run io.neovim.nvim'
+fi
+
 # Used like: `sleep 10; alert`
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
