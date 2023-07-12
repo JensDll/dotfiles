@@ -38,7 +38,7 @@ EOF
     fi
 
     if [[ $default_nvim_data_home != "$nvim_data_home" ]]; then
-    cat << EOF
+      cat << EOF
 
 [Neovim] Detected a non-default ($default_nvim_data_home) data directory, also copying files to: $nvim_data_home
 [Neovim] See https://neovim.io/doc/user/starting.html#standard-path

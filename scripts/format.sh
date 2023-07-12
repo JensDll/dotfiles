@@ -7,3 +7,5 @@ root="$(
 declare -r root
 
 shfmt -w "$root" "$root/.bash_aliases" "$root/.bash_logout" "$root/.bashrc" "$root/.profile"
+
+stylua "$root/.config/nvim"
