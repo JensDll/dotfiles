@@ -14,11 +14,10 @@ __bootstrap() {
   # https://manpages.debian.org/rsync/rsync
   rsync --no-perms --archive --verbose --human-readable --exclude-from="$root/.rsyncignore" "$root/" "$HOME"
 
-  # https://neovim.io/doc/user/builtin.html#writefile()
-  # https://neovim.io/doc/user/builtin.html#stdpath()
-
   if type -f nvim > /dev/null 2>&1; then
     # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-mapfile
+    # https://neovim.io/doc/user/builtin.html#writefile()
+    # https://neovim.io/doc/user/builtin.html#stdpath()
     mapfile -t < <(nvim --noplugin --headless --cmd 'call writefile([stdpath("config"), stdpath("data")], "/dev/stdout", "b") | q')
 
     local -r nvim_config_home="${MAPFILE[0]}"
@@ -28,7 +27,7 @@ __bootstrap() {
     local -r default_nvim_data_home="$HOME/.local/share/nvim"
 
     if [[ $default_nvim_config_home != "$nvim_config_home" ]]; then
-      cat <<- EOF
+      cat << EOF
 
 [Neovim] Detected a non-default ($default_nvim_config_home) config directory, also copying files to: $nvim_config_home
 [Neovim] See https://neovim.io/doc/user/starting.html#standard-path
@@ -39,7 +38,7 @@ EOF
     fi
 
     if [[ $default_nvim_data_home != "$nvim_data_home" ]]; then
-    cat <<- EOF
+    cat << EOF
 
 [Neovim] Detected a non-default ($default_nvim_data_home) data directory, also copying files to: $nvim_data_home
 [Neovim] See https://neovim.io/doc/user/starting.html#standard-path
