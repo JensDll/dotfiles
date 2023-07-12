@@ -3,7 +3,7 @@
 # shellcheck disable=SC1091
 
 # https://manpages.debian.org/ls
-alias ls='ls --color=auto -F'
+alias ls='ls --color=auto -F --group-directories-first'
 alias ll='ls --all -l'
 alias la='ls --almost-all'
 
