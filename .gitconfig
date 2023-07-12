@@ -9,3 +9,5 @@
 [init]
   # https://git-scm.com/docs/git-config#Documentation/git-config.txt-initdefaultBranch
   defaultBranch = main
+[alias]
+  supdate = submodule update --remote --merge
