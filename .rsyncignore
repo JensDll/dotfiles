@@ -1,0 +1,7 @@
+.git/
+.github/
+scripts/
+.gitignore
+.gitmodules
+.rsyncignore
+bootstrap.sh
