@@ -12,22 +12,24 @@ source "$root/.bash_aliases"
 
 __bootstrap() {
   # https://manpages.debian.org/rsync/rsync
-  rsync --no-perms --archive --verbose --human-readable \
-    --exclude '.git/' \
-    --exclude '.github/' \
-    --exclude 'scripts/' \
-    --exclude 'bootstrap.sh' \
-    --exclude 'texlive2023profile' \
-    "$root/" "$HOME"
+  rsync --no-perms --archive --verbose --human-readable --exclude-from="$root/.rsyncignore" "$root/" "$HOME"
+
+  # https://neovim.io/doc/user/builtin.html#writefile()
+  # https://neovim.io/doc/user/builtin.html#stdpath()
 
   if type -f nvim > /dev/null 2>&1; then
-    # https://neovim.io/doc/user/builtin.html#writefile()
-    local -r nvim_config_home=$(nvim --noplugin --headless -c 'call writefile([stdpath("config")], "/dev/stdout", "b") | q')
+    local -r nvim_config_home=$(nvim --noplugin --headless --cmd 'call writefile([stdpath("config")], "/dev/stdout", "b") | q')
     local -r default_nvim_config_home="$HOME/.config/nvim"
 
-    if [[ $nvim_config_home != "$default_nvim_config_home" ]]; then
-      # https://manpages.debian.org/coreutils/ln
-      ln --symbolic --verbose --no-dereference --force "$default_nvim_config_home" "$nvim_config_home"
+    local -r nvim_data_home=$(nvim --noplugin --headless --cmd 'call writefile([stdpath("data")], "/dev/stdout", "b") | q')
+    local -r default_nvim_data_home="$HOME/.local/share/nvim"
+
+    if [[ $default_nvim_config_home != "$nvim_config_home" ]]; then
+      rsync --no-perms --archive --verbose --human-readable --exclude-from="$root/.rsyncignore" "$default_nvim_config_home/" "$nvim_config_home"
+    fi
+
+    if [[ $default_nvim_data_home != "$nvim_data_home" ]]; then
+      rsync --no-perms --archive --verbose --human-readable --exclude-from="$root/.rsyncignore" "$default_nvim_data_home/" "$nvim_data_home"
     fi
   fi
 }
