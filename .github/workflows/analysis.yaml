@@ -12,10 +12,9 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: scripts
     steps:
       - name: Checking out the repository
         uses: actions/checkout@v3.5.3
 
       - name: Running ShellCheck
-        run: ./lint.sh
+        run: ./scripts/lint.sh
