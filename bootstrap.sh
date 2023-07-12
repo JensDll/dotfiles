@@ -34,7 +34,7 @@ __bootstrap() {
 
 EOF
 
-      rsync --no-perms --archive --verbose --human-readable --exclude-from="$root/.rsyncignore" "$default_nvim_config_home/" "$nvim_config_home"
+      rsync --no-perms --archive --verbose --human-readable "$default_nvim_config_home/" "$nvim_config_home"
     fi
 
     if [[ $default_nvim_data_home != "$nvim_data_home" ]]; then
@@ -45,7 +45,7 @@ EOF
 
 EOF
 
-      rsync --no-perms --archive --verbose --human-readable --exclude-from="$root/.rsyncignore" "$default_nvim_data_home/" "$nvim_data_home"
+      rsync --no-perms --archive --verbose --human-readable "$default_nvim_data_home/" "$nvim_data_home"
     fi
   fi
 }
