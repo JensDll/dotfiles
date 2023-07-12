@@ -1,29 +1,29 @@
 #!/usr/bin/env bash
 
-source="$(
+script_root="$(
   cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null 2>&1 || exit
   pwd -P
 )/"
-declare -r source
+declare -r script_root
 
 shopt -s expand_aliases
 
 # shellcheck source=/dev/null
-source "$source/.bash_aliases"
+source "$script_root/.bash_aliases"
 
 __bootstrap() {
-  if type -f nvim > /dev/null 2>&1; then
-    nvim_config=$(nvim --noplugin --headless -c "call writefile([stdpath('config')], '/dev/stdout', 'b') | q")
-    echo "Nvim config: $nvim_config"
-  fi
-
   # https://manpages.debian.org/rsync/rsync
   rsync --no-perms --archive --verbose --human-readable \
     --exclude '.git/' \
     --exclude '.github/' \
     --exclude 'scripts/' \
     --exclude 'bootstrap.sh' \
-    "$source" "$HOME"
+    "$script_root" "$HOME"
+
+  if type -f nvim > /dev/null 2>&1; then
+    local -r nvim_config_path=$(nvim --noplugin --headless -c 'call writefile([stdpath("config")], "/dev/stdout", "b") | q')
+    ln --symbolic --verbose --no-dereference --force "$HOME/.config/nvim" "$nvim_config_path"
+  fi
 }
 
 if [[ $1 = --yes || $1 = -y ]]; then
