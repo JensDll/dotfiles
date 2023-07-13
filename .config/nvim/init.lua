@@ -1,45 +1,4 @@
-local datapath = vim.fn.stdpath("data")
-
-local lazypath = datapath .. "/lazy/lazy.nvim"
-
-if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
-    "git",
-    "clone",
-    "--filter=blob:none",
-    "--branch=stable",
-    "https://github.com/folke/lazy.nvim.git",
-    lazypath,
-  })
-end
-
-vim.opt.runtimepath:prepend(lazypath)
-
-vim.g.mapleader = " "
-
-require("lazy").setup({
-  "editorconfig/editorconfig-vim",
-  "mhartington/formatter.nvim",
-  {
-    "VonHeikemen/lsp-zero.nvim",
-    branch = "dev-v3",
-    dependencies = {
-      { "neovim/nvim-lspconfig" },
-      {
-        "williamboman/mason.nvim",
-        build = function()
-          pcall(vim.cmd, "MasonUpdate")
-        end,
-      },
-      { "williamboman/mason-lspconfig.nvim" },
-      { "hrsh7th/nvim-cmp" },
-      { "hrsh7th/cmp-nvim-lsp" },
-      { "L3MON4D3/LuaSnip" },
-    },
-  },
-})
-
-vim.o.relativenumber = true
+require('plugins')
 
 local lsp = require("lsp-zero").preset({})
 
@@ -55,6 +14,7 @@ require("formatter").setup({
   logging = true,
   log_level = vim.log.levels.WARN,
   filetype = {
+    -- https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd
     sh = {
       function()
         local shiftwidth = vim.opt.shiftwidth:get()
@@ -73,3 +33,8 @@ require("formatter").setup({
     },
   },
 })
+
+vim.o.relativenumber = true
+
+vim.keymap.set("n", "<leader>f", ":Format<CR>", { silent = true, unique = true })
+vim.keymap.set("n", "<leader>F", ":FormatWrite<CR>", { silent = true, unique = true })
