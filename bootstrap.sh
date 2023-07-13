@@ -15,38 +15,42 @@ __bootstrap() {
   rsync --no-perms --archive --verbose --human-readable --exclude-from="$root/.rsyncignore" "$root/" "$HOME"
 
   if type -f nvim > /dev/null 2>&1; then
-    # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-mapfile
-    # https://neovim.io/doc/user/builtin.html#writefile()
-    # https://neovim.io/doc/user/builtin.html#stdpath()
-    mapfile -t < <(nvim --noplugin --headless --cmd 'call writefile([stdpath("config"), stdpath("data")], "/dev/stdout", "b")' --cmd 'quit')
+    __bootstrap_nvim
+  fi
+}
 
-    local -r nvim_config_home="${MAPFILE[0]}"
-    local -r default_nvim_config_home="$HOME/.config/nvim"
+__bootstrap_nvim() {
+  # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-mapfile
+  # https://neovim.io/doc/user/builtin.html#writefile()
+  # https://neovim.io/doc/user/builtin.html#stdpath()
+  mapfile -t < <(nvim --noplugin --headless --cmd 'call writefile([stdpath("config"), stdpath("data")], "/dev/stdout", "b")' --cmd 'quit')
 
-    local -r nvim_data_home="${MAPFILE[1]}"
-    local -r default_nvim_data_home="$HOME/.local/share/nvim"
+  local -r nvim_config_home="${MAPFILE[0]}"
+  local -r default_nvim_config_home="$HOME/.config/nvim"
 
-    if [[ -d $default_nvim_config_home && $default_nvim_config_home != "$nvim_config_home"  ]]; then
-      cat << EOF
+  local -r nvim_data_home="${MAPFILE[1]}"
+  local -r default_nvim_data_home="$HOME/.local/share/nvim"
+
+  if [[ -d $default_nvim_config_home && $default_nvim_config_home != "$nvim_config_home"  ]]; then
+    cat << EOF
 
 [Neovim] Detected a non-default ($default_nvim_config_home) config directory, also copying files to: $nvim_config_home
 [Neovim] See https://neovim.io/doc/user/starting.html#standard-path
 
 EOF
 
-      rsync --no-perms --archive --verbose --human-readable "$default_nvim_config_home/" "$nvim_config_home"
-    fi
+    rsync --no-perms --archive --verbose --human-readable "$default_nvim_config_home/" "$nvim_config_home"
+  fi
 
-    if [[ -d $default_nvim_data_home && $default_nvim_data_home != "$nvim_data_home" ]]; then
-      cat << EOF
+  if [[ -d $default_nvim_data_home && $default_nvim_data_home != "$nvim_data_home" ]]; then
+    cat << EOF
 
 [Neovim] Detected a non-default ($default_nvim_data_home) data directory, also copying files to: $nvim_data_home
 [Neovim] See https://neovim.io/doc/user/starting.html#standard-path
 
 EOF
 
-      rsync --no-perms --archive --verbose --human-readable "$default_nvim_data_home/" "$nvim_data_home"
-    fi
+    rsync --no-perms --archive --verbose --human-readable "$default_nvim_data_home/" "$nvim_data_home"
   fi
 }
 

@@ -1,22 +1,25 @@
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+local datapath = vim.fn.stdpath("data")
+
+local lazypath = datapath .. "/lazy/lazy.nvim"
 
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
     "git",
     "clone",
     "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git",
     "--branch=stable",
+    "https://github.com/folke/lazy.nvim.git",
     lazypath,
   })
 end
 
-vim.opt.rtp:prepend(lazypath)
+vim.opt.runtimepath:prepend(lazypath)
 
 vim.g.mapleader = " "
 
 require("lazy").setup({
   "editorconfig/editorconfig-vim",
+  "mhartington/formatter.nvim",
   {
     "VonHeikemen/lsp-zero.nvim",
     branch = "dev-v3",
@@ -45,3 +48,28 @@ lsp.on_attach(function(client, bufnr)
 end)
 
 lsp.extend_cmp()
+
+require("mason").setup()
+
+require("formatter").setup({
+  logging = true,
+  log_level = vim.log.levels.WARN,
+  filetype = {
+    sh = {
+      function()
+        local shiftwidth = vim.opt.shiftwidth:get()
+        local expandtab = vim.opt.expandtab:get()
+
+        if not expandtab then
+          shiftwidth = 0
+        end
+
+        return {
+          exe = "shfmt",
+          args = { "--indent", shiftwidth, "--binary-next-line", "--space-redirects", "--keep-padding" },
+          stdin = true,
+        }
+      end,
+    },
+  },
+})
