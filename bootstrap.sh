@@ -27,11 +27,13 @@ __bootstrap_nvim() {
 
   local -r nvim_config_home="${MAPFILE[0]}"
   local -r default_nvim_config_home="$HOME/.config/nvim"
+  local -r local_nvim_config_home="$root/.config/nvim"
 
   local -r nvim_data_home="${MAPFILE[1]}"
   local -r default_nvim_data_home="$HOME/.local/share/nvim"
+  local -r local_nvim_data_home="$root/.local/share/nvim"
 
-  if [[ -d $default_nvim_config_home && $default_nvim_config_home != "$nvim_config_home"  ]]; then
+  if [[ -d $local_nvim_config_home && $default_nvim_config_home != "$nvim_config_home"  ]]; then
     cat << EOF
 
 [Neovim] Detected a non-default ($default_nvim_config_home) config directory, also copying files to: $nvim_config_home
@@ -42,7 +44,7 @@ EOF
     rsync --no-perms --archive --verbose --human-readable "$default_nvim_config_home/" "$nvim_config_home"
   fi
 
-  if [[ -d $default_nvim_data_home && $default_nvim_data_home != "$nvim_data_home" ]]; then
+  if [[ -d $local_nvim_data_home && $default_nvim_data_home != "$nvim_data_home" ]]; then
     cat << EOF
 
 [Neovim] Detected a non-default ($default_nvim_data_home) data directory, also copying files to: $nvim_data_home
