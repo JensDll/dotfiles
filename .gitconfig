@@ -12,3 +12,4 @@
 # https://git-scm.com/docs/git-config#Documentation/git-config.txt-alias
 [alias]
   supdate = submodule update --remote --merge
+  cls = clean -Xdf
