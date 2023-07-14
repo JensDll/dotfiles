@@ -23,6 +23,9 @@ if flatpak list --app --columns=application | grep io.neovim.nvim > /dev/null; t
   alias nvim='flatpak run io.neovim.nvim'
 fi
 
+# https://sourceware.org/gdb/documentation
+alias gdb='gdb --quiet'
+
 # Used like: `sleep 10; alert`
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
