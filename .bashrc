@@ -37,7 +37,7 @@ shopt -s checkwinsize
 #   \w  The value of the PWD shell variable, with $HOME abbreviated with a tilde (uses the $PROMPT_DIRTRIM variable)
 #   \[  Begin a sequence of non-printing characters
 #   \]  End a sequence of non-printing characters
-# See https://stackoverflow.com/a/33206814/13332128 for information about the ANSI color syntax
+# See https://en.wikipedia.org/wiki/ANSI_escape_code for information about the ANSI color syntax
 if [[ $color_prompt = yes ]]; then
   PS1='${debian_chroot:+($debian_chroot)}\[\033[1;32m\]\u@\h\[\033[00m\]:\[\033[1;34m\]\w\[\033[36m\]$(__git_ps1 "(%s)")\[\033[00m\]\$ '
 else
