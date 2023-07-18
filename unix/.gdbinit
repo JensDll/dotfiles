@@ -1,9 +1,13 @@
 python
-import gdbconfig
+import os
+import sys
+import pathlib
+config_home = os.environ.get("XDG_CONFIG_HOME") or pathlib.Path.home() / ".config"
+sys.path.insert(0, str(config_home / "gdbdash"))
+import gdbdash
+gdbdash.start()
 end
 
-# https://sourceware.org/gdb/current/onlinedocs/gdb.html/Prompt.html#Prompt
-# set prompt \033[38;5;177mgdb\033[0m$
 # https://sourceware.org/gdb/current/onlinedocs/gdb.html/Messages_002fWarnings.html#Messages_002fWarnings
 set confirm off
 set verbose off
