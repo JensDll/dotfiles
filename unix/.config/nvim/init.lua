@@ -1,4 +1,4 @@
-require('plugins')
+require("plugins")
 
 local lsp = require("lsp-zero").preset({})
 
