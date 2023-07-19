@@ -2,10 +2,20 @@ from . import Dashboard
 
 
 class Stack(Dashboard.Module):
+    """Print stack information"""
+
     def label(self) -> str:
-        return Stack.__name__
+        return "stack"
+
+    def render(self, terminal_size) -> None:
+        pass
 
 
 class Registers(Dashboard.Module):
+    """Print register information"""
+
     def label(self) -> str:
-        return Registers.__name__
+        return "registers"
+
+    def render(self, terminal_size) -> None:
+        pass

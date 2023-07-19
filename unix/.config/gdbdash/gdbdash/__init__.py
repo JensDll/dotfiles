@@ -2,6 +2,7 @@ import gdb  # pyright: ignore [reportMissingModuleSource]
 import os
 import importlib
 import inspect
+import abc
 
 
 class Dashboard(gdb.Command):
@@ -24,9 +25,7 @@ class Dashboard(gdb.Command):
         if argv:
             write_err(f"Invalid argument: {argv[0]}\n")
         elif not is_running():
-            write_err(
-                "The program is not running. Make sure `gdb` has stopped before running `dashboard`\n"
-            )
+            write_err("The program is not running")
         else:
             self.render()
 
@@ -74,15 +73,33 @@ class Dashboard(gdb.Command):
                 write_err(f"Invalid argument: {argv[0]}; must be on or off\n")
 
         def complete(self, text, word):
-            return ["on", "off"]
+            return ("on", "off")
 
-    class Module:
+    class OutputCommand(gdb.Command):
+        def __init__(self, dashboard: "Dashboard"):
+            super().__init__(
+                "dashboard -output", gdb.COMMAND_USER, gdb.COMPLETE_FILENAME
+            )
+            self.dashboard = dashboard
+
+        def invoke(self, argument, from_tty):
+            argv = gdb.string_to_argv(argument)
+            print("output command")
+
+    class Module(metaclass=abc.ABCMeta):
+        @abc.abstractmethod
         def label(self) -> str:
-            return ""
+            pass
+
+        @abc.abstractmethod
+        def render(self, terminal_size: os.terminal_size) -> None:
+            pass
 
     class ModuleInfo:
         def __init__(self, dashboard: "Dashboard", module: type["Dashboard.Module"]):
             self.instance = module()
+            self.doc = self.instance.__doc__ or "(no documentation)"
+            self.output = gdb.STDOUT
 
 
 def get_terminal_size(fd=gdb.STDOUT):
