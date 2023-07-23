@@ -20,8 +20,6 @@ set history expansion on
 set print pretty on
 set print array off
 set print array-indexes on
-# https://sourceware.org/gdb/current/onlinedocs/gdb.html/Machine-Code.html#Machine-Code
-set disassembly-flavor intel
 # https://sourceware.org/gdb/current/onlinedocs/gdb.html/Python-Commands.html#Python-Commands
 set python print-stack full
 
