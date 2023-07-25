@@ -1,22 +1,43 @@
-import abc
 import collections
-import dataclasses
-import typing
+from abc import ABCMeta, abstractmethod
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Sequence
 
 import gdb  # pyright: ignore [reportMissingModuleSource]
-import gdbdash
-import gdbdash.utils
+
+from .utils import GdbBool, GdbInt, complete
+
+
+@dataclass
+class BoolOption:
+    doc: str
+    value: GdbBool = GdbBool()
+    choices: Sequence[str] = GdbBool.CHOICES
+
+
+@dataclass
+class IntOption:
+    doc: str
+    value: GdbInt = GdbInt()
+    choices: int = gdb.COMPLETE_NONE
+
+
+@dataclass
+class StrOption:
+    doc: str
+    value: str
+    choices: int = gdb.COMPLETE_NONE
 
 
 class Command:
     def __init__(
         self,
         /,
-        command_name: str,
-        command_class: int,
-        command_completer_class: typing.Optional[int] = None,
-        command_prefix: bool = False,
-        command_doc: typing.Optional[str] = None,
+        command_name,
+        command_class,
+        command_completer_class=None,
+        command_prefix=False,
+        command_doc=None,
         **kwargs,
     ):
         cls = type(
@@ -28,6 +49,7 @@ class Command:
                 "__doc__": command_doc or "(no documentation)",
             },
         )
+
         self.command = (
             cls(command_name, command_class, prefix=command_prefix)
             if command_completer_class is None
@@ -35,6 +57,7 @@ class Command:
                 command_name, command_class, command_completer_class, command_prefix
             )
         )
+
         self.command_name = command_name
 
         super().__init__(**kwargs)
@@ -43,56 +66,38 @@ class Command:
         self.command.dont_repeat()
 
     def invoke(self, arg, from_tty):
-        print(f'The command "{self.command_name}" is not implemented')
+        self.stdout(f"The command is not implemented")
 
     def complete(self, text, word):
         raise NotImplementedError
 
+    def write(self, message, fd):
+        gdb.write(f"[{self.command_name}] {message}\n", fd)
 
-@dataclasses.dataclass
-class BoolOption:
-    doc: str
-    value: gdbdash.utils.GdbBool = gdbdash.utils.GdbBool()
-    choices: typing.Sequence[str] = gdbdash.utils.GdbBool.CHOICES
+    def stdout(self, message):
+        self.write(message, gdb.STDOUT)
 
-
-@dataclasses.dataclass
-class IntOption:
-    doc: str
-    value: gdbdash.utils.GdbInt = gdbdash.utils.GdbInt()
-    choices: int = gdb.COMPLETE_NONE
+    def stderr(self, message):
+        self.write(message, gdb.STDERR)
 
 
-@dataclasses.dataclass
-class StrOption:
-    doc: str
-    value: str
-    choices: int = gdb.COMPLETE_NONE
-
-
-Option = typing.Union[BoolOption, IntOption, StrOption]
-Options = typing.Dict[str, Option]
-
-
-class Configurable(metaclass=abc.ABCMeta):
-    command_name: str
-
+class Configurable(metaclass=ABCMeta):
     def __init__(self, /, **kwargs):
-        super().__init__(**kwargs)
+        if not isinstance(self, Command):
+            raise TypeError(f"{self} must be a {Command}")
 
-        if not hasattr(self, "command_name"):
-            raise TypeError("super() must initialize command_name instance variable")
+        super().__init__(**kwargs)
 
         ConfigureCommand(self)
 
     @property
-    @abc.abstractmethod
-    def options(self) -> Options:
+    @abstractmethod
+    def options(self):
         pass
 
 
 class ConfigureCommand(Command):
-    def __init__(self, configurable: "Configurable"):
+    def __init__(self, configurable):
         super().__init__(
             command_name=f"{configurable.command_name} -configure",
             command_class=gdb.COMMAND_USER,
@@ -107,11 +112,11 @@ class ConfigureCommand(Command):
             )
 
     def invoke(self, arg, from_tty):
-        print("TODO: options summary here")
+        self.stdout("TODO: options summary here")
 
 
 class ConfigureOptionCommand(Command):
-    def __init__(self, /, command_name: str, option_name: str, option: Option):
+    def __init__(self, /, command_name, option_name, option):
         super().__init__(
             command_name=command_name,
             command_class=gdb.COMMAND_USER,
@@ -127,9 +132,7 @@ class ConfigureOptionCommand(Command):
         argv = gdb.string_to_argv(arg)
 
         if not argv:
-            print(
-                f'The current value of option {self.option_name} is "{self.option.value}"'
-            )
+            self.stdout(f'The current value is "{self.option.value}"')
             return
 
         self.option.value = argv[0]
@@ -138,17 +141,15 @@ class ConfigureOptionCommand(Command):
         if isinstance(self.option.choices, int):
             return self.option.choices
         else:
-            return gdbdash.utils.complete(word, self.option.choices)
+            return complete(word, self.option.choices)
 
 
 class Togglable:
-    command_name: str
-
     def __init__(self, /, **kwargs):
-        super().__init__(**kwargs)
+        if not isinstance(self, Command):
+            raise TypeError(f"{self} must be a {Command}")
 
-        if not hasattr(self, "command_name"):
-            raise TypeError("super() must initialize command_name instance variable")
+        super().__init__(**kwargs)
 
         self.enabled = False
         self.enable()
@@ -163,9 +164,9 @@ class Togglable:
 
 
 class EnableCommand(Command):
-    gdb_bool = gdbdash.utils.GdbBool()
+    gdb_bool = GdbBool()
 
-    def __init__(self, togglable: "Togglable"):
+    def __init__(self, togglable):
         super().__init__(
             command_name=f"{togglable.command_name} -enable",
             command_class=gdb.COMMAND_USER,
@@ -179,8 +180,8 @@ class EnableCommand(Command):
         argv = gdb.string_to_argv(arg)
 
         if not argv:
-            print(
-                f"[{self.togglable.command_name}] Is currently {self.togglable.enabled and 'enabled' or 'disabled'}"
+            self.togglable.stdout(
+                f"Is currently {self.togglable.enabled and 'enabled' or 'disabled'}"
             )
             return
 
@@ -192,26 +193,22 @@ class EnableCommand(Command):
             self.togglable.disable()
 
     def complete(self, text, word):
-        return gdbdash.utils.complete(word, gdbdash.utils.GdbBool.CHOICES)
+        return complete(word, GdbBool.CHOICES)
 
 
-class Outputable(metaclass=abc.ABCMeta):
-    command_name: str
+class Outputable:
+    def __init__(self, /, dashboard_modules, **kwargs):
+        if not isinstance(self, Command):
+            raise TypeError(f"{self} must be a {Command}")
 
-    def __init__(
-        self, /, dashboard_modules: "gdbdash.DashboardModules", **kwargs
-    ) -> None:
         super().__init__(**kwargs)
 
-        if not hasattr(self, "command_name"):
-            raise TypeError("super() must initialize command_name instance variable")
-
         self.dashboard_modules = dashboard_modules
-        self.output: gdbdash.utils.FileDescriptorOrPath = gdb.STDOUT
+        self.output = gdb.STDOUT
 
         OutputCommand(self)
 
-    def on_output_changed(self, old_output: gdbdash.utils.FileDescriptorOrPath):
+    def on_output_changed(self, old_output):
         import gdbdash.modules
 
         if not isinstance(self, gdbdash.modules.Module):
@@ -227,7 +224,7 @@ class Outputable(metaclass=abc.ABCMeta):
 
 
 class OutputCommand(Command):
-    def __init__(self, outputable: "Outputable"):
+    def __init__(self, outputable):
         super().__init__(
             command_name=f"{outputable.command_name} -output",
             command_class=gdb.COMMAND_USER,
@@ -241,10 +238,8 @@ class OutputCommand(Command):
         super().dont_repeat()
         argv = gdb.string_to_argv(arg)
 
-        if not argv:
-            print(
-                f'[{self.outputable.command_name}] The current output is "{self.outputable.output}"'
-            )
+        if len(argv) == 0:
+            self.stdout(f'The current output is "{self.outputable.output}"')
             return
 
         old_output = self.outputable.output

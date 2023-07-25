@@ -1,33 +1,25 @@
-import os
-import typing
+from os import PathLike
+from typing import Union
 
-import gdb  # pyright: ignore [reportMissingModuleSource]
+from gdb import (  # pyright: ignore [reportMissingModuleSource]
+    selected_frame,
+    selected_inferior,
+)
 
-RESET_COLOR: typing.Final = "\033[0m"
-FONT_BOLD: typing.Final = "\033[1m"
-
-StrOrBytesPath = typing.Union[str, bytes, os.PathLike[str], os.PathLike[bytes]]
-FileDescriptorOrPath = typing.Union[int, StrOrBytesPath]
+RESET_COLOR = "\033[0m"
+FONT_BOLD = "\033[1m"
 
 
 def is_running():
-    return gdb.selected_inferior().pid != 0
+    return selected_inferior().pid != 0
 
 
-def write_err(msg: str):
-    gdb.write(msg, gdb.STDERR)
-
-
-def get_terminal_size(fd=gdb.STDOUT):
-    return os.get_terminal_size(fd)
-
-
-def complete(word: str, candidates: typing.Sequence[str]):
+def complete(word, candidates):
     return filter(lambda candidate: candidate.startswith(word), candidates)
 
 
 class GdbBool:
-    CHOICES: typing.Final = ("on", "1", "enable", "off", "0", "disable")
+    CHOICES = ("on", "1", "enable", "off", "0", "disable")
 
     def __init__(self, default=False):
         self._default = default
@@ -35,17 +27,17 @@ class GdbBool:
     def __set_name__(self, owner, name):
         self._name = "_" + name
 
-    def __get__(self, instance, owner=None) -> bool:
+    def __get__(self, instance, owner=None):
         if instance is None:
             return self._default
 
         return getattr(instance, self._name, self._default)
 
-    def __set__(self, instance, value) -> None:
+    def __set__(self, instance, value):
         setattr(instance, self._name, GdbBool.to_python(value))
 
     @staticmethod
-    def to_python(value: str) -> bool:
+    def to_python(value: str):
         if value == "on" or value == "1" or value == "enable":
             return True
         elif value == "off" or value == "0" or value == "disable":
@@ -58,8 +50,28 @@ class GdbInt:
     def __set_name__(self, owner, name):
         self._name = "_" + name
 
-    def __get__(self, instance, owner=None) -> int:
+    def __get__(self, instance, owner=None):
         return getattr(instance, self._name)
 
     def __set__(self, instance, value):
         setattr(instance, self._name, int(value))
+
+
+def fetch_instructions(architecture, start_pc, count=1):
+    return architecture.disassemble(start_pc, count=count)
+
+
+def fetch_instructions_range(architecture, start_pc, end_pc):
+    return architecture.disassemble(start_pc, end_pc=end_pc)
+
+
+def fetch_gdb():
+    inferior = selected_inferior()
+    frame = selected_frame()
+    architecture = frame.architecture()
+    pc = fetch_pc(frame)
+    return inferior, frame, architecture, pc
+
+
+def fetch_pc(frame):
+    return frame.pc()
