@@ -55,9 +55,9 @@ class Dashboard(Command, Togglable, Configurable, Outputable):
     def invoke(self, arg, from_tty):
         argv = gdb.string_to_argv(arg)
         if len(argv) > 0:
-            self.stderr(f"Invalid argument: {argv[0]}\n")
+            self.stderr(f"Invalid argument: {argv[0]}")
         elif not is_running():
-            self.stderr("The program is not running\n")
+            self.stderr("The program is not running")
         else:
             self.render()
 

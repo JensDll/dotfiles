@@ -8,7 +8,12 @@ from .utils import GdbBool, GdbInt, complete
 
 if TYPE_CHECKING:
     from . import DashboardModulesDict
-    from .commands import ConfigurableProtocol, OutputableProtocol, TogglableProtocol
+    from .commands import (
+        ConfigurableProtocol,
+        Option,
+        OutputableProtocol,
+        TogglableProtocol,
+    )
 
 
 @dataclass
@@ -53,13 +58,12 @@ class Command:
             },
         )
 
-        self.command = (
-            cls(command_name, command_class, prefix=command_prefix)
-            if command_completer_class is None
-            else cls(
+        if command_completer_class is None:
+            self.command = cls(command_name, command_class, prefix=command_prefix)
+        else:
+            self.command = cls(
                 command_name, command_class, command_completer_class, command_prefix
             )
-        )
 
         self.command_name = command_name
 
@@ -126,7 +130,13 @@ class ConfigureCommand(Command):
 
 
 class ConfigureOptionCommand(Command):
-    def __init__(self, /, command_name, option_name, option):
+    def __init__(
+        self,
+        /,
+        command_name,  # type: str
+        option_name,  # type: str
+        option,  # type: Option
+    ):
         super().__init__(
             command_name=command_name,
             command_class=gdb.COMMAND_USER,
