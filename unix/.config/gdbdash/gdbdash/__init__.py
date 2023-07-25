@@ -13,9 +13,12 @@ from .modules import Module
 from .utils import is_running
 
 if TYPE_CHECKING:
+    from typing import Sequence
+
     from gdb.events import StopEvent  # pyright: ignore [reportMissingModuleSource]
 
-    from . import DashboardModules
+    from . import DashboardModulesDict, DashboardOptions
+    from .utils import FileDescriptorOrPath
 
 
 class Dashboard(Command, Togglable, Configurable, Outputable):
@@ -24,7 +27,7 @@ class Dashboard(Command, Togglable, Configurable, Outputable):
             command_name="dashboard",
             command_class=gdb.COMMAND_USER,
             command_prefix=True,
-            dashboard_modules=dict(),
+            dashboard_modules_dict=dict(),
         )
 
         self.module_types = [
@@ -36,16 +39,19 @@ class Dashboard(Command, Togglable, Configurable, Outputable):
         ]
 
     @cached_property
-    def modules(self):
-        result = dict()  # type: DashboardModules
+    def modules_dict(self):
+        modules_dict = dict()  # type: DashboardModulesDict
 
         for module_type in self.module_types:
             module = module_type(
-                dashboard_options=self.options, dashboard_modules=result
+                dashboard_options=self.options, dashboard_modules_dict=modules_dict
             )
-            result.setdefault(module.output, collections.deque()).append(module)
+            modules_dict.setdefault(module.output, []).append(module)
 
-        return result
+        for modules in modules_dict.values():
+            modules.sort(key=lambda module: module.ORDER)
+
+        return modules_dict
 
     def invoke(self, arg, from_tty):
         argv = gdb.string_to_argv(arg)
@@ -60,25 +66,31 @@ class Dashboard(Command, Togglable, Configurable, Outputable):
         width = 160
         height = 24
 
-        for output, modules in self.modules.items():
-            if isinstance(output, int):
-                try:
-                    width, height = get_terminal_size(output)
-                except OSError as e:
-                    self.stderr(
-                        f"Failed to get terminal size using fallback values (width = {width}, height = {height}): {e}\n"
-                    )
-
-                write = partial(gdb.write, stream=output)
-
+        def render_file(
+            output, modules
+        ):  # type: (FileDescriptorOrPath, Sequence[Module]) -> None
+            with open(output, "w") as f:
                 for module in modules:
-                    module.divider(width, height, write)
-                    module.render(width, height, write)
-            else:
-                with open(output, "w") as f:
-                    for module in modules:
-                        module.divider(width, height, f.write)
-                        module.render(width, height, f.write)
+                    module.divider(width, height, f.write)
+                    module.render(width, height, f.write)
+
+        for output, modules in self.modules_dict.items():
+            if not isinstance(output, int):
+                render_file(output, modules)
+                continue
+
+            try:
+                width, height = get_terminal_size(output)
+            except OSError:
+                # File descriptor is not a terminal, try rendering to file
+                render_file(output, modules)
+                continue
+
+            write = partial(gdb.write, stream=output)
+
+            for module in modules:
+                module.divider(width, height, write)
+                module.render(width, height, write)
 
     def enable(self):
         if self.enabled:
@@ -97,18 +109,20 @@ class Dashboard(Command, Togglable, Configurable, Outputable):
             self.render()
 
     def on_output_changed(self, old_output):
-        deque = collections.deque()
-        modules = dict(((self.output, deque),))  # type: DashboardModules
+        modules = []  # type: list[Module]
+        modules_dict = dict(((self.output, modules),))  # type: DashboardModulesDict
 
-        for module in itertools.chain.from_iterable(self.modules.values()):
+        for module in itertools.chain.from_iterable(self.modules_dict.values()):
             module.output = self.output
-            module.dashboard_modules = modules
-            deque.append(module)
+            module.dashboard_modules_dict = modules_dict
+            modules.append(module)
 
-        self.modules = modules
+        modules.sort(key=lambda module: module.ORDER)
+
+        self.modules_dict = modules_dict
 
     @cached_property
-    def options(self):
+    def options(self):  # type: () -> DashboardOptions
         return {
             "text-highlight": StrOption("Text highlight color", "\033[1;38;5;40m"),
             "text-divider": StrOption("Divider color", "\033[38:5:111m"),

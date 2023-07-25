@@ -7,6 +7,10 @@ import gdb  # pyright: ignore [reportMissingModuleSource]
 
 from .utils import GdbBool, GdbInt, complete
 
+if TYPE_CHECKING:
+    from . import DashboardModulesDict
+    from .commands import ConfigurableProtocol, OutputableProtocol, TogglableProtocol
+
 
 @dataclass
 class BoolOption:
@@ -82,7 +86,11 @@ class Command:
 
 
 class Configurable(metaclass=ABCMeta):
-    def __init__(self, /, **kwargs):
+    def __init__(
+        self,  # type: ConfigurableProtocol
+        /,
+        **kwargs,
+    ):
         if not isinstance(self, Command):
             raise TypeError(f"{self} must be a {Command}")
 
@@ -97,7 +105,10 @@ class Configurable(metaclass=ABCMeta):
 
 
 class ConfigureCommand(Command):
-    def __init__(self, configurable):
+    def __init__(
+        self,
+        configurable,  # type: ConfigurableProtocol
+    ):
         super().__init__(
             command_name=f"{configurable.command_name} -configure",
             command_class=gdb.COMMAND_USER,
@@ -132,7 +143,7 @@ class ConfigureOptionCommand(Command):
         argv = gdb.string_to_argv(arg)
 
         if not argv:
-            self.stdout(f'The current value is "{self.option.value}"')
+            self.stdout(f'The current value is "{repr(self.option.value)}"')
             return
 
         self.option.value = argv[0]
@@ -145,7 +156,11 @@ class ConfigureOptionCommand(Command):
 
 
 class Togglable:
-    def __init__(self, /, **kwargs):
+    def __init__(
+        self,  # type: TogglableProtocol
+        /,
+        **kwargs,
+    ):
         if not isinstance(self, Command):
             raise TypeError(f"{self} must be a {Command}")
 
@@ -166,7 +181,10 @@ class Togglable:
 class EnableCommand(Command):
     gdb_bool = GdbBool()
 
-    def __init__(self, togglable):
+    def __init__(
+        self,
+        togglable,  # type: TogglableProtocol
+    ):
         super().__init__(
             command_name=f"{togglable.command_name} -enable",
             command_class=gdb.COMMAND_USER,
@@ -197,13 +215,18 @@ class EnableCommand(Command):
 
 
 class Outputable:
-    def __init__(self, /, dashboard_modules, **kwargs):
+    def __init__(
+        self,  # type: OutputableProtocol
+        /,
+        dashboard_modules_dict,  # type: DashboardModulesDict
+        **kwargs,
+    ):
         if not isinstance(self, Command):
             raise TypeError(f"{self} must be a {Command}")
 
         super().__init__(**kwargs)
 
-        self.dashboard_modules = dashboard_modules
+        self.dashboard_modules_dict = dashboard_modules_dict
         self.output = gdb.STDOUT
 
         OutputCommand(self)
@@ -214,17 +237,22 @@ class Outputable:
         if not isinstance(self, gdbdash.modules.Module):
             raise TypeError(f"{self} must be a {gdbdash.modules.Module}")
 
-        deque = self.dashboard_modules[old_output]
-        deque.remove(self)
+        modules = self.dashboard_modules_dict[old_output]
+        modules.remove(self)
 
-        if len(deque) == 0:
-            del self.dashboard_modules[old_output]
+        if len(modules) == 0:
+            del self.dashboard_modules_dict[old_output]
 
-        self.dashboard_modules.setdefault(self.output, collections.deque()).append(self)
+        modules = self.dashboard_modules_dict.setdefault(self.output, [])
+        modules.append(self)
+        modules.sort(key=lambda module: module.ORDER)
 
 
 class OutputCommand(Command):
-    def __init__(self, outputable):
+    def __init__(
+        self,
+        outputable,  # type: OutputableProtocol
+    ):
         super().__init__(
             command_name=f"{outputable.command_name} -output",
             command_class=gdb.COMMAND_USER,

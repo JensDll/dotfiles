@@ -1,10 +1,10 @@
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
-from typing import Mapping, Sequence
+from typing import Mapping, Protocol, Sequence
 
 import gdb  # pyright: ignore [reportMissingModuleSource]
 
-from . import DashboardModules
+from . import DashboardModulesDict
 from .utils import FileDescriptorOrPath, GdbBool, GdbInt
 
 @dataclass
@@ -28,6 +28,11 @@ class StrOption:
 Option = BoolOption | IntOption | StrOption
 Options = Mapping[str, Option]
 
+class CommandProtocol(Protocol):
+    command_name: str
+    def stdout(self, message: str) -> None: ...
+    def stderr(self, message: str) -> None: ...
+
 class Command:
     def __init__(
         self,
@@ -46,11 +51,19 @@ class Command:
     def stdout(self, message: str) -> None: ...
     def stderr(self, message: str) -> None: ...
 
+class ConfigurableProtocol(CommandProtocol, Protocol):
+    options: Options
+
 class Configurable(metaclass=ABCMeta):
     def __init__(self, /, **kwargs) -> None: ...
     @property
     @abstractmethod
     def options(self) -> Options: ...
+
+class TogglableProtocol(CommandProtocol, Protocol):
+    enabled: bool
+    def enable(self) -> None: ...
+    def disable(self) -> None: ...
 
 class Togglable(metaclass=ABCMeta):
     enabled: bool
@@ -60,7 +73,12 @@ class Togglable(metaclass=ABCMeta):
     @abstractmethod
     def disable(self) -> None: ...
 
+class OutputableProtocol(CommandProtocol, Protocol):
+    dashboard_modules_dict: DashboardModulesDict
+    output: FileDescriptorOrPath
+    def on_output_changed(self, old_output: FileDescriptorOrPath) -> None: ...
+
 class Outputable:
-    dashboard_modules: DashboardModules
+    dashboard_modules_dict: DashboardModulesDict
     output: FileDescriptorOrPath
     def on_output_changed(self, old_output: FileDescriptorOrPath) -> None: ...

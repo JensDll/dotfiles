@@ -16,4 +16,4 @@ DashboardOptions = TypedDict(
     },
 )
 
-DashboardModules = dict[FileDescriptorOrPath, collections.deque[Module]]
+DashboardModulesDict = dict[FileDescriptorOrPath, list[Module]]

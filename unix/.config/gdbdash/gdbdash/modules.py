@@ -10,6 +10,7 @@ from .utils import RESET_COLOR, fetch_gdb, fetch_instructions
 
 if TYPE_CHECKING:
     from . import DashboardOptions
+    from .modules import AlignmentOptions, AssemblyOptions, RegistryOptions
 
 
 class Module(
@@ -57,6 +58,7 @@ class Module(
 class Alignment(Module):
     """Print 64-byte-block formatted memory to see if instructions cross block boundaries"""
 
+    ORDER = 0
     BLOCK_SIZE = 64
 
     def __init__(self, /, **kwargs):
@@ -68,7 +70,7 @@ class Alignment(Module):
         self.start = pc - residue_class
         self.end = self.start + self.BLOCK_SIZE
 
-    def render(self, width, height, write) -> None:
+    def render(self, width, height, write):
         if width < 115:
             per_row = 16
         else:
@@ -120,14 +122,16 @@ class Alignment(Module):
             self.end += self.BLOCK_SIZE
 
     @cached_property
-    def options(self):
+    def options(self):  # type:  () -> AlignmentOptions
         return {}
 
 
 class Assembly(Module):
     """Print assembly information"""
 
-    def render(self, width, height, write) -> None:
+    ORDER = 1
+
+    def render(self, width, height, write):
         inferior, frame, architecture, pc = fetch_gdb()
 
         instructions = fetch_instructions(architecture, pc, 6)
@@ -230,7 +234,7 @@ class Assembly(Module):
         )
 
     @cached_property
-    def options(self):
+    def options(self):  # type:  () -> AssemblyOptions
         return {
             "show-function": BoolOption("Show current function and offset", value="on"),
         }
@@ -239,11 +243,13 @@ class Assembly(Module):
 class Registers(Module):
     """Print register information"""
 
-    def render(self, width, height, write) -> None:
+    ORDER = 2
+
+    def render(self, width, height, write):
         pass
 
     @cached_property
-    def options(self):
+    def options(self):  # type:  () -> RegistryOptions
         return {}
 
 
