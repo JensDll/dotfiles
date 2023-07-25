@@ -3,6 +3,12 @@ import typing
 
 import gdb  # pyright: ignore [reportMissingModuleSource]
 
+RESET_COLOR: typing.Final = "\033[0m"
+FONT_BOLD: typing.Final = "\033[1m"
+
+StrOrBytesPath = typing.Union[str, bytes, os.PathLike[str], os.PathLike[bytes]]
+FileDescriptorOrPath = typing.Union[int, StrOrBytesPath]
+
 
 def is_running():
     return gdb.selected_inferior().pid != 0
@@ -23,19 +29,19 @@ def complete(word: str, candidates: typing.Sequence[str]):
 class GdbBool:
     CHOICES: typing.Final = ("on", "1", "enable", "off", "0", "disable")
 
+    def __init__(self, default=False):
+        self._default = default
+
     def __set_name__(self, owner, name):
         self._name = "_" + name
 
-    def __get__(self, instance, owner=None):
+    def __get__(self, instance, owner=None) -> bool:
         if instance is None:
-            return False
+            return self._default
 
-        if getattr(instance, self._name):
-            return "on"
-        else:
-            return "off"
+        return getattr(instance, self._name, self._default)
 
-    def __set__(self, instance, value):
+    def __set__(self, instance, value) -> None:
         setattr(instance, self._name, GdbBool.to_python(value))
 
     @staticmethod
@@ -52,10 +58,7 @@ class GdbInt:
     def __set_name__(self, owner, name):
         self._name = "_" + name
 
-    def __get__(self, instance, owner=None):
-        if instance is None:
-            return False
-
+    def __get__(self, instance, owner=None) -> int:
         return getattr(instance, self._name)
 
     def __set__(self, instance, value):

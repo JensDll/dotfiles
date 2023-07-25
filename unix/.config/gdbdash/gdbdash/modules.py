@@ -1,130 +1,131 @@
 import abc
+import collections
 import functools
 import itertools
-import os
 import typing
 
 import gdb  # pyright: ignore [reportMissingModuleSource]
 import gdbdash.commands
-import gdbdash.utils
+from gdbdash.utils import RESET_COLOR
 
-COLOR_BLUE = "\033[30;1;34m"
-COLOR_GREEN = "\033[30;1;32m"
-COLOR_RESET = "\033[0m"
+WriteWrapper = typing.Callable[[str], typing.Any]
 
 
 class Module(
-    gdbdash.commands.Togglable, gdbdash.commands.Configurable, gdbdash.commands.Command
+    gdbdash.commands.Command,
+    gdbdash.commands.Togglable,
+    gdbdash.commands.Configurable,
+    gdbdash.commands.Outputable,
+    metaclass=abc.ABCMeta,
 ):
-    def __init__(self):
-        self.output = gdb.STDOUT
-        self.inferior = gdb.selected_inferior()
-        self.frame = gdb.selected_frame()
-        self.architecture = self.frame.architecture()
-        self.pc = fetch_pc(self.frame)
-        self.name = self.__class__.__name__.lower()
-        self.doc = self.__doc__ or "(no documentation)"
+    def __init__(self, /, dashboard_options: "gdbdash.DashboardOptions", **kwargs):
+        self.o = dashboard_options
+        self.name = self.__class__.__name__
+
         super().__init__(
-            command_name=f"dashboard {self.name}",
+            command_name=f"dashboard {self.name.lower()}",
             command_class=gdb.COMMAND_USER,
             command_prefix=True,
+            command_doc=self.__doc__,
+            **kwargs,
         )
 
-    def write(self, string: str):
-        gdb.write(string, self.output)
-
     @abc.abstractmethod
-    def render(self, width: int, height: int) -> None:
+    def render(self, width: int, height: int, write: WriteWrapper) -> None:
         pass
+
+    def divider(self, width: int, height: int, write: WriteWrapper) -> None:
+        before = self.o["divider-fill-char"].value * (width // 16)
+        name = f" {self.name} "
+        after = self.o["divider-fill-char"].value * (width - len(before) - len(name))
+
+        write(self.o["text-divider"].value)
+        write(before)
+        write(self.o["text-divider-title"].value)
+        write(name)
+        write(self.o["text-divider"].value)
+        write(after)
+        write(RESET_COLOR)
+        write("\n")
 
 
 class Alignment(Module):
-    """Print 64-byte block formatted memory"""
+    """Print 64-byte-block formatted memory to see if instructions cross block boundaries"""
 
-    BLOCK_SIZE = 64
+    BLOCK_SIZE: typing.Final = 64
 
-    def __init__(self):
-        super().__init__()
-        self.per_row = 32
-        self.padding = self.per_row * 2
-        residue_class = self.pc & (self.BLOCK_SIZE - 1)
-        self.start = self.pc - residue_class
+    def __init__(self, /, **kwargs):
+        super().__init__(**kwargs)
+
+        _, _, _, pc = fetch_gdb()
+
+        residue_class = pc & (self.BLOCK_SIZE - 1)
+        self.start = pc - residue_class
         self.end = self.start + self.BLOCK_SIZE
 
-    @functools.cached_property
-    def options(self) -> gdbdash.commands.Options:
-        return {}
+    def render(self, width, height, write) -> None:
+        if width < 115:
+            per_row = 16
+        else:
+            per_row = 32
 
-    def render(self, width, height) -> None:
-        pc = fetch_pc(self.frame)
+        padding = per_row * 2
 
-        instruction_length = fetch_instructions(self.architecture, pc)[0]["length"]
+        inferior, _, architecture, pc = fetch_gdb()
 
-        memory = self.inferior.read_memory(
-            self.start - self.padding, self.BLOCK_SIZE + self.padding * 2
+        instruction_length = fetch_instructions(architecture, pc)[0]["length"]
+
+        memory = inferior.read_memory(
+            self.start - padding, self.BLOCK_SIZE + padding * 2
         )
 
-        instruction_start = self.padding + (pc & (self.BLOCK_SIZE - 1))
+        instruction_start = padding + (pc & (self.BLOCK_SIZE - 1))
         instruction_end = instruction_start + instruction_length
 
-        color: typing.Union[None, str] = None
+        color: typing.Optional[str] = None
 
         for i, byte in enumerate(typing.cast(typing.Iterable[bytes], memory)):
-            if i == self.padding:
-                self.write("\n")
-            elif i == self.padding + self.BLOCK_SIZE:
-                self.write("\n")
+            if i == padding:
+                write("\n")
+            elif i == padding + self.BLOCK_SIZE:
+                write("\n")
 
             if i == instruction_start:
-                self.write(COLOR_GREEN)
-                color = COLOR_GREEN
+                write(self.o["text-highlight"].value)
+                color = self.o["text-highlight"].value
             elif i == instruction_end:
-                self.write(COLOR_RESET)
+                write(RESET_COLOR)
                 color = None
 
-            if i & (self.per_row - 1) == 0:
-                self.write(COLOR_RESET)
-                self.write(f"{pc + i - instruction_start:#016x}  ")
+            if i & (per_row - 1) == 0:
+                write(RESET_COLOR)
+                write(self.o["text-200"].value)
+                write(f"{pc + i - instruction_start:#016x}  ")
+                write(self.o["text-100"].value)
                 if color:
-                    self.write(color)
+                    write(color)
 
-            self.write(byte.hex() + " ")
+            write(byte.hex() + " ")
 
-            if (i + 1) & (self.per_row - 1) == 0:
-                self.write("\n")
+            if (i + 1) & (per_row - 1) == 0:
+                write("\n")
 
         if pc + instruction_length >= self.end:
             self.start += self.BLOCK_SIZE
             self.end += self.BLOCK_SIZE
 
+    @functools.cached_property
+    def options(self) -> gdbdash.commands.Options:
+        return {}
+
 
 class Assembly(Module):
     """Print assembly information"""
 
-    def __init__(self):
-        super().__init__()
+    def render(self, width, height, write) -> None:
+        inferior, frame, architecture, pc = fetch_gdb()
 
-    @functools.cached_property
-    def options(self) -> gdbdash.commands.Options:
-        return {
-            "opcodes": gdbdash.commands.BoolOption(
-                "Show hexadecimal instruction next to assembly",
-                value="on",
-            ),
-        }
-
-    def render(self, width, height) -> None:
-        pc = fetch_pc(self.frame)
-
-        try:
-            flavor = str(gdb.parameter("disassembly-flavor"))
-        except:
-            flavor = "att"
-
-        instructions = fetch_instructions(self.architecture, pc, 6)
-
-        func = self.frame.function()
-        func_addr = int(func.value().address.cast(gdb.lookup_type("unsigned long")))
+        instructions = fetch_instructions(architecture, pc, 6)
 
         max_instruction_width = (
             max(instruction["length"] for instruction in instructions) * 2
@@ -133,42 +134,114 @@ class Assembly(Module):
             (max_instruction_width // 2) + (max_instruction_width % 2) - 1
         )
 
-        max_offset_width = len(str(instructions[-1]["addr"] - func_addr))
+        try:
+            flavor = str(gdb.parameter("disassembly-flavor"))
+        except:
+            flavor = "att"
 
-        addr = instructions[0]["addr"]
-        length = instructions[0]["length"]
-        asm = syntax_highlight(instructions[0]["asm"], flavor)
-        instruction = self.inferior.read_memory(addr, length)
-        offset = addr - func_addr
+        if not self.options["show-function"].value:
+            self.write_line(
+                instruction=instructions[0],
+                max_instruction_width=max_instruction_width,
+                flavor=flavor,
+                opcode_color=self.o["text-highlight"].value,
+                inferior=inferior,
+                write=write,
+            )
 
-        self.write(
-            f"{addr:#016x}  {COLOR_GREEN}{instruction.hex(' ', 1):<{max_instruction_width}}{COLOR_RESET}  {func}+{offset:<{max_offset_width}} {asm}"
+            for instruction in itertools.islice(instructions, 1, None):
+                self.write_line(
+                    instruction=instruction,
+                    max_instruction_width=max_instruction_width,
+                    flavor=flavor,
+                    opcode_color=self.o["text-100"].value,
+                    inferior=inferior,
+                    write=write,
+                )
+
+            return
+
+        function = frame.function()
+
+        function_address = int(
+            function.value().address.cast(gdb.lookup_type("unsigned long"))
+        )
+
+        max_offset_width = len(str(instructions[-1]["addr"] - function_address))
+
+        self.write_line(
+            instruction=instructions[0],
+            max_instruction_width=max_instruction_width,
+            flavor=flavor,
+            opcode_color=self.o["text-highlight"].value,
+            inferior=inferior,
+            write=write,
+            function=function,
+            function_address=function_address,
+            max_offset_width=max_offset_width,
         )
 
         for instruction in itertools.islice(instructions, 1, None):
-            addr = instruction["addr"]
-            length = instruction["length"]
-            asm = syntax_highlight(instruction["asm"], flavor)
-            memory = self.inferior.read_memory(addr, length)
-            offset = addr - func_addr
-
-            self.write(
-                f"{addr:#016x}  {memory.hex(' ', 1):<{max_instruction_width}}  {func}+{offset:<{max_offset_width}} {asm}"
+            self.write_line(
+                instruction=instruction,
+                max_instruction_width=max_instruction_width,
+                flavor=flavor,
+                opcode_color=self.o["text-100"].value,
+                inferior=inferior,
+                write=write,
+                function=function,
+                function_address=function_address,
+                max_offset_width=max_offset_width,
             )
+
+    def write_line(
+        self,
+        *,
+        instruction: "Instruction",
+        max_instruction_width: int,
+        flavor: str,
+        opcode_color: str,
+        inferior: gdb.Inferior,
+        write: WriteWrapper,
+        function: typing.Optional[gdb.Symbol] = None,
+        function_address: int = -1,
+        max_offset_width: int = -1,
+    ):
+        address = instruction["addr"]
+        length = instruction["length"]
+        assembly = syntax_highlight(instruction["asm"], flavor)
+        opcode = inferior.read_memory(address, length)
+
+        if function is None:
+            write(
+                f"{self.o['text-200'].value}{address:#016x}  {opcode_color}{opcode.hex(' ', 1):<{max_instruction_width}}  {RESET_COLOR}{assembly}"
+            )
+            return
+
+        offset = address - function_address
+
+        write(
+            f"{self.o['text-200'].value}{address:#016x}  {opcode_color}{opcode.hex(' ', 1):<{max_instruction_width}}  {RESET_COLOR}{self.o['text-200'].value}{function}+{offset:<{max_offset_width}}  {RESET_COLOR}{assembly}"
+        )
+
+    @functools.cached_property
+    def options(self) -> gdbdash.commands.Options:
+        return {
+            "show-function": gdbdash.commands.BoolOption(
+                "Show current function and offset", value="on"
+            ),
+        }
 
 
 class Registers(Module):
     """Print register information"""
 
-    def __init__(self):
-        super().__init__()
+    def render(self, width, height, write) -> None:
+        pass
 
     @functools.cached_property
     def options(self) -> gdbdash.commands.Options:
         return {}
-
-    def render(self, width, height) -> None:
-        pass
 
 
 def syntax_highlight(source: str, hint: str):
@@ -189,6 +262,14 @@ def syntax_highlight(source: str, hint: str):
         return pygments.highlight(source, lexer, formatter)
     except ImportError:
         return source
+
+
+def fetch_gdb():
+    inferior = gdb.selected_inferior()
+    frame = gdb.selected_frame()
+    architecture = frame.architecture()
+    pc = fetch_pc(frame)
+    return inferior, frame, architecture, pc
 
 
 def fetch_pc(frame: gdb.Frame):
@@ -213,3 +294,7 @@ def fetch_instructions_range(
     return typing.cast(
         typing.List[Instruction], architecture.disassemble(start_pc, end_pc=end_pc)
     )
+
+
+class Foo:
+    pass

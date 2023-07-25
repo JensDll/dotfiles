@@ -1,4 +1,5 @@
 import abc
+import collections
 import dataclasses
 import typing
 
@@ -15,13 +16,17 @@ class Command:
         command_class: int,
         command_completer_class: typing.Optional[int] = None,
         command_prefix: bool = False,
-        command_doc: str = "(no documentation)",
+        command_doc: typing.Optional[str] = None,
         **kwargs,
     ):
         cls = type(
             "",
             (gdb.Command,),
-            {"invoke": self.invoke, "complete": self.complete, "__doc__": command_doc},
+            {
+                "invoke": self.invoke,
+                "complete": self.complete,
+                "__doc__": command_doc or "(no documentation)",
+            },
         )
         self.command = (
             cls(command_name, command_class, prefix=command_prefix)
@@ -58,7 +63,14 @@ class IntOption:
     choices: int = gdb.COMPLETE_NONE
 
 
-Option = typing.Union[BoolOption, IntOption]
+@dataclasses.dataclass
+class StrOption:
+    doc: str
+    value: str
+    choices: int = gdb.COMPLETE_NONE
+
+
+Option = typing.Union[BoolOption, IntOption, StrOption]
 Options = typing.Dict[str, Option]
 
 
@@ -111,6 +123,7 @@ class ConfigureOptionCommand(Command):
         self.option = option
 
     def invoke(self, arg, from_tty):
+        super().dont_repeat()
         argv = gdb.string_to_argv(arg)
 
         if not argv:
@@ -137,9 +150,10 @@ class Togglable:
         if not hasattr(self, "command_name"):
             raise TypeError("super() must initialize command_name instance variable")
 
-        EnableCommand(self)
         self.enabled = False
         self.enable()
+
+        EnableCommand(self)
 
     def enable(self):
         self.enabled = True
@@ -149,6 +163,8 @@ class Togglable:
 
 
 class EnableCommand(Command):
+    gdb_bool = gdbdash.utils.GdbBool()
+
     def __init__(self, togglable: "Togglable"):
         super().__init__(
             command_name=f"{togglable.command_name} -enable",
@@ -161,18 +177,81 @@ class EnableCommand(Command):
     def invoke(self, arg, from_tty):
         super().dont_repeat()
         argv = gdb.string_to_argv(arg)
+
         if not argv:
             print(
                 f"[{self.togglable.command_name}] Is currently {self.togglable.enabled and 'enabled' or 'disabled'}"
             )
-        elif argv[0] == "on":
+            return
+
+        self.gdb_bool = argv[0]
+
+        if self.gdb_bool:
             self.togglable.enable()
-        elif argv[0] == "off":
-            self.togglable.disable()
         else:
-            gdbdash.utils.write_err(
-                f"[{self.togglable.command_name}] Invalid argument: {argv[0]}; must be: on off\n"
-            )
+            self.togglable.disable()
 
     def complete(self, text, word):
-        return gdbdash.utils.complete(word, ("on", "off"))
+        return gdbdash.utils.complete(word, gdbdash.utils.GdbBool.CHOICES)
+
+
+class Outputable(metaclass=abc.ABCMeta):
+    command_name: str
+
+    def __init__(
+        self, /, dashboard_modules: "gdbdash.DashboardModules", **kwargs
+    ) -> None:
+        super().__init__(**kwargs)
+
+        if not hasattr(self, "command_name"):
+            raise TypeError("super() must initialize command_name instance variable")
+
+        self.dashboard_modules = dashboard_modules
+        self.output: gdbdash.utils.FileDescriptorOrPath = gdb.STDOUT
+
+        OutputCommand(self)
+
+    def on_output_changed(self, old_output: gdbdash.utils.FileDescriptorOrPath):
+        import gdbdash.modules
+
+        if not isinstance(self, gdbdash.modules.Module):
+            raise TypeError(f"{self} must be a {gdbdash.modules.Module}")
+
+        deque = self.dashboard_modules[old_output]
+        deque.remove(self)
+
+        if len(deque) == 0:
+            del self.dashboard_modules[old_output]
+
+        self.dashboard_modules.setdefault(self.output, collections.deque()).append(self)
+
+
+class OutputCommand(Command):
+    def __init__(self, outputable: "Outputable"):
+        super().__init__(
+            command_name=f"{outputable.command_name} -output",
+            command_class=gdb.COMMAND_USER,
+            command_completer_class=gdb.COMPLETE_FILENAME,
+            command_prefix=False,
+        )
+
+        self.outputable = outputable
+
+    def invoke(self, arg, from_tty):
+        super().dont_repeat()
+        argv = gdb.string_to_argv(arg)
+
+        if not argv:
+            print(
+                f'[{self.outputable.command_name}] The current output is "{self.outputable.output}"'
+            )
+            return
+
+        old_output = self.outputable.output
+
+        try:
+            self.outputable.output = int(argv[0])
+        except ValueError:
+            self.outputable.output = argv[0]
+
+        self.outputable.on_output_changed(old_output)
