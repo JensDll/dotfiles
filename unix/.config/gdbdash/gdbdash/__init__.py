@@ -1,4 +1,3 @@
-import collections
 import itertools
 from functools import cached_property, partial
 from inspect import isclass

@@ -1,4 +1,3 @@
-import collections
 from typing import TypedDict
 
 from .commands import FileDescriptorOrPath, StrOption

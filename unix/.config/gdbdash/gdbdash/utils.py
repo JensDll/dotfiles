@@ -1,6 +1,3 @@
-from os import PathLike
-from typing import Union
-
 from gdb import (  # pyright: ignore [reportMissingModuleSource]
     selected_frame,
     selected_inferior,

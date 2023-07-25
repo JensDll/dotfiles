@@ -13,12 +13,7 @@ if TYPE_CHECKING:
     from .modules import AlignmentOptions, AssemblyOptions, RegistryOptions
 
 
-class Module(
-    Command,
-    Togglable,
-    Configurable,
-    Outputable,
-):
+class Module(Command, Togglable, Configurable, Outputable):
     def __init__(
         self,
         /,
