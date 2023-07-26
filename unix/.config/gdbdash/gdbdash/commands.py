@@ -22,6 +22,9 @@ class BoolOption:
     value: GdbBool = GdbBool()
     choices: Sequence[str] = GdbBool.CHOICES
 
+    def __str__(self):
+        return str(self.value)
+
 
 @dataclass
 class IntOption:
@@ -29,12 +32,18 @@ class IntOption:
     value: GdbInt = GdbInt()
     choices: int = gdb.COMPLETE_NONE
 
+    def __str__(self):
+        return str(self.value)
+
 
 @dataclass
 class StrOption:
     doc: str
     value: str
     choices: int = gdb.COMPLETE_NONE
+
+    def __str__(self):
+        return self.value
 
 
 class Command:
@@ -206,7 +215,7 @@ class EnableCommand(Command):
         super().dont_repeat()
         argv = gdb.string_to_argv(arg)
 
-        if not argv:
+        if len(argv) == 0:
             self.togglable.stdout(
                 f"Is currently {self.togglable.enabled and 'enabled' or 'disabled'}"
             )

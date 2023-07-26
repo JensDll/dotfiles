@@ -7,7 +7,14 @@ from typing import TYPE_CHECKING
 import gdb  # pyright: ignore [reportMissingModuleSource]
 import gdbdash.modules
 
-from .commands import Command, Configurable, Outputable, StrOption, Togglable
+from .commands import (
+    BoolOption,
+    Command,
+    Configurable,
+    Outputable,
+    StrOption,
+    Togglable,
+)
 from .modules import Module
 from .utils import is_running
 
@@ -123,20 +130,18 @@ class Dashboard(Command, Togglable, Configurable, Outputable):
     @cached_property
     def options(self):  # type: () -> DashboardOptions
         return {
-            "text-highlight": StrOption("Text highlight color", "\033[1;38;5;40m"),
-            "text-divider": StrOption("Divider color", "\033[38:5:111m"),
-            "text-divider-title": StrOption("Divider title color", "\033[38:5:111m"),
-            "text-100": StrOption("Text color", "\033[38:5:251m"),
-            "text-200": StrOption("Text color", "\033[38:5:245m"),
-            "divider-fill-char": StrOption(
-                "Char used for the module divider line", "─"
-            ),
+            "text-highlight": StrOption("", "\033[1;38;5;220m"),
+            "text-secondary": StrOption("", "\033[38;5;245m"),
+            "text-divider": StrOption("", "\033[38;5;240m"),
+            "text-divider-title": StrOption("", "\033[1;38;5;245m"),
+            "divider-fill-char": StrOption("", "─"),
+            "show-divider": BoolOption("", "on"),
         }
 
 
 def custom_prompt(current_prompt):  # type: (str) -> str
     # https://sourceware.org/gdb/current/onlinedocs/gdb.html/gdb_002eprompt.html#gdb_002eprompt
-    prompt = gdb.prompt.substitute_prompt(r"\[\e[38;5;177m\]gdb\[\e[0m\]$ ")
+    prompt = gdb.prompt.substitute_prompt(r">>> ")
     return prompt
 
 
