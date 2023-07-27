@@ -36,48 +36,30 @@ class Assembly(Module):
         self.frame = frame
 
         try:
-            flavor = str(gdb.parameter("disassembly-flavor"))
+            self.flavor = str(gdb.parameter("disassembly-flavor"))
         except:
-            flavor = "att"
+            self.flavor = "att"
 
         location = self.find_pc_location(pc)
 
-        before = self.options["before"].value
-        after = self.options["after"].value
+        before = self.options["instructions-before"].value
+        after = self.options["instructions-after"].value
 
-        max_opcode_width = self.get_max_opcode_width(location)
-        max_offset_width = self.get_max_offset_width(location)
+        self.max_opcode_width = self.get_max_opcode_width(location)
+        self.max_offset_width = self.get_max_offset_width(location)
 
         padding_before = max(before - location, 0)
         padding_after = max(location + after + 1 - len(self.instructions), 0)
 
         self.write_padding(padding_before, write)
         self.write_instructions(
-            location - before + padding_before,
-            location,
-            inferior,
-            max_opcode_width,
-            max_offset_width,
-            flavor,
-            write,
+            location - before + padding_before, location, inferior, write
         )
         self.write_instruction(
-            inferior,
-            self.instructions[location],
-            self.o["text-highlight"],
-            max_opcode_width,
-            max_offset_width,
-            flavor,
-            write,
+            inferior, self.instructions[location], self.o["text-highlight"], write
         )
         self.write_instructions(
-            location + 1,
-            location + after - padding_after + 1,
-            inferior,
-            max_opcode_width,
-            max_offset_width,
-            flavor,
-            write,
+            location + 1, location + after - padding_after + 1, inferior, write
         )
         self.write_padding(padding_after, write)
 
@@ -98,9 +80,19 @@ class Assembly(Module):
             frame.architecture(), self.function_address, count
         )
 
+    def find_pc_location(self, pc):  # type: (int) -> int
+        for i, instruction in enumerate(self.instructions):
+            if instruction["addr"] == pc:
+                return i
+
+        return -1
+
     def get_max_opcode_width(self, location):  # type: (int) -> int
-        start = max(location - self.options["before"].value, 0)
-        end = min(location + self.options["after"].value + 1, len(self.instructions))
+        start = max(location - self.options["instructions-before"].value, 0)
+        end = min(
+            location + self.options["instructions-after"].value + 1,
+            len(self.instructions),
+        )
 
         result = 0
 
@@ -110,72 +102,41 @@ class Assembly(Module):
         return 2 * result + result - 1
 
     def get_max_offset_width(self, location):  # type: (int) -> int
-        last = min(location + self.options["after"].value, len(self.instructions) - 1)
+        last = min(
+            location + self.options["instructions-after"].value,
+            len(self.instructions) - 1,
+        )
         offset = str(self.instructions[last]["addr"] - self.function_address)
         return len(offset)
-
-    def find_pc_location(self, pc):  # type: (int) -> int
-        for i, instruction in enumerate(self.instructions):
-            address = instruction["addr"]
-            if instruction["addr"] == pc:
-                return i
-
-        return -1
 
     def write_padding(self, end, write):
         for _ in range(end):
             write(self.o["text-secondary"].value)
             write(f"{0:#016x}  ...\n")
 
-    def write_instruction(
-        self,
-        inferior,
-        instruction,
-        opcode_color,
-        max_opcode_width,
-        max_offset_width,
-        flavor,
-        write,
-    ):
+    def write_instruction(self, inferior, instruction, opcode_color, write):
         address = instruction["addr"]
         length = instruction["length"]
         opcode = inferior.read_memory(address, length)
         offset = address - self.function_address
-        assembly = syntax_highlight(instruction["asm"], flavor)
+        assembly = syntax_highlight(instruction["asm"], self.flavor)
 
         write(
             f"{self.o['text-secondary']}{address:#016x}{RESET_COLOR}  "
-            f"{opcode_color}{opcode.hex(' ', 1):<{max_opcode_width}}{RESET_COLOR}  "
-            f"{self.o['text-secondary']}{self.function}+{offset:<{max_offset_width}}{RESET_COLOR}  "
+            f"{opcode_color}{opcode.hex(' ', 1):<{self.max_opcode_width}}{RESET_COLOR}  "
+            f"{self.o['text-secondary']}{self.function}+{offset:<{self.max_offset_width}}{RESET_COLOR}  "
             f"{assembly}"
         )
 
-    def write_instructions(
-        self,
-        start,
-        end,
-        inferior,
-        max_opcode_width,
-        max_offset_width,
-        flavor,
-        write,
-    ):
+    def write_instructions(self, start, end, inferior, write):
         for i in range(start, end):
-            self.write_instruction(
-                inferior,
-                self.instructions[i],
-                RESET_COLOR,
-                max_opcode_width,
-                max_offset_width,
-                flavor,
-                write,
-            )
+            self.write_instruction(inferior, self.instructions[i], RESET_COLOR, write)
 
     @cached_property
     def options(self):  # type: () -> AssemblyOptions
         return {
-            "before": IntOption("", 4),
-            "after": IntOption("", 4),
+            "instructions-before": IntOption("", 5),
+            "instructions-after": IntOption("", 5),
         }
 
 
@@ -197,56 +158,3 @@ def syntax_highlight(source, hint):
         return pygments.highlight(source, lexer, formatter)
     except ImportError:
         return source
-
-
-#     def _render(self, width, height, write):
-#         inferior = gdb.selected_inferior()
-#         frame = gdb.selected_frame()
-#         architecture = frame.architecture()
-#         pc = fetch_pc(frame)
-
-#         instructions = fetch_instructions(architecture, pc, 6)
-
-#         max_instruction_width = (
-#             max(instruction["length"] for instruction in instructions) * 2
-#         )
-#         max_instruction_width += (
-#             (max_instruction_width // 2) + (max_instruction_width % 2) - 1
-#         )
-
-#         try:
-#             flavor = str(gdb.parameter("disassembly-flavor"))
-#         except:
-#             flavor = "att"
-
-#         function = frame.function()
-#         function_address = int(
-#             function.value().address.cast(gdb.lookup_type("unsigned long"))
-#         )
-
-#         max_offset_width = len(str(instructions[-1]["addr"] - function_address))
-
-#         self.write_line(
-#             instruction=instructions[0],
-#             max_instruction_width=max_instruction_width,
-#             flavor=flavor,
-#             opcode_color=self.o["text-highlight"].value,
-#             inferior=inferior,
-#             write=write,
-#             function=function,
-#             function_address=function_address,
-#             max_offset_width=max_offset_width,
-#         )
-
-#         for instruction in islice(instructions, 1, None):
-#             self.write_line(
-#                 instruction=instruction,
-#                 max_instruction_width=max_instruction_width,
-#                 flavor=flavor,
-#                 opcode_color=RESET_COLOR,
-#                 inferior=inferior,
-#                 write=write,
-#                 function=function,
-#                 function_address=function_address,
-#                 max_offset_width=max_offset_width,
-#             )
