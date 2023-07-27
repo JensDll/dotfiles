@@ -98,7 +98,7 @@ class Assembly(Module):
         for i in range(start, end):
             result = max(result, self.instructions[i]["length"])
 
-        return 2 * result + result - 1
+        return 3 * result - 1
 
     def get_max_offset_width(self, location):  # type: (int) -> int
         last = min(
