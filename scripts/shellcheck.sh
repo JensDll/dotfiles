@@ -7,6 +7,5 @@ root="$(
 declare -r root
 declare -r unix="$root/unix"
 
-shfmt -w "$root" "$unix/.bash_aliases" "$unix/.bash_logout" "$unix/.bashrc" "$unix/.profile"
-
-stylua "$unix/.config/nvim"
+shellcheck --external-sources "$root"/**/*.sh "$unix"/.local/**/*.sh \
+  "$unix/.bash_aliases" "$unix/.bash_logout" "$unix/.bashrc" "$unix/.profile"

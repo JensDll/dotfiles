@@ -1,0 +1,16 @@
+[tool.pyright]
+# https://microsoft.github.io/pyright/#/configuration?id=main-configuration-options
+include = ['unix', 'windows', 'misc', 'scripts']
+exclude = ['**/__pycache__']
+ignore = ['gdb']
+pythonVersion = '3.8'
+
+[tool.black]
+# https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#t-target-version
+target-version = ['py38']
+
+[tool.isort]
+# https://pycqa.github.io/isort/docs/configuration/options.html#python-version
+py_version = 38
+# https://pycqa.github.io/isort/docs/configuration/options.html#profile
+profile = 'black'

@@ -1,10 +1,1 @@
-.git/
-.github/
-scripts/
-.gitignore
-.gitmodules
-.rsyncignore
-bootstrap.sh
-Microsoft.PowerShell_profile.ps1
-setup.reg
-texlive2023profile
+__pycache__/
