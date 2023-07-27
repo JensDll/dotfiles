@@ -10,11 +10,13 @@ if TYPE_CHECKING:
     from gdb import RegisterDescriptor  # pyright: ignore [reportMissingModuleSource]
     from gdbdash.utils import WriteWrapper
 
+    from .registers import RegisterOptions
+
 
 class Registers(Module):
     """Print register information"""
 
-    ORDER = 2
+    ORDER = 300
 
     def __init__(self, /, **kwargs):
         super().__init__(**kwargs)
@@ -36,11 +38,11 @@ class Registers(Module):
 
     def render(self, width, height, write):
         frame = gdb.selected_frame()
-        self.render_general_purpose(width // 22, frame, write)
-        self.render_segment(width // 16, frame, write)
-        self.render_eflags(width, frame, write)
+        self.write_general_purpose_registers(width // 22, frame, write)
+        self.write_eflags(width, frame, write)
+        self.write_segment_registers(width // 16, frame, write)
 
-    def render_general_purpose(
+    def write_general_purpose_registers(
         self, per_row, frame, write
     ):  # type: (int, gdb.Frame, WriteWrapper) -> None
         i = 0
@@ -67,7 +69,7 @@ class Registers(Module):
 
             write("\n")
 
-    def render_segment(
+    def write_segment_registers(
         self, per_row, frame, write
     ):  # type: (int, gdb.Frame, WriteWrapper) -> None
         i = 0
@@ -94,7 +96,7 @@ class Registers(Module):
 
             write("\n")
 
-    def render_eflags(
+    def write_eflags(
         self, width, frame, write
     ):  # type: (int, gdb.Frame, WriteWrapper) -> None
         if self.eflags is None:
@@ -112,9 +114,7 @@ class Registers(Module):
         df = (value >> 10) & 1  # Direction flag
         write_flag(df, "DF")
         self.df = df
-
-        write("  ")
-
+        write("- ")
         # System flags
         tf = (value >> 8) & 1  # Trap flag
         _if = (value >> 9) & 1  # Interrupt enable flag
@@ -146,9 +146,7 @@ class Registers(Module):
         self.vif = vif
         self.vip = vip
         self.id = id
-
-        write("  ")
-
+        write("- ")
         # Status flags
         cf = value & 1  # Carry flag
         pf = (value >> 2) & 1  # Parity flag
@@ -172,5 +170,5 @@ class Registers(Module):
         write("\n")
 
     @cached_property
-    def options(self):
+    def options(self):  # type: () -> RegisterOptions
         return {}

@@ -1,15 +1,19 @@
 from functools import cached_property
+from typing import TYPE_CHECKING
 
 import gdb  # pyright: ignore [reportMissingModuleSource]
 from gdbdash.utils import RESET_COLOR, fetch_instructions, fetch_pc
 
 from .module import Module
 
+if TYPE_CHECKING:
+    from .alignment import AlignmentOptions
+
 
 class Alignment(Module):
     """Print 64-byte-block formatted memory to see if instructions cross block boundaries"""
 
-    ORDER = 0
+    ORDER = 100
     BLOCK_SIZE = 64
 
     def __init__(self, /, **kwargs):
@@ -72,5 +76,5 @@ class Alignment(Module):
             self.end += self.BLOCK_SIZE
 
     @cached_property
-    def options(self):
+    def options(self):  # type: () -> AlignmentOptions
         return {}

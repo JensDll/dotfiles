@@ -1,5 +1,6 @@
 from typing import TypedDict
 
+import gdb
 from gdbdash.commands import BoolOption, StrOption
 from gdbdash.modules import Module
 from gdbdash.utils import FileDescriptorOrPath
@@ -19,4 +20,6 @@ DashboardOptions = TypedDict(
 DashboardModulesDict = dict[FileDescriptorOrPath, list[Module]]
 
 class Dashboard:
-    pass
+    options: DashboardOptions
+    modules_dict: DashboardModulesDict
+    def on_order_changed(self) -> None: ...

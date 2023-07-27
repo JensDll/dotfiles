@@ -41,15 +41,18 @@ class ConfigureCommand(Command):
             command_prefix=True,
         )
 
-        for option_name, option in configurable.options.items():
+        self.commands = [
             ConfigureOptionCommand(
                 command_name=f"{self.command_name} {option_name}",
                 option_name=option_name,
                 option=option,
             )
+            for option_name, option in configurable.options.items()
+        ]
 
     def invoke(self, arg, from_tty):
-        self.stdout("TODO: options summary here")
+        for command in self.commands:
+            command.invoke("", from_tty)
 
 
 class ConfigureOptionCommand(Command):

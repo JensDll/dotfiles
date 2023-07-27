@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class Assembly(Module):
     """Print assembly information"""
 
-    ORDER = 1
+    ORDER = 200
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -135,8 +135,12 @@ class Assembly(Module):
     @cached_property
     def options(self):  # type: () -> AssemblyOptions
         return {
-            "instructions-before": IntOption("", 5),
-            "instructions-after": IntOption("", 5),
+            "instructions-before": IntOption(
+                "Number of instructions displayed before the program counter", 5
+            ),
+            "instructions-after": IntOption(
+                "Number of instructions displayed after the program counter", 5
+            ),
         }
 
 

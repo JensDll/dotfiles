@@ -17,7 +17,7 @@ from gdbdash.commands import (
 )
 
 if TYPE_CHECKING:
-    from typing import Sequence
+    from typing import Iterable
 
     from gdb.events import StopEvent  # pyright: ignore [reportMissingModuleSource]
     from gdbdash.utils import FileDescriptorOrPath
@@ -73,13 +73,22 @@ class Dashboard(Command, Togglable, Configurable, Outputable):
 
         def render_file(
             output, modules
-        ):  # type: (FileDescriptorOrPath, Sequence[gdbdash.modules.Module]) -> None
+        ):  # type: (FileDescriptorOrPath, filter[gdbdash.modules.Module]) -> None
+            next_module = next(modules, None)
+
+            if next_module is None:
+                return
+
             with open(output, "w") as f:
+                next_module.divider(width, height, f.write)
+                next_module.render(width, height, f.write)
                 for module in modules:
                     module.divider(width, height, f.write)
                     module.render(width, height, f.write)
 
         for output, modules in self.modules_dict.items():
+            modules = filter(lambda module: module.enabled, modules)
+
             if not isinstance(output, int):
                 render_file(output, modules)
                 continue

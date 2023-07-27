@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import ClassVar
 
 from gdbdash.commands import Command, Configurable, Outputable, Togglable
-from gdbdash.dashboard import DashboardOptions
+from gdbdash.dashboard import DashboardModulesDict, DashboardOptions
 from gdbdash.utils import WriteWrapper
 
 class Module(Command, Togglable, Configurable, Outputable):
@@ -11,7 +11,8 @@ class Module(Command, Togglable, Configurable, Outputable):
     def __init__(
         self,
         /,
-        dashboard_options,
+        dashboard_options: DashboardOptions,
+        dashboard_modules_dict: DashboardModulesDict,
         **kwargs,
     ): ...
     @abstractmethod
