@@ -1,7 +1,8 @@
 from typing import TypedDict
 
-from .commands import BoolOption, FileDescriptorOrPath, StrOption
-from .modules import Module
+from gdbdash.commands import BoolOption, StrOption
+from gdbdash.modules import Module
+from gdbdash.utils import FileDescriptorOrPath
 
 DashboardOptions = TypedDict(
     "DashboardOptions",
@@ -16,3 +17,6 @@ DashboardOptions = TypedDict(
 )
 
 DashboardModulesDict = dict[FileDescriptorOrPath, list[Module]]
+
+class Dashboard:
+    pass

@@ -1,14 +1,7 @@
-from gdb import (  # pyright: ignore [reportMissingModuleSource]
-    selected_frame,
-    selected_inferior,
-)
+import gdb  # pyright: ignore [reportMissingModuleSource]
 
 RESET_COLOR = "\033[0m"
 FONT_BOLD = "\033[1m"
-
-
-def is_running():
-    return selected_inferior().pid != 0
 
 
 def complete(word, candidates):
@@ -60,14 +53,6 @@ def fetch_instructions(architecture, start_pc, count=1):
 
 def fetch_instructions_range(architecture, start_pc, end_pc):
     return architecture.disassemble(start_pc, end_pc=end_pc)
-
-
-def fetch_gdb():
-    inferior = selected_inferior()
-    frame = selected_frame()
-    architecture = frame.architecture()
-    pc = fetch_pc(frame)
-    return inferior, frame, architecture, pc
 
 
 def fetch_pc(frame):
