@@ -13,12 +13,12 @@ class Module(Command, Togglable, Configurable, Outputable, Orderable):
     def __init__(
         self,
         /,
-        dashboard_options,  # type: DashboardOptions
-        dashboard_modules_dict,  # type: DashboardModulesDict
+        options,  # type: DashboardOptions
+        outputables,  # type: DashboardModulesDict
         **kwargs,
     ):
-        self.o = dashboard_options
-        self.dashboard_modules_dict = dashboard_modules_dict
+        self.o = options
+        self.outputables = outputables
         self.name = self.__class__.__name__
 
         super().__init__(
@@ -26,12 +26,11 @@ class Module(Command, Togglable, Configurable, Outputable, Orderable):
             command_class=gdb.COMMAND_USER,
             command_prefix=True,
             command_doc=self.__doc__,
-            dashboard_modules_dict=dashboard_modules_dict,
             **kwargs,
         )
 
     def on_order_changed(self):
-        for modules in self.dashboard_modules_dict.values():
+        for modules in self.outputables.values():
             modules.sort(key=lambda module: module.ORDER)
 
     def divider(self, width, height, write):

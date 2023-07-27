@@ -1,5 +1,3 @@
-import gdb  # pyright: ignore [reportMissingModuleSource]
-
 RESET_COLOR = "\033[0m"
 FONT_BOLD = "\033[1m"
 

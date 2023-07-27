@@ -5,8 +5,6 @@ import gdb  # pyright: ignore [reportMissingModuleSource]
 from .command import Command
 
 if TYPE_CHECKING:
-    from gdbdash.dashboard import DashboardModulesDict
-
     from .output import OutputableProtocol
 
 
@@ -14,7 +12,6 @@ class Outputable:
     def __init__(
         self,  # type: OutputableProtocol
         /,
-        dashboard_modules_dict,  # type: DashboardModulesDict
         **kwargs,
     ):
         if not isinstance(self, Command):
@@ -22,7 +19,6 @@ class Outputable:
 
         super().__init__(**kwargs)
 
-        self.dashboard_modules_dict = dashboard_modules_dict
         self.output = gdb.STDOUT
 
         OutputCommand(self)
@@ -33,13 +29,13 @@ class Outputable:
         if not isinstance(self, gdbdash.modules.Module):
             raise TypeError(f"{self} must be a {gdbdash.modules.Module}")
 
-        modules = self.dashboard_modules_dict[old_output]
+        modules = self.outputables[old_output]
         modules.remove(self)
 
         if len(modules) == 0:
-            del self.dashboard_modules_dict[old_output]
+            del self.outputables[old_output]
 
-        modules = self.dashboard_modules_dict.setdefault(self.output, [])
+        modules = self.outputables.setdefault(self.output, [])
         modules.append(self)
         modules.sort(key=lambda module: module.ORDER)
 

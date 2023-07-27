@@ -1,5 +1,4 @@
 from functools import cached_property
-from itertools import islice
 from typing import TYPE_CHECKING
 
 import gdb  # pyright: ignore [reportMissingModuleSource]

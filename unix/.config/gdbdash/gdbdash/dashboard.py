@@ -17,8 +17,6 @@ from gdbdash.commands import (
 )
 
 if TYPE_CHECKING:
-    from typing import Iterable
-
     from gdb.events import StopEvent  # pyright: ignore [reportMissingModuleSource]
     from gdbdash.utils import FileDescriptorOrPath
 
@@ -31,7 +29,6 @@ class Dashboard(Command, Togglable, Configurable, Outputable):
             command_name="dashboard",
             command_class=gdb.COMMAND_USER,
             command_prefix=True,
-            dashboard_modules_dict=dict(),
         )
 
         self.module_types = [
@@ -47,9 +44,7 @@ class Dashboard(Command, Togglable, Configurable, Outputable):
         modules_dict = dict()  # type: DashboardModulesDict
 
         for module_type in self.module_types:
-            module = module_type(
-                dashboard_options=self.options, dashboard_modules_dict=modules_dict
-            )
+            module = module_type(options=self.options, outputables=modules_dict)
             modules_dict.setdefault(module.output, []).append(module)
 
         for modules in modules_dict.values():
@@ -128,7 +123,7 @@ class Dashboard(Command, Togglable, Configurable, Outputable):
 
         for module in itertools.chain.from_iterable(self.modules_dict.values()):
             module.output = self.output
-            module.dashboard_modules_dict = modules_dict
+            module.outputables = modules_dict
             modules.append(module)
 
         modules.sort(key=lambda module: module.ORDER)

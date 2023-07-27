@@ -9,11 +9,7 @@ class Module(Command, Togglable, Configurable, Outputable):
     ORDER: ClassVar[int]
     o: DashboardOptions
     def __init__(
-        self,
-        /,
-        dashboard_options: DashboardOptions,
-        dashboard_modules_dict: DashboardModulesDict,
-        **kwargs,
+        self, /, options: DashboardOptions, outputables: DashboardModulesDict, **kwargs
     ): ...
     @abstractmethod
     def render(self, width: int, height, write: WriteWrapper): ...

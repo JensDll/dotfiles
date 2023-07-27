@@ -42,7 +42,7 @@ class OrderCommand(Command):
         argv = gdb.string_to_argv(arg)
 
         if len(argv) == 0:
-            self.stdout(f"The current order is {self.orderable.ORDER}")
+            self.stdout(f'The current order is "{self.orderable.ORDER}"')
             return
 
         self.orderable.__class__.ORDER = int(argv[0])

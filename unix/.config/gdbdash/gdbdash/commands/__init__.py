@@ -1,6 +1,5 @@
 from .command import Command
-from .configure import Configurable
+from .configure import BoolOption, Configurable, IntOption, StrOption
 from .enable import Togglable
-from .options import BoolOption, IntOption, StrOption
 from .order import Orderable
 from .output import Outputable
