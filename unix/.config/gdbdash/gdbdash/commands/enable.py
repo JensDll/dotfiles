@@ -43,6 +43,7 @@ class EnableCommand(Command):
             command_name=f"{togglable.command_name} -enable",
             command_class=gdb.COMMAND_USER,
             command_prefix=False,
+            command_doc=f"Enable or disable this module",
         )
 
         self.togglable = togglable

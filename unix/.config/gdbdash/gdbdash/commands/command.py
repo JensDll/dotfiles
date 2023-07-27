@@ -37,7 +37,7 @@ class Command:
         self.command.dont_repeat()
 
     def invoke(self, arg, from_tty):
-        self.stdout(f"The command is not implemented")
+        self.stdout(f"This command is not implemented and did nothing")
 
     def complete(self, text, word):
         raise NotImplementedError

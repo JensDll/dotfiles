@@ -69,6 +69,7 @@ class ConfigureCommand(Command):
             command_name=f"{configurable.command_name} -configure",
             command_class=gdb.COMMAND_USER,
             command_prefix=True,
+            command_doc="Configure the options of this module",
         )
 
         self.commands = [

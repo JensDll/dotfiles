@@ -33,6 +33,7 @@ class OrderCommand(Command):
             command_name=f"{orderable.command_name} -order",
             command_class=gdb.COMMAND_USER,
             command_prefix=False,
+            command_doc=f"Change the order in which this module's text appears in the output",
         )
 
         self.orderable = orderable

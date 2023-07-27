@@ -50,6 +50,7 @@ class OutputCommand(Command):
             command_class=gdb.COMMAND_USER,
             command_completer_class=gdb.COMPLETE_FILENAME,
             command_prefix=False,
+            command_doc=f"Change the location where module output is written",
         )
 
         self.outputable = outputable

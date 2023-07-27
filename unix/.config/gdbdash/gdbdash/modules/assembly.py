@@ -108,8 +108,8 @@ class Assembly(Module):
         offset = str(self.instructions[last]["addr"] - self.function_address)
         return len(offset)
 
-    def write_padding(self, end, write):
-        for _ in range(end):
+    def write_padding(self, count, write):
+        for _ in range(count):
             write(self.o["text-secondary"].value)
             write(f"{0:#016x}  ...\n")
 
