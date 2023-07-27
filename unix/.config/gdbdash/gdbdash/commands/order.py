@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from .order import OrderableProtocol
 
 
-class Orderable(metaclass=ABCMeta):
+class Orderable:
     def __init__(
         self,  # type: OrderableProtocol
         **kwargs,
@@ -21,8 +21,7 @@ class Orderable(metaclass=ABCMeta):
 
         OrderCommand(self)
 
-    @abstractmethod
-    def on_order_changed(self) -> None:
+    def on_order_changed(self):
         pass
 
 

@@ -30,8 +30,7 @@ class Module(Command, Togglable, Configurable, Outputable, Orderable):
         )
 
     def on_order_changed(self):
-        for modules in self.outputables.values():
-            modules.sort(key=lambda module: module.ORDER)
+        self.outputables[self.output].sort(key=lambda module: module.ORDER)
 
     def divider(self, width, height, write):
         if not self.o["show-divider"].value:

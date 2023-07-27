@@ -33,7 +33,7 @@ class Togglable:
 
 
 class EnableCommand(Command):
-    gdb_bool = GdbBool()
+    descriptor = GdbBool()
 
     def __init__(
         self,
@@ -57,9 +57,9 @@ class EnableCommand(Command):
             )
             return
 
-        self.gdb_bool = argv[0]
+        self.descriptor = argv[0]
 
-        if self.gdb_bool:
+        if self.descriptor:
             self.togglable.enable()
         else:
             self.togglable.disable()

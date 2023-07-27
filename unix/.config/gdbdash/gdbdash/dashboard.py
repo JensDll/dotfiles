@@ -17,6 +17,8 @@ from gdbdash.commands import (
 )
 
 if TYPE_CHECKING:
+    from typing import Iterator
+
     from gdb.events import StopEvent  # pyright: ignore [reportMissingModuleSource]
     from gdbdash.utils import FileDescriptorOrPath
 
@@ -68,7 +70,7 @@ class Dashboard(Command, Togglable, Configurable, Outputable):
 
         def render_file(
             output, modules
-        ):  # type: (FileDescriptorOrPath, filter[gdbdash.modules.Module]) -> None
+        ):  # type: (FileDescriptorOrPath, Iterator[gdbdash.modules.Module]) -> None
             next_module = next(modules, None)
 
             if next_module is None:
