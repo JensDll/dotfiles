@@ -48,7 +48,7 @@ class Configurable(metaclass=ABCMeta):
         **kwargs,
     ):
         if not isinstance(self, Command):
-            raise TypeError(f"{self} must be a {Command}")
+            raise TypeError(f"A configurable class must be a command")
 
         super().__init__(**kwargs)
 

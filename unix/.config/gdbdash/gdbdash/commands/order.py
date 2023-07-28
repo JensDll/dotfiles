@@ -15,7 +15,7 @@ class Orderable:
         **kwargs,
     ):
         if not isinstance(self, Command):
-            raise TypeError(f"{self} must be a {Command}")
+            raise TypeError(f"A orderable class must be a command")
 
         super().__init__(**kwargs)
 

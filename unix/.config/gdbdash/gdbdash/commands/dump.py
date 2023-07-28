@@ -15,10 +15,10 @@ class Dumpable(metaclass=ABCMeta):
         self,  # type: DumpableProtocol
         **kwargs,
     ):
-        super().__init__(**kwargs)
-
         if not isinstance(self, Configurable):
-            raise TypeError(f"{self} must be {Configurable}")
+            raise TypeError(f"A dumpable class must be configurable")
+
+        super().__init__(**kwargs)
 
         DumpCommand(self)
         LoadCommand(self)

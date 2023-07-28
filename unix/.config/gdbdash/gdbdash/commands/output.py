@@ -15,7 +15,7 @@ class Outputable:
         **kwargs,
     ):
         if not isinstance(self, Command):
-            raise TypeError(f"{self} must be a {Command}")
+            raise TypeError(f"A outputable class must be a command")
 
         super().__init__(**kwargs)
 
