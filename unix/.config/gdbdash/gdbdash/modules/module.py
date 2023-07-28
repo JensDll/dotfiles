@@ -20,9 +20,10 @@ class Module(Command, Togglable, Configurable, Outputable, Orderable):
         self.o = options
         self.outputables = outputables
         self.name = self.__class__.__name__
+        self.lower_name = self.name.lower()
 
         super().__init__(
-            command_name=f"dashboard {self.name.lower()}",
+            command_name=f"dashboard {self.lower_name}",
             command_class=gdb.COMMAND_USER,
             command_prefix=True,
             command_doc=self.__doc__,

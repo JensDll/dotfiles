@@ -63,9 +63,10 @@ class Assembly(Module):
         self.write_padding(padding_after, write)
 
     def fetch_new_instructions(self, frame):  # type: (gdb.Frame) -> None
-        self.function = frame.function()
+        function = frame.function()
+        self.function = function.name
         self.function_address = int(
-            self.function.value().address.cast(gdb.lookup_type("unsigned long"))
+            function.value().address.cast(gdb.lookup_type("unsigned long"))
         )
 
         disassembly = gdb.execute("disassemble", to_string=True)
@@ -109,9 +110,13 @@ class Assembly(Module):
         return len(offset)
 
     def write_padding(self, count, write):
+        padding = "..."
         for _ in range(count):
             write(self.o["text-secondary"].value)
-            write(f"{0:#016x}  ...\n")
+            write(
+                f"{padding:<16}  {padding:<{self.max_opcode_width}}  "
+                f"{padding:<{len(self.function) + self.max_offset_width + 1}}  {padding}\n"
+            )
 
     def write_instruction(self, inferior, instruction, opcode_color, write):
         address = instruction["addr"]

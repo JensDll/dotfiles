@@ -31,7 +31,7 @@ class GdbBool:
         elif value == "off" or value == "0" or value == "disable":
             return False
         else:
-            raise ValueError(f"Invalid boolean value: {value}")
+            return bool(value)
 
 
 class GdbInt:

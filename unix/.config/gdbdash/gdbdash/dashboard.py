@@ -1,4 +1,5 @@
 import itertools
+import json
 from functools import cached_property, partial
 from inspect import isclass
 from os import get_terminal_size
@@ -11,6 +12,7 @@ from gdbdash.commands import (
     BoolOption,
     Command,
     Configurable,
+    Dumpable,
     Outputable,
     StrOption,
     Togglable,
@@ -25,7 +27,7 @@ if TYPE_CHECKING:
     from .dashboard import DashboardModulesDict, DashboardOptions
 
 
-class Dashboard(Command, Togglable, Configurable, Outputable):
+class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
     def __init__(self):
         super().__init__(
             command_name="dashboard",
@@ -131,6 +133,42 @@ class Dashboard(Command, Togglable, Configurable, Outputable):
         modules.sort(key=lambda module: module.ORDER)
 
         self.modules_dict = modules_dict
+
+    def dump(self, path):
+        values = {
+            "dashboard": {
+                "options": {
+                    option_name: option.value  # type: ignore
+                    for option_name, option in self.options.items()
+                }
+            }
+        }
+
+        values["dashboard"]["modules"] = {
+            module.lower_name: {
+                "options": {
+                    option_name: option.value
+                    for option_name, option in module.options.items()
+                }
+            }
+            for module in itertools.chain.from_iterable(self.modules_dict.values())
+        }
+
+        with open(path, "w") as f:
+            json.dump(values, f, indent=2)
+
+    def load(self, path):
+        with open(path) as f:
+            config = json.load(f)
+
+        for option_name, option in config["dashboard"]["options"].items():
+            self.options[option_name].value = option
+
+        for module in itertools.chain.from_iterable(self.modules_dict.values()):
+            for option_name, option in config["dashboard"]["modules"][
+                module.lower_name
+            ]["options"].items():
+                module.options[option_name].value = option
 
     @cached_property
     def options(self):  # type: () -> DashboardOptions
