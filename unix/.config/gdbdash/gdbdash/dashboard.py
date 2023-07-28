@@ -145,7 +145,7 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
         }
 
         values["dashboard"]["modules"] = {
-            module.lower_name: {
+            module.normalized_name: {
                 "options": {
                     option_name: option.value
                     for option_name, option in module.options.items()
@@ -166,7 +166,7 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
 
         for module in itertools.chain.from_iterable(self.modules_dict.values()):
             for option_name, option in config["dashboard"]["modules"][
-                module.lower_name
+                module.normalized_name
             ]["options"].items():
                 module.options[option_name].value = option
 

@@ -60,7 +60,7 @@ class OutputCommand(Command):
         argv = gdb.string_to_argv(arg)
 
         if len(argv) == 0:
-            self.stdout(f'The current output is "{self.outputable.output}"')
+            self.outputable.stdout(f'The current output is "{self.outputable.output}"')
             return
 
         old_output = self.outputable.output
