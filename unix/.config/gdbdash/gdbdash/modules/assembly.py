@@ -1,3 +1,4 @@
+import re
 from functools import cached_property
 from typing import TYPE_CHECKING
 
@@ -63,18 +64,35 @@ class Assembly(Module):
         self.write_padding(padding_after, write)
 
     def fetch_new_instructions(self, frame):  # type: (gdb.Frame) -> None
-        function = frame.function()
-        self.function = function.name
-        self.function_address = int(
-            function.value().address.cast(gdb.lookup_type("unsigned long"))
-        )
-
         disassembly = gdb.execute("disassemble", to_string=True)
 
         if disassembly is None:
             return
 
-        count = disassembly.count("\n") - 2
+        function = frame.function()
+
+        if function is None:
+            lines = disassembly.split("\n")
+
+            match = re.search(r"(\w+):$", lines[0])
+
+            if match:
+                self.function_name = match.group(1)
+            else:
+                self.function_name = "?"
+
+            match = re.search(r"0x([0-9a-fA-F]+)", lines[1])
+
+            if match:
+                self.function_address = int(match.group(1), 16)
+
+            count = len(lines) - 3
+        else:
+            self.function_name = function.name
+            self.function_address = int(
+                function.value().address.cast(gdb.lookup_type("unsigned long"))
+            )
+            count = disassembly.count("\n") - 2
 
         self.instructions = fetch_instructions(
             frame.architecture(), self.function_address, count
@@ -115,7 +133,7 @@ class Assembly(Module):
             write(self.o["text-secondary"].value)
             write(
                 f"{padding:<16}  {padding:<{self.max_opcode_width}}  "
-                f"{padding:<{len(self.function) + self.max_offset_width + 1}}  {padding}\n"
+                f"{padding:<{len(self.function_name) + self.max_offset_width + 1}}  {padding}\n"
             )
 
     def write_instruction(self, inferior, instruction, opcode_color, write):
@@ -128,7 +146,7 @@ class Assembly(Module):
         write(
             f"{self.o['text-secondary']}{address:#016x}{RESET_COLOR}  "
             f"{opcode_color}{opcode.hex(' ', 1):<{self.max_opcode_width}}{RESET_COLOR}  "
-            f"{self.o['text-secondary']}{self.function}+{offset:<{self.max_offset_width}}{RESET_COLOR}  "
+            f"{self.o['text-secondary']}{self.function_name}+{offset:<{self.max_offset_width}}{RESET_COLOR}  "
             f"{assembly}"
         )
 
