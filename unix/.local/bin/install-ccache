@@ -13,8 +13,8 @@ __usage() {
   cat <<EOF
 Usage: $(basename "${BASH_SOURCE[0]}") <version> [options]
 Options: [defaults in brackets after descriptions]
-  --help | -h | -?    print this message
-  --prefix            directory in which to install    [$HOME/.local/bin]
+  --help|-h|-?    print this message
+  --prefix        directory in which to install    [$HOME/.local/bin]
 EOF
 
   if [[ $1 == --success ]]; then
