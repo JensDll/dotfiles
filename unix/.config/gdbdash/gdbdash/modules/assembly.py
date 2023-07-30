@@ -67,7 +67,7 @@ class Assembly(Module):
         disassembly = gdb.execute("disassemble", to_string=True)
 
         if disassembly is None:
-            return
+            raise Exception("Failed to disassemble current frame")
 
         function = frame.function()
 

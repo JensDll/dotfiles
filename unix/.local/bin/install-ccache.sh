@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# bash -s <version> < <(curl --location --fail --silent --show-error https://raw.githubusercontent.com/JensDll/dotfiles/main/.local/bin/install-ccache.sh)
+# bash -s <version> < <(curl --location --fail --silent --show-error https://raw.githubusercontent.com/JensDll/dotfiles/main/unix/.local/bin/install-ccache.sh)
 
 # https://ccache.dev
 
@@ -13,8 +13,8 @@ __usage() {
   cat << EOF
 Usage: $(basename "${BASH_SOURCE[0]}") <version> [options]
 Options: [defaults in brackets after descriptions]
-  --help -h -?    print this message
-  --prefix        directory in which to install    [$HOME/.local/bin]
+  --help | -h | -?    print this message
+  --prefix            directory in which to install    [$HOME/.local/bin]
 EOF
 
   if [[ $1 == --success ]]; then
@@ -42,20 +42,6 @@ __cleanup() {
   echo "Cleaning up temporary directory: $1"
   # https://manpages.debian.org/coreutils/rm
   rm --recursive "$1"
-}
-
-__check_argument() {
-  if [[ -z $1 ]]; then
-    __error "Missing value for argument <$2>"
-    __usage
-  fi
-}
-
-__check_option() {
-  if [[ -z $1 ]]; then
-    __error "Missing value for option --$2"
-    __usage
-  fi
 }
 
 __parse_parameters() {
@@ -91,9 +77,15 @@ __parse_parameters() {
 
   version=${arguments[0]#v}
 
-  __check_argument "$version" version
+  if [[ -z $version ]]; then
+    __error "Missing value for argument: <version>"
+    __usage
+  fi
 
-  __check_option "$prefix" prefix
+  if [[ -z $prefix ]]; then
+    __error "Missing value for option: --prefix"
+    __usage
+  fi
 }
 
 __parse_parameters "$@"
