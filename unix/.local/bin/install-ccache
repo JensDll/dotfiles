@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# bash -s <version> < <(curl --location --fail --silent --show-error https://raw.githubusercontent.com/JensDll/dotfiles/main/unix/.local/bin/install-ccache.sh)
+# bash -s <version> < <(curl --location --fail --silent --show-error https://raw.githubusercontent.com/JensDll/dotfiles/main/unix/.local/bin/install-ccache)
 
 # https://ccache.dev
 
@@ -10,7 +10,7 @@ declare -r green="\033[0;32m"
 
 __usage() {
   # https://manpages.debian.org/coreutils/cat
-  cat << EOF
+  cat <<EOF
 Usage: $(basename "${BASH_SOURCE[0]}") <version> [options]
 Options: [defaults in brackets after descriptions]
   --help | -h | -?    print this message
@@ -99,7 +99,7 @@ declare -r temp_dir
 trap '__cleanup $temp_dir' EXIT
 
 # https://manpages.debian.org/gpg/gpg
-if ! gpg --list-public-keys '5A939A71A46792CF57866A51996DDA075594ADB8' > /dev/null 2>&1; then
+if ! gpg --list-public-keys '5A939A71A46792CF57866A51996DDA075594ADB8' >/dev/null 2>&1; then
   gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys '5A939A71A46792CF57866A51996DDA075594ADB8'
 fi
 

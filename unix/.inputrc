@@ -1,0 +1,6 @@
+# https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-show_002dall_002dif_002dambiguous
+set show-all-if-ambiguous on
+# https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-visible_002dstats
+set visible-stats on
+# https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-page_002dcompletions
+set page-completions off
