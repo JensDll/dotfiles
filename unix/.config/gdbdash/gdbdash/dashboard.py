@@ -137,19 +137,21 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
     def dump(self, path):
         values = {
             "dashboard": {
+                "enabled": self.enabled,
                 "options": {
                     option_name: option.value  # type: ignore
                     for option_name, option in self.options.items()
-                }
+                },
             }
         }
 
         values["dashboard"]["modules"] = {
             module.normalized_name: {
+                "enabled": module.enabled,
                 "options": {
                     option_name: option.value
                     for option_name, option in module.options.items()
-                }
+                },
             }
             for module in itertools.chain.from_iterable(self.modules_dict.values())
         }
@@ -161,13 +163,15 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
         with open(path) as f:
             config = json.load(f)
 
-        for option_name, option in config["dashboard"]["options"].items():
+        json_dashboard = config["dashboard"]
+        self.enabled = json_dashboard["enabled"]
+        for option_name, option in json_dashboard["options"].items():
             self.options[option_name].value = option
 
         for module in itertools.chain.from_iterable(self.modules_dict.values()):
-            for option_name, option in config["dashboard"]["modules"][
-                module.normalized_name
-            ]["options"].items():
+            json_module = config["dashboard"]["modules"][module.normalized_name]
+            module.enabled = json_module["enabled"]
+            for option_name, option in json_module["options"].items():
                 module.options[option_name].value = option
 
     @cached_property

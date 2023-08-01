@@ -19,13 +19,6 @@ class Alignment(Module):
     def __init__(self, /, **kwargs):
         super().__init__(**kwargs)
 
-        frame = gdb.selected_frame()
-        pc = fetch_pc(frame)
-
-        residue_class = pc & (self.BLOCK_SIZE - 1)
-        self.start = pc - residue_class
-        self.end = self.start + self.BLOCK_SIZE
-
     def render(self, width, height, write):
         if width < 115:
             per_row = 16
@@ -38,6 +31,8 @@ class Alignment(Module):
         frame = gdb.selected_frame()
         architecture = frame.architecture()
         pc = fetch_pc(frame)
+
+        self.set_current_block(pc)
 
         instruction_length = fetch_instructions(architecture, pc)[0]["length"]
 
@@ -71,9 +66,10 @@ class Alignment(Module):
             if (i + 1) & (per_row - 1) == 0:
                 write("\n")
 
-        if pc + instruction_length >= self.end:
-            self.start += self.BLOCK_SIZE
-            self.end += self.BLOCK_SIZE
+    def set_current_block(self, pc):
+        residue_class = pc & (self.BLOCK_SIZE - 1)
+        self.start = pc - residue_class
+        self.end = self.start + self.BLOCK_SIZE
 
     @cached_property
     def options(self):  # type: () -> AlignmentOptions
