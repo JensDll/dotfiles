@@ -1,5 +1,6 @@
 import itertools
 import json
+import pathlib
 from functools import cached_property, partial
 from inspect import isclass
 from os import get_terminal_size
@@ -35,6 +36,9 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
             command_prefix=True,
         )
 
+        self.config_path = pathlib.Path.cwd() / "gdbdash.config.json"
+        self.config_modified_time = 0
+
         self.module_types = [
             value
             for value in vars(gdbdash.modules).values()
@@ -69,6 +73,8 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
     def render(self):
         width = 160
         height = 24
+
+        self.try_load_config()
 
         def render_file(
             output, modules
@@ -173,6 +179,13 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
             module.enabled = json_module["enabled"]
             for option_name, option in json_module["options"].items():
                 module.options[option_name].value = option
+
+    def try_load_config(self):
+        if self.config_path.is_file():
+            config_modified_time = self.config_path.stat().st_mtime
+            if config_modified_time > self.config_modified_time:
+                self.config_modified_time = config_modified_time
+                self.load(self.config_path)
 
     @cached_property
     def options(self):  # type: () -> DashboardOptions

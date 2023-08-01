@@ -24,6 +24,7 @@ set print array-indexes on
 set python print-stack full
 
 define cls
+dont-repeat
 shell clear
 end
 document cls
