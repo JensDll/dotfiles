@@ -36,7 +36,7 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
             command_prefix=True,
         )
 
-        self.config_path = pathlib.Path.cwd() / "gdbdash.config.json"
+        self.config_path = pathlib.Path.cwd() / "gdbdash.json"
         self.config_modified_time = 0
 
         self.module_types = [

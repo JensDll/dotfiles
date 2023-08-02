@@ -38,7 +38,7 @@ class Registers(Module):
 
     def render(self, width, height, write):
         frame = gdb.selected_frame()
-        self.write_general_purpose_registers(width // 22, frame, write)
+        self.write_general_purpose_registers(width // 24, frame, write)
         self.write_eflags(width, frame, write)
         self.write_segment_registers(width // 16, frame, write)
 
@@ -54,16 +54,17 @@ class Registers(Module):
                     return
 
                 register = self.general_purpose[i]
-                value = int(frame.read_register(register))
+                register_value = frame.read_register(register)
+                formatted = register_value.format_string(format="z")
 
-                if value == getattr(self, register.name, value):
+                if register_value == getattr(self, register.name, register_value):
                     color = self.o["text-secondary"].value
                 else:
                     color = self.o["text-highlight"].value
 
-                write(f"{color}{register.name:>3}{RESET_COLOR} {value:#016x}  ")
+                write(f"{color}{register.name:>3}{RESET_COLOR} {formatted} ")
 
-                setattr(self, register.name, value)
+                setattr(self, register.name, register_value)
 
                 i += 1
 
@@ -81,16 +82,16 @@ class Registers(Module):
                     return
 
                 register = self.segment[i]
-                value = int(frame.read_register(register))
+                register_value = int(frame.read_register(register))
 
-                if value == getattr(self, register.name, value):
+                if register_value == getattr(self, register.name, register_value):
                     color = self.o["text-secondary"].value
                 else:
                     color = self.o["text-highlight"].value
 
-                write(f"{color}{register.name:>2}{RESET_COLOR} {value:#04x}  ")
+                write(f"{color}{register.name:>2}{RESET_COLOR} {register_value:#06x}  ")
 
-                setattr(self, register.name, value)
+                setattr(self, register.name, register_value)
 
                 i += 1
 

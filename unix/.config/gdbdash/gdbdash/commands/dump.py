@@ -48,7 +48,7 @@ class DumpCommand(Command):
 
     def invoke(self, arg, from_tty):
         argv = gdb.string_to_argv(arg)
-        path = argv[0] if len(argv) > 0 else "gdbdash.config.json"
+        path = argv[0] if len(argv) > 0 else "gdbdash.json"
         self.dumpable.dump(path)
 
 
@@ -68,5 +68,5 @@ class LoadCommand(Command):
 
     def invoke(self, arg, from_tty):
         argv = gdb.string_to_argv(arg)
-        path = argv[0] if len(argv) > 0 else "gdbdash.config.json"
+        path = argv[0] if len(argv) > 0 else "gdbdash.json"
         self.dumpable.load(path)
