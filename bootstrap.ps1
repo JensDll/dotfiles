@@ -26,6 +26,11 @@ function Install-Registry() {
   regedit.exe /s "$PSScriptRoot\windows\setup.reg"
 }
 
+if (-not $IsWindows) {
+  Write-Error 'This script is only for Windows.'
+  return
+}
+
 if ($Registry) {
   Install-Registry
   return
