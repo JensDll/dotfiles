@@ -195,4 +195,4 @@ def syntax_highlight(source, hint):
 
         return pygments.highlight(source, lexer, formatter)
     except ImportError:
-        return source
+        return source + "\n"
