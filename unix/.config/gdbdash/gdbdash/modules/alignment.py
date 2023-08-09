@@ -45,12 +45,12 @@ class Alignment(Module):
         color = RESET_COLOR
 
         for i in range(0, per_row * 3, per_row):
-            write(self.o["text-secondary"].value)
-            write(f"{pc + i - instruction_start:#016x}")
-            write(color)
+            write(
+                f"{self.o['text-secondary']}{pc + i - instruction_start:#016x}{color}"
+            )
 
             for j in range(0, per_row, block_size):
-                write(" ")
+                write(f"{RESET_COLOR} {color}")
 
                 for k in range(block_size):
                     idx = i + j + k
