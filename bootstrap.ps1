@@ -4,6 +4,9 @@ Bootstrap Windows specific dotfiles.
 
 .PARAMETER Yes
 Do not prompt for confirmation.
+
+.PARAMETER Registry
+Install the registry setup file.
 #>
 [CmdletBinding(DefaultParameterSetName = 'Dotfiles')]
 param(
@@ -42,6 +45,6 @@ while ($true) {
     Install-Dotfiles
     return
   } else {
-    Write-Host "Please answer y or n."
+    Write-Host 'Please answer y or n.'
   }
 }
