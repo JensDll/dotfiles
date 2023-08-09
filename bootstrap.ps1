@@ -10,6 +10,7 @@ Install the registry setup file.
 #>
 [CmdletBinding(DefaultParameterSetName = 'Dotfiles')]
 param(
+  [Alias('Y')]
   [Parameter(ParameterSetName = 'Dotfiles')]
   [switch]$Yes,
   [Parameter(ParameterSetName = 'Registry')]
@@ -17,8 +18,8 @@ param(
 )
 
 function Install-Dotfiles() {
-  Copy-Item -Path "$PSScriptRoot\windows\profile.ps1" -Destination $PROFILE
-  Get-ChildItem -Path "$PSScriptRoot\unix" -File | Select-Object -ExpandProperty FullName | Copy-Item -Destination $HOME
+  Copy-Item -Path "$PSScriptRoot\windows\profile.ps1" -Destination $PROFILE -Verbose
+  Get-ChildItem -Path "$PSScriptRoot\unix" -File | Select-Object -ExpandProperty FullName | Copy-Item -Destination $HOME -Verbose
 }
 
 function Install-Registry() {
