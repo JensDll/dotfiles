@@ -1,8 +1,12 @@
 Windows Registry Editor Version 5.00
 
+; Dual boot wrong time fix
+; https://superuser.com/a/884311
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation]
 "RealTimeIsUniversal"=dword:00000001
 
+; Old context menu
+; https://www.elevenforum.com/t/disable-show-more-options-context-menu-in-windows-11.1589
 [HKEY_CURRENT_USER\Software\Classes\CLSID\{86CA1AA0-34AA-4E8B-A509-50C905BAE2A2}]
 
 [HKEY_CURRENT_USER\Software\Classes\CLSID\{86CA1AA0-34AA-4E8B-A509-50C905BAE2A2}\InprocServer32]
