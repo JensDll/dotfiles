@@ -12,12 +12,17 @@ Install the registry setup file.
 param(
   [Alias('Y')]
   [Parameter(ParameterSetName = 'Dotfiles')]
-  [switch]$Yes,
+  [switch]$Dotfiles,
   [Parameter(ParameterSetName = 'Registry')]
   [switch]$Registry,
   [Parameter(ParameterSetName = 'Environment')]
   [switch]$Environment
 )
+
+if (-not $IsWindows) {
+  Write-Error 'This script is only for Windows.'
+  return
+}
 
 function Install-Dotfiles() {
   Copy-Item -Path "$PSScriptRoot\windows\profile.ps1" -Destination $PROFILE -Verbose
@@ -47,21 +52,7 @@ if ($Environment) {
   return
 }
 
-if ($Yes) {
+if ($Dotfiles) {
   Install-Dotfiles
   return
-}
-
-while ($true) {
-  $result = Read-Host -Prompt 'This may overwrite existing files in your home directory. Are you sure? (Y/n)'
-  $result = $result.ToLower()
-
-  if ($result -eq 'n') {
-    return
-  } elseif ($result -eq 'y' -or [string]::IsNullOrWhiteSpace($result)) {
-    Install-Dotfiles
-    return
-  } else {
-    Write-Host 'Please answer y or n.'
-  }
 }

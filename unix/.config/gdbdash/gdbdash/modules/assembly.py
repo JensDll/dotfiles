@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import gdb  # pyright: ignore [reportMissingModuleSource]
 from gdbdash.commands import IntOption
-from gdbdash.utils import RESET_COLOR, fetch_instructions, fetch_pc
+from gdbdash.utils import FONT_BOLD, RESET_COLOR, fetch_instructions, fetch_pc
 
 from .module import Module
 
@@ -55,9 +55,7 @@ class Assembly(Module):
         self.write_instructions(
             location - before + padding_before, location, inferior, write
         )
-        self.write_instruction(
-            inferior, self.instructions[location], self.o["text-highlight"], write
-        )
+        self.write_current_instruction(inferior, self.instructions[location], write)
         self.write_instructions(
             location + 1, location + after - padding_after + 1, inferior, write
         )
@@ -136,7 +134,7 @@ class Assembly(Module):
                 f"{padding:<{len(self.function_name) + self.max_offset_width + 1}}  {padding}\n"
             )
 
-    def write_instruction(self, inferior, instruction, opcode_color, write):
+    def write_instruction(self, inferior, instruction, write):
         address = instruction["addr"]
         length = instruction["length"]
         opcode = inferior.read_memory(address, length)
@@ -145,14 +143,28 @@ class Assembly(Module):
 
         write(
             f"{self.o['text-secondary']}{address:#016x}{RESET_COLOR}  "
-            f"{opcode_color}{opcode.hex(' ', 1):<{self.max_opcode_width}}{RESET_COLOR}  "
+            f"{opcode.hex(' ', 1):<{self.max_opcode_width}}{RESET_COLOR}  "
             f"{self.o['text-secondary']}{self.function_name}+{offset:<{self.max_offset_width}}{RESET_COLOR}  "
             f"{assembly}"
         )
 
+    def write_current_instruction(self, inferior, instruction, write):
+        address = instruction["addr"]
+        length = instruction["length"]
+        opcode = inferior.read_memory(address, length)
+        offset = address - self.function_address
+        assembly = syntax_highlight(instruction["asm"], self.flavor)
+
+        write(
+            f"{self.o['text-secondary']}{FONT_BOLD}{address:#016x}{RESET_COLOR}  "
+            f"{self.o['text-highlight']}{FONT_BOLD}{opcode.hex(' ', 1):<{self.max_opcode_width}}{RESET_COLOR}  "
+            f"{self.o['text-secondary']}{FONT_BOLD}{self.function_name}+{offset:<{self.max_offset_width}}{RESET_COLOR}  "
+            f"{FONT_BOLD}{assembly}"
+        )
+
     def write_instructions(self, start, end, inferior, write):
         for i in range(start, end):
-            self.write_instruction(inferior, self.instructions[i], RESET_COLOR, write)
+            self.write_instruction(inferior, self.instructions[i], write)
 
     @cached_property
     def options(self):  # type: () -> AssemblyOptions
@@ -183,4 +195,4 @@ def syntax_highlight(source, hint):
 
         return pygments.highlight(source, lexer, formatter)
     except ImportError:
-        return source
+        return source + "\n"

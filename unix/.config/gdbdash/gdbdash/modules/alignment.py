@@ -2,75 +2,71 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 import gdb  # pyright: ignore [reportMissingModuleSource]
+from gdbdash.commands import IntOption
 from gdbdash.utils import RESET_COLOR, fetch_instructions, fetch_pc
 
 from .module import Module
 
 if TYPE_CHECKING:
+    from typing import Any
+
     from .alignment import AlignmentOptions
 
 
 class Alignment(Module):
-    """Print 64-byte-block formatted memory to see if instructions cross block boundaries"""
+    """Print block formatted memory around the program counter"""
 
     ORDER = 100
-    BLOCK_SIZE = 64
 
     def __init__(self, /, **kwargs):
         super().__init__(**kwargs)
 
     def render(self, width, height, write):
-        if width < 115:
-            per_row = 16
-        else:
-            per_row = 32
+        block_size = self.options["block-size"].value
 
-        padding = per_row * 2
+        blocks_per_row = max((width - 20) // (block_size * 3), 1)
+        per_row = blocks_per_row * block_size
 
         inferior = gdb.selected_inferior()
         frame = gdb.selected_frame()
         architecture = frame.architecture()
         pc = fetch_pc(frame)
 
-        self.set_current_block(pc)
-
         instruction_length = fetch_instructions(architecture, pc)[0]["length"]
 
-        memory = inferior.read_memory(
-            self.start - padding, self.BLOCK_SIZE + padding * 2
-        )
+        residue_class = pc & (per_row - 1)
+        start = pc - residue_class
 
-        instruction_start = padding + (pc & (self.BLOCK_SIZE - 1))
+        instruction_start = per_row + (pc & (per_row - 1))
         instruction_end = instruction_start + instruction_length
+
+        memory = inferior.read_memory(start - per_row, per_row * 3)
 
         color = RESET_COLOR
 
-        for i, byte in enumerate(memory):
-            if i == padding:
-                write("\n")
-            elif i == padding + self.BLOCK_SIZE:
-                write("\n")
+        for i in range(0, per_row * 3, per_row):
+            write(
+                f"{self.o['text-secondary']}{pc + i - instruction_start:#016x}{color}"
+            )
 
-            if i == instruction_start:
-                color = self.o["text-highlight"].value
-            elif i == instruction_end:
-                color = RESET_COLOR
+            for j in range(0, per_row, block_size):
+                write(f"{RESET_COLOR} {color}")
 
-            if i & (per_row - 1) == 0:
-                write(self.o["text-secondary"].value)
-                write(f"{pc + i - instruction_start:#016x} ")
-                write(color)
+                for k in range(block_size):
+                    idx = i + j + k
+                    byte = memory[idx]  # type: Any
 
-            write(f" {color}{byte.hex()}")  # type: ignore
+                    if idx == instruction_start:
+                        color = self.o["text-highlight"].value
+                    elif idx == instruction_end:
+                        color = RESET_COLOR
 
-            if (i + 1) & (per_row - 1) == 0:
-                write("\n")
+                    write(f" {color}{byte.hex()}")
 
-    def set_current_block(self, pc):
-        residue_class = pc & (self.BLOCK_SIZE - 1)
-        self.start = pc - residue_class
-        self.end = self.start + self.BLOCK_SIZE
+            write("\n")
 
     @cached_property
     def options(self):  # type: () -> AlignmentOptions
-        return {}
+        return {
+            "block-size": IntOption("The block size in byte to be printed together", 16)
+        }

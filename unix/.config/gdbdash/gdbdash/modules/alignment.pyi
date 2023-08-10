@@ -1,6 +1,8 @@
 import typing
 
-AlignmentOptions = typing.TypedDict("AlignmentOptions", {})
+from gdbdash.commands import IntOption
+
+AlignmentOptions = typing.TypedDict("AlignmentOptions", {"block-size": IntOption})
 
 class Alignment:
     pass
