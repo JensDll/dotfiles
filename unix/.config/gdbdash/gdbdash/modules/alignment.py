@@ -35,12 +35,13 @@ class Alignment(Module):
         instruction_length = fetch_instructions(architecture, pc)[0]["length"]
 
         residue_class = pc & (per_row - 1)
-        start = pc - residue_class
+        middle = pc - residue_class
 
         instruction_start = per_row + (pc & (per_row - 1))
         instruction_end = instruction_start + instruction_length
 
-        memory = inferior.read_memory(start - per_row, per_row * 3)
+        # read one row of memory before and after the pc
+        memory = inferior.read_memory(middle - per_row, per_row * 3)
 
         color = RESET_COLOR
 
@@ -68,5 +69,7 @@ class Alignment(Module):
     @cached_property
     def options(self):  # type: () -> AlignmentOptions
         return {
-            "block-size": IntOption("The block size in byte to be printed together", 16)
+            "block-size": IntOption(
+                "The block size in byte which are grouped together", 16
+            )
         }

@@ -13,6 +13,28 @@ if TYPE_CHECKING:
 
     from .assembly import AssemblyOptions
 
+try:
+    import pygments  # pyright: ignore [reportMissingModuleSource]
+    import pygments.formatters  # pyright: ignore [reportMissingModuleSource]
+    import pygments.lexers  # pyright: ignore [reportMissingModuleSource]
+
+    def syntax_highlight(source, hint):
+        if hint == "intel":
+            lexer = pygments.lexers.NasmLexer()
+        elif hint == "att":
+            lexer = pygments.lexers.GasLexer()
+        else:
+            lexer = pygments.lexers.get_lexer_for_filename(hint)
+
+        formatter = pygments.formatters.TerminalFormatter()
+
+        return pygments.highlight(source, lexer, formatter)
+
+except ImportError:
+
+    def syntax_highlight(source, hint):
+        return source + "\n"
+
 
 class Assembly(Module):
     """Print assembly information"""
@@ -176,23 +198,3 @@ class Assembly(Module):
                 "Number of instructions displayed after the program counter", 5
             ),
         }
-
-
-def syntax_highlight(source, hint):
-    try:
-        import pygments  # pyright: ignore [reportMissingModuleSource]
-        import pygments.formatters  # pyright: ignore [reportMissingModuleSource]
-        import pygments.lexers  # pyright: ignore [reportMissingModuleSource]
-
-        if hint == "intel":
-            lexer = pygments.lexers.NasmLexer()
-        elif hint == "att":
-            lexer = pygments.lexers.GasLexer()
-        else:
-            lexer = pygments.lexers.get_lexer_for_filename(hint)
-
-        formatter = pygments.formatters.TerminalFormatter()
-
-        return pygments.highlight(source, lexer, formatter)
-    except ImportError:
-        return source + "\n"

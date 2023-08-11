@@ -2,7 +2,7 @@ python
 import os
 import sys
 import pathlib
-config_home = os.environ.get("XDG_CONFIG_HOME") or pathlib.Path.home() / ".config"
+config_home = pathlib.Path(os.environ.get("XDG_CONFIG_HOME", "~/.config")).expanduser()
 sys.path.insert(0, str(config_home / "gdbdash"))
 import gdbdash
 gdbdash.start()
@@ -22,6 +22,8 @@ set print array off
 set print array-indexes on
 # https://sourceware.org/gdb/current/onlinedocs/gdb.html/Python-Commands.html#Python-Commands
 set python print-stack full
+# https://sourceware.org/gdb/current/onlinedocs/gdb.html/Machine-Code.html#Machine-Code
+set disassembly-flavor intel
 
 define cls
 dont-repeat
