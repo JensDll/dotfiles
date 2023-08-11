@@ -2,12 +2,17 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 import gdb  # pyright: ignore [reportMissingModuleSource]
+from gdbdash.commands import BoolOption
 from gdbdash.utils import RESET_COLOR
 
 from .module import Module
 
 if TYPE_CHECKING:
-    from gdb import RegisterDescriptor  # pyright: ignore [reportMissingModuleSource]
+    from gdb import (  # pyright: ignore [reportMissingModuleSource]
+        RegisterDescriptor,
+        Type,
+    )
+    from gdbdash.dashboard import DashboardOptions
     from gdbdash.utils import WriteWrapper
 
     from .registers import RegisterOptions
@@ -24,98 +29,242 @@ class Registers(Module):
         frame = gdb.selected_frame()
         architecture = frame.architecture()
 
-        self.segment = []  # type: list[RegisterDescriptor]
-        self.general_purpose = []  # type: list[RegisterDescriptor]
-        self.eflags = None  # type: RegisterDescriptor | None
+        int_type = architecture.integer_type(64, False)
+
+        self.general_purpose = []  # type: list[GeneralPurposeRegister]
+        self.segment = []  # type: list[SegmentRegister]
 
         for descriptor in architecture.registers("general"):
             if descriptor.name == "eflags":
-                self.eflags = descriptor
+                self.eflags = EFlagsRegister(descriptor, int_type, self.o)
+            elif descriptor.name == "rip":
+                continue
             elif descriptor.name.endswith("s"):
-                self.segment.append(descriptor)
+                self.segment.append(SegmentRegister(descriptor, int_type, self.o))
             else:
-                self.general_purpose.append(descriptor)
+                self.general_purpose.append(
+                    GeneralPurposeRegister(descriptor, int_type, self.o)
+                )
 
     def render(self, width, height, write):
         frame = gdb.selected_frame()
-        self.write_general_purpose_registers(width // 24, frame, write)
-        self.write_eflags(width, frame, write)
-        self.write_segment_registers(width // 16, frame, write)
+        self.write_general_purpose(width // 25, frame, write)
+        self.write_eflags(frame, write)
+        self.write_segment(frame, write)
 
-    def write_general_purpose_registers(
+    def write_general_purpose(
         self, per_row, frame, write
     ):  # type: (int, gdb.Frame, WriteWrapper) -> None
-        i = 0
+        registers_left = len(self.general_purpose)
+        stop = min(registers_left, per_row)
+        row = 0
 
-        while True:
-            for _ in range(0, per_row):
-                if i >= len(self.general_purpose):
-                    write("\n")
-                    return
+        new_line_after_row = (
+            self.options["show-32"].value or self.options["show-decimal"].value
+        )
 
-                register = self.general_purpose[i]
-                register_value = frame.read_register(register)
-                formatted = register_value.format_string(format="z")
-
-                if register_value == getattr(self, register.name, register_value):
-                    color = self.o["text-secondary"].value
-                else:
-                    color = self.o["text-highlight"].value
-
-                write(f"{color}{register.name:>3}{RESET_COLOR} {formatted} ")
-
-                setattr(self, register.name, register_value)
-
-                i += 1
+        while stop > 0:
+            for col in range(0, stop):
+                register = self.general_purpose[row * per_row + col]
+                write(register.get_value_64(frame))
 
             write("\n")
 
-    def write_segment_registers(
-        self, per_row, frame, write
-    ):  # type: (int, gdb.Frame, WriteWrapper) -> None
-        i = 0
+            if self.options["show-32"].value:
+                for col in range(0, stop):
+                    register = self.general_purpose[row * per_row + col]
+                    write(register.get_value_32())
+                write("\n")
 
-        while True:
-            for _ in range(0, per_row):
-                if i >= len(self.segment):
-                    write("\n")
-                    return
+            if self.options["show-decimal"].value:
+                for col in range(0, stop):
+                    register = self.general_purpose[row * per_row + col]
+                    write(register.get_value_decimal())
+                write("\n")
 
-                register = self.segment[i]
-                register_value = int(frame.read_register(register))
+            registers_left -= per_row
+            stop = min(registers_left, per_row)
+            row += 1
 
-                if register_value == getattr(self, register.name, register_value):
-                    color = self.o["text-secondary"].value
-                else:
-                    color = self.o["text-highlight"].value
+            if new_line_after_row:
+                write("\n")
 
-                write(f"{color}{register.name:>2}{RESET_COLOR} {register_value:#06x}  ")
-
-                setattr(self, register.name, register_value)
-
-                i += 1
-
+        if not new_line_after_row:
             write("\n")
 
-    def write_eflags(
-        self, width, frame, write
-    ):  # type: (int, gdb.Frame, WriteWrapper) -> None
-        if self.eflags is None:
-            return
+    def write_eflags(self, frame, write):  # type: (gdb.Frame, WriteWrapper) -> None
+        write(self.eflags.get_value(frame))
+        write("\n")
 
-        def write_flag(value, display):  # type: (int, str) -> None
-            if value:
-                write(f"{self.o['text-highlight']}{display}{RESET_COLOR} ")
-            else:
-                write(f"{self.o['text-secondary']}{display}{RESET_COLOR} ")
+    def write_segment(self, frame, write):  # type: (gdb.Frame, WriteWrapper) -> None
+        for register in self.segment:
+            write(register.get_value(frame))
+        write("\n")
 
-        value = int(frame.read_register(self.eflags))
+    @cached_property
+    def options(self):  # type: () -> RegisterOptions
+        return {
+            "show-32": BoolOption(
+                "Show 32-bit version of general purpose register", True
+            ),
+            "show-decimal": BoolOption(
+                "Show decimal value of general purpose register", True
+            ),
+        }
+
+
+class Register:
+    def __init__(
+        self,
+        descriptor,  # type: RegisterDescriptor
+        int_type,  # type: Type
+        options,  # type: DashboardOptions
+    ):
+        self.descriptor = descriptor
+        self.name = descriptor.name
+        self.int_type = int_type
+        self.options = options
+
+
+class GeneralPurposeRegister(Register):
+    MAP32 = {
+        "rax": "eax",
+        "rbx": "ebx",
+        "rcx": "ecx",
+        "rdx": "edx",
+        "rsi": "esi",
+        "rdi": "edi",
+        "rbp": "ebp",
+        "rsp": "esp",
+        "r8": "r8d",
+        "r9": "r9d",
+        "r10": "r10d",
+        "r11": "r11d",
+        "r12": "r12d",
+        "r13": "r13d",
+        "r14": "r14d",
+        "r15": "r15d",
+    }
+
+    MAP16 = {
+        "eax": "ax",
+        "ebx": "bx",
+        "ecx": "cx",
+        "edx": "dx",
+        "esi": "si",
+        "edi": "di",
+        "ebp": "bp",
+        "esp": "sp",
+        "r8d": "r8w",
+        "r9d": "r9w",
+        "r10d": "r10w",
+        "r11d": "r11w",
+        "r12d": "r12w",
+        "r13d": "r13w",
+        "r14d": "r14w",
+        "r15d": "r15w",
+    }
+
+    MAP8H = {
+        "ax": "ah",
+        "bx": "bh",
+        "cx": "ch",
+        "dx": "dh",
+    }
+
+    MAP8L = {
+        "ax": "al",
+        "bx": "bl",
+        "cx": "cl",
+        "dx": "dl",
+        "si": "sil",
+        "di": "dil",
+        "bp": "bpl",
+        "sp": "spl",
+        "r8w": "r8b",
+        "r9w": "r9b",
+        "r10w": "r10b",
+        "r11w": "r11b",
+        "r12w": "r12b",
+        "r13w": "r13b",
+        "r14w": "r14b",
+        "r15w": "r15b",
+    }
+
+    def __init__(
+        self,
+        descriptor,  # type: RegisterDescriptor
+        int_type,  # type: Type
+        options,  # type: DashboardOptions
+    ):
+        super().__init__(descriptor, int_type, options)
+
+        self.name32 = self.MAP32[descriptor.name]
+
+        self.value64 = None  # type: int | None
+
+    def get_value_64(self, frame):  # type: (gdb.Frame) -> str
+        self.value = frame.read_register(self.descriptor)
+        int_value = self.value.cast(self.int_type)
+
+        value64 = int(int_value)
+
+        if self.value64 is not None and self.value64 != value64:
+            self.color = self.options["text-highlight"]
+        else:
+            self.color = self.options["text-secondary"]
+
+        self.value64 = value64
+        self.value32 = int(int_value & 0xFFFF_FFFF)
+
+        return f"{self.color}{self.name:<4}{RESET_COLOR} {value64:#018x}  "
+
+    def get_value_32(self):  # type: () -> str
+        return (
+            f"{self.color}{self.name32:<4}{RESET_COLOR}           {self.value32:08x}  "
+        )
+
+    def get_value_decimal(self):  # type: () -> str
+        return f" {self.value.format_string(format='d'):<24}"
+
+
+class SegmentRegister(Register):
+    def __init__(
+        self,
+        descriptor,  # type: RegisterDescriptor
+        int_type,  # type: Type
+        options,  # type: DashboardOptions
+    ):
+        super().__init__(descriptor, int_type, options)
+
+        self.value = None  # type: int | None
+
+    def get_value(self, frame):  # type: (gdb.Frame) -> str
+        value = int(frame.read_register(self.descriptor))
+
+        if self.value is not None and self.value != value:
+            color = self.options["text-highlight"]
+        else:
+            color = self.options["text-secondary"]
+
+        return f"{color}{self.name:>2}{RESET_COLOR} {value:#06x}  "
+
+
+class EFlagsRegister(Register):
+    def __init__(
+        self,
+        descriptor,  # type: RegisterDescriptor
+        int_type,  # type: Type
+        options,  # type: DashboardOptions
+    ):
+        super().__init__(descriptor, int_type, options)
+
+    def get_value(self, frame):  # type: (gdb.Frame) -> str
+        value = int(frame.read_register(self.descriptor))
 
         # Control flags
         df = (value >> 10) & 1  # Direction flag
-        write_flag(df, "DF")
-        self.df = df
-        write("- ")
+
         # System flags
         tf = (value >> 8) & 1  # Trap flag
         _if = (value >> 9) & 1  # Interrupt enable flag
@@ -127,27 +276,7 @@ class Registers(Module):
         vif = (value >> 19) & 1  # Virtual interrupt flag
         vip = (value >> 20) & 1  # Virtual interrupt pending flag
         id = (value >> 21) & 1  # ID flag
-        write_flag(tf, "TF")
-        write_flag(_if, "IF")
-        write_flag(iopl, "IOPL")
-        write_flag(nt, "NT")
-        write_flag(rf, "RF")
-        write_flag(vm, "VM")
-        write_flag(ac, "AC")
-        write_flag(vif, "VIF")
-        write_flag(vip, "VIP")
-        write_flag(id, "ID")
-        self.tf = tf
-        self._if = _if
-        self.iopl = iopl
-        self.nt = nt
-        self.rf = rf
-        self.vm = vm
-        self.ac = ac
-        self.vif = vif
-        self.vip = vip
-        self.id = id
-        write("- ")
+
         # Status flags
         cf = value & 1  # Carry flag
         pf = (value >> 2) & 1  # Parity flag
@@ -155,21 +284,16 @@ class Registers(Module):
         zf = (value >> 6) & 1  # Zero flag
         sf = (value >> 7) & 1  # Sign flag
         of = (value >> 11) & 1  # Overflow flag
-        write_flag(cf, "CF")
-        write_flag(pf, "PF")
-        write_flag(af, "AF")
-        write_flag(zf, "ZF")
-        write_flag(sf, "SF")
-        write_flag(of, "OF")
-        self.cf = cf
-        self.pf = pf
-        self.af = af
-        self.zf = zf
-        self.sf = sf
-        self.of = of
 
-        write("\n")
+        return (
+            f"{self.flag('DF', df)}   "
+            f"{self.flag('TF', tf)} {self.flag('IF', _if)} {self.flag('IOPL', iopl)} {self.flag('NT', nt)} {self.flag('RF', rf)} "
+            f"{self.flag('VM', vm)} {self.flag('AC', ac)} {self.flag('VIF', vif)} {self.flag('VIP', vip)} {self.flag('ID', id)}   "
+            f"{self.flag('CF', cf)} {self.flag('PF', pf)} {self.flag('AF', af)} {self.flag('ZF', zf)} {self.flag('SF', sf)} {self.flag('OF', of)}\n"
+        )
 
-    @cached_property
-    def options(self):  # type: () -> RegisterOptions
-        return {}
+    def flag(self, name, value):
+        if value:
+            return f"{self.options['text-highlight']}{name}{RESET_COLOR}"
+        else:
+            return f"{self.options['text-secondary']}{name}{RESET_COLOR}"

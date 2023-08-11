@@ -84,6 +84,7 @@ class Assembly(Module):
         self.write_padding(padding_after, write)
 
     def fetch_new_instructions(self, frame):  # type: (gdb.Frame) -> None
+        architecture = frame.architecture()
         disassembly = gdb.execute("disassemble", to_string=True)
 
         if disassembly is None:
@@ -105,17 +106,19 @@ class Assembly(Module):
 
             if match:
                 self.function_address = int(match.group(1), 16)
+            else:
+                raise Exception("Failed to determine function address from disassembly")
 
             count = len(lines) - 3
         else:
             self.function_name = function.name
             self.function_address = int(
-                function.value().address.cast(gdb.lookup_type("unsigned long"))
+                function.value().address.cast(architecture.integer_type(64, False))
             )
             count = disassembly.count("\n") - 2
 
         self.instructions = fetch_instructions(
-            frame.architecture(), self.function_address, count
+            architecture, self.function_address, count
         )
 
     def find_pc_location(self, pc):  # type: (int) -> int
@@ -123,7 +126,9 @@ class Assembly(Module):
             if instruction["addr"] == pc:
                 return i
 
-        return -1
+        raise Exception(
+            "Program counter is not part of the current list of instructions"
+        )
 
     def get_max_opcode_width(self, location):  # type: (int) -> int
         start = max(location - self.options["instructions-before"].value, 0)
