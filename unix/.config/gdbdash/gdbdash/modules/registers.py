@@ -247,6 +247,8 @@ class SegmentRegister(Register):
         else:
             color = self.options["text-secondary"]
 
+        self.value = value
+
         return f"{color}{self.name:>2}{RESET_COLOR} {value:#06x}  "
 
 
