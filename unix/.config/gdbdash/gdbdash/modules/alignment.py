@@ -32,16 +32,13 @@ class Alignment(Module):
         architecture = frame.architecture()
         pc = fetch_pc(frame)
 
+        residue_class = pc % per_row
+
         instruction_length = fetch_instructions(architecture, pc)[0]["length"]
-
-        residue_class = pc & (per_row - 1)
-        middle = pc - residue_class
-
-        instruction_start = per_row + (pc & (per_row - 1))
+        instruction_start = per_row + residue_class
         instruction_end = instruction_start + instruction_length
 
-        # read one row of memory before and after the pc
-        memory = inferior.read_memory(middle - per_row, per_row * 3)
+        memory = inferior.read_memory(pc - residue_class - per_row, per_row * 3)
 
         color = RESET_COLOR
 

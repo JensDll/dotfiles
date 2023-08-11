@@ -66,7 +66,7 @@ class Registers(Module):
         while stop > 0:
             for col in range(0, stop):
                 register = self.general_purpose[row * per_row + col]
-                write(register.get_value_64(frame))
+                write(register.get_value(frame))
 
             write("\n")
 
@@ -199,23 +199,24 @@ class GeneralPurposeRegister(Register):
     ):
         super().__init__(descriptor, int_type, options)
 
-        self.name32 = self.MAP32[descriptor.name]
+        self.name32 = self.MAP32[self.name]
+        self.name16 = self.MAP16[self.name32]
+        self.name8h = self.MAP8H.get(self.name16)
+        self.name8l = self.MAP8L[self.name16]
 
-        self.value64 = None  # type: int | None
-
-    def get_value_64(self, frame):  # type: (gdb.Frame) -> str
+    def get_value(self, frame):  # type: (gdb.Frame) -> str
         self.value = frame.read_register(self.descriptor)
-        int_value = self.value.cast(self.int_type)
+        value = self.value.cast(self.int_type)
 
-        value64 = int(int_value)
+        value64 = int(value)
 
-        if self.value64 is not None and self.value64 != value64:
+        if getattr(self, "value64", value64) != value64:
             self.color = self.options["text-highlight"]
         else:
             self.color = self.options["text-secondary"]
 
         self.value64 = value64
-        self.value32 = int(int_value & 0xFFFF_FFFF)
+        self.value32 = int(value & 0xFFFF_FFFF)
 
         return f"{self.color}{self.name:<4}{RESET_COLOR} {value64:#018x}  "
 
@@ -237,12 +238,10 @@ class SegmentRegister(Register):
     ):
         super().__init__(descriptor, int_type, options)
 
-        self.value = None  # type: int | None
-
     def get_value(self, frame):  # type: (gdb.Frame) -> str
         value = int(frame.read_register(self.descriptor))
 
-        if self.value is not None and self.value != value:
+        if getattr(self, "value", value) != value:
             color = self.options["text-highlight"]
         else:
             color = self.options["text-secondary"]
