@@ -8,8 +8,6 @@ from gdbdash.utils import RESET_COLOR, fetch_instructions, fetch_pc
 from .module import Module
 
 if TYPE_CHECKING:
-    from typing import Any
-
     from .alignment import AlignmentOptions
 
 
@@ -42,25 +40,19 @@ class Alignment(Module):
 
         color = RESET_COLOR
 
-        for i in range(0, per_row * 3, per_row):
-            write(
-                f"{self.o['text-secondary']}{pc + i - instruction_start:#016x}{color}"
-            )
-
-            for j in range(0, per_row, block_size):
+        for row in range(0, per_row * 3, per_row):
+            address = pc + row - instruction_start
+            write(f"{self.o['text-secondary']}{address:#016x}{color}")
+            for block in range(0, per_row, block_size):
                 write(f"{RESET_COLOR} {color}")
-
-                for k in range(block_size):
-                    idx = i + j + k
-                    byte = memory[idx]  # type: Any
-
+                for col in range(block_size):
+                    idx = row + block + col
                     if idx == instruction_start:
                         color = self.o["text-highlight"].value
                     elif idx == instruction_end:
                         color = RESET_COLOR
-
-                    write(f" {color}{byte.hex()}")
-
+                    # in reality is bytes and not int
+                    write(f" {color}{memory[idx].hex()}")  # type: ignore
             write("\n")
 
     @cached_property
