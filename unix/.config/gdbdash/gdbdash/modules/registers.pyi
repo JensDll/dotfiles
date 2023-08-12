@@ -7,6 +7,9 @@ RegisterOptions = typing.TypedDict(
     {
         "show-32": BoolOption,
         "show-decimal": BoolOption,
+        "show-segment": BoolOption,
+        "show-eflags": BoolOption,
+        "show-mxcsr": BoolOption,
     },
 )
 

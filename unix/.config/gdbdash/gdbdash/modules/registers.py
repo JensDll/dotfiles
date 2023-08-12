@@ -5,7 +5,12 @@ import gdb  # pyright: ignore [reportMissingModuleSource]
 from gdbdash.commands import BoolOption
 
 from .module import Module
-from .register_wrapper import EFlags, GeneralPurpose, Segment
+from .register import (
+    EflagsRegister,
+    GeneralPurposeRegister,
+    MxcsrRegister,
+    SegmentRegister,
+)
 
 if TYPE_CHECKING:
     from gdbdash.utils import WriteWrapper
@@ -26,82 +31,108 @@ class Registers(Module):
 
         int_type = architecture.integer_type(64, False)
 
-        self.general_purpose = []  # type: list[GeneralPurpose]
-        self.segment = []  # type: list[Segment]
+        self.general_purpose_registers = []  # type: list[GeneralPurposeRegister]
+        self.segment_registers = []  # type: list[SegmentRegister]
 
         for descriptor in architecture.registers("general"):
             if descriptor.name == "eflags":
-                self.eflags = EFlags(descriptor, int_type, self.o)
+                self.eflags_register = EflagsRegister(descriptor, int_type, self.o)
             elif descriptor.name == "rip":
                 continue
             elif descriptor.name.endswith("s"):
-                self.segment.append(Segment(descriptor, int_type, self.o))
-            else:
-                self.general_purpose.append(
-                    GeneralPurpose(descriptor, int_type, self.o)
+                self.segment_registers.append(
+                    SegmentRegister(descriptor, int_type, self.o)
                 )
+            else:
+                self.general_purpose_registers.append(
+                    GeneralPurposeRegister(descriptor, int_type, self.o)
+                )
+
+        for descriptor in architecture.registers("sse"):
+            if descriptor.name == "mxcsr":
+                self.mxcsr_register = MxcsrRegister(descriptor, int_type, self.o)
 
     def render(self, width, height, write):
         frame = gdb.selected_frame()
-        self.write_general_purpose(width // 25, frame, write)
-        self.write_eflags(frame, write)
-        self.write_segment(frame, write)
 
-    def write_general_purpose(
+        self.write_general_purpose_registers(width // 25, frame, write)
+
+        if self.options["show-segment"].value:
+            write("\n\n")
+            self.write_segment_registers(frame, write)
+
+        if self.options["show-eflags"].value:
+            write("\n\n")
+            self.write_eflags_register(frame, write)
+
+        if self.options["show-mxcsr"].value:
+            write("\n\n")
+            self.write_mxcsr_register(frame, write)
+
+        write("\n")
+
+    def write_general_purpose_registers(
         self, per_row, frame, write
     ):  # type: (int, gdb.Frame, WriteWrapper) -> None
-        registers_left = len(self.general_purpose)
-        stop = min(registers_left, per_row)
+        left = len(self.general_purpose_registers)
+        stop = min(left, per_row)
         row = 0
 
-        new_line_after_row = (
-            self.options["show-32"].value or self.options["show-decimal"].value
-        )
-
-        while stop > 0:
+        def write_row():
             for col in range(0, stop):
-                register = self.general_purpose[row * per_row + col]
+                register = self.general_purpose_registers[row * per_row + col]
                 write(register.get_value(frame))
-            write("\n")
 
             if self.options["show-32"].value:
-                for col in range(0, stop):
-                    register = self.general_purpose[row * per_row + col]
-                    write(register.get_value_32())
                 write("\n")
+                for col in range(0, stop):
+                    register = self.general_purpose_registers[row * per_row + col]
+                    write(register.get_value_32())
 
             if self.options["show-decimal"].value:
+                write("\n")
                 for col in range(0, stop):
-                    register = self.general_purpose[row * per_row + col]
+                    register = self.general_purpose_registers[row * per_row + col]
                     write(register.get_value_decimal())
-                write("\n")
 
-            if new_line_after_row:
-                write("\n")
+        write_row()
+        left -= per_row
+        stop = min(left, per_row)
+        row += 1
 
-            registers_left -= per_row
-            stop = min(registers_left, per_row)
+        while stop > 0:
+            write("\n")
+            write_row()
+            left -= per_row
+            stop = min(left, per_row)
             row += 1
 
-        if not new_line_after_row:
-            write("\n")
-
-    def write_eflags(self, frame, write):  # type: (gdb.Frame, WriteWrapper) -> None
-        write(self.eflags.get_value(frame))
-        write("\n")
-
-    def write_segment(self, frame, write):  # type: (gdb.Frame, WriteWrapper) -> None
-        for register in self.segment:
+    def write_segment_registers(
+        self, frame, write
+    ):  # type: (gdb.Frame, WriteWrapper) -> None
+        for register in self.segment_registers:
             write(register.get_value(frame))
-        write("\n")
+
+    def write_eflags_register(
+        self, frame, write
+    ):  # type: (gdb.Frame, WriteWrapper) -> None
+        write(self.eflags_register.get_value(frame))
+
+    def write_mxcsr_register(
+        self, frame, write
+    ):  # type: (gdb.Frame, WriteWrapper) -> None
+        write(self.mxcsr_register.get_value(frame))
 
     @cached_property
     def options(self):  # type: () -> RegisterOptions
         return {
             "show-32": BoolOption(
-                "Show 32-bit version of general purpose registers", True
+                "Visibility of general purpose registers 32-bit version", True
             ),
             "show-decimal": BoolOption(
-                "Show decimal value of general purpose registers", True
+                "Visibility of general purpose registers decimal value", True
             ),
+            "show-segment": BoolOption("Visibility of segment registers", True),
+            "show-eflags": BoolOption("Visibility of eflags register", True),
+            "show-mxcsr": BoolOption("Visibility of mxcsr register", True),
         }

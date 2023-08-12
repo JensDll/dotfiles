@@ -5,6 +5,7 @@ import gdb
 
 RESET_COLOR: Literal["\033[0m"]
 FONT_BOLD: Literal["\033[1m"]
+FONT_UNDERLINE = Literal["\033[4m"]
 
 StrOrBytesPath = str | bytes | PathLike[str] | PathLike[bytes]
 FileDescriptorOrPath = int | StrOrBytesPath
