@@ -226,7 +226,7 @@ class GeneralPurposeRegister(Register):
         )
 
     def get_value_decimal(self):  # type: () -> str
-        return f" {self.value.format_string(format='d'):<24}"
+        return f"{self.options['text-secondary']}|{RESET_COLOR} {self.value.format_string(format='d'):>21}  "
 
 
 class SegmentRegister(Register):
