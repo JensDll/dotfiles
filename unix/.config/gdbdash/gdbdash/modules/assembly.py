@@ -183,7 +183,7 @@ class Assembly(Module):
         assembly = syntax_highlight(instruction["asm"], self.flavor)
 
         write(
-            f"{self.o['text-secondary']}{FONT_BOLD}{address:#016x}{RESET_COLOR}  "
+            f"{self.o['text-secondary']}{address:#016x}{RESET_COLOR}  "
             f"{self.o['text-highlight']}{FONT_BOLD}{opcode.hex(' ', 1):<{self.max_opcode_width}}{RESET_COLOR}  "
             f"{self.o['text-secondary']}{FONT_BOLD}{self.function_name}+{offset:<{self.max_offset_width}}{RESET_COLOR}  "
             f"{FONT_BOLD}{assembly}"

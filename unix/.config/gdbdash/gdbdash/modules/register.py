@@ -115,9 +115,6 @@ class GeneralPurposeRegister(Register):
 
         self.value64 = value64
         self.value32 = int(value & 0xFFFF_FFFF)
-        self.value16 = int(value & 0xFFFF)
-        self.value8h = int(value & 0xFF00) >> 8
-        self.value8l = int(value & 0xFF)
 
         return f"{self.color}{self.name:<4}{RESET_COLOR} {value64:#018x}  "
 
@@ -128,7 +125,7 @@ class GeneralPurposeRegister(Register):
 
     def get_value_decimal(self):  # type: () -> str
         return (
-            f"{self.color}|{RESET_COLOR} {self.value.format_string(format='d'):>21}  "
+            f"{self.color}={RESET_COLOR} {self.value.format_string(format='d'):>21}  "
         )
 
 
@@ -320,7 +317,7 @@ class MxcsrRegister(FlagsRegister):
 
         return (
             f"{self.options['text-highlight'] if any_change else self.options['text-secondary']}{self.name}{RESET_COLOR} "
-            f"{open_bracket} {self.flag('FTZ', ftz)} {self.flag('RC', rc)} {close_bracket}"
+            f"{open_bracket} {self.flag('FTZ', ftz)} {self.flag('RC', rc)} {close_bracket} "
             f"{open_bracket} {self.flag('PM', pm)} {self.flag('UM', um)} {self.flag('UM', um)} {self.flag('OM', om)} "
             f"{self.flag('ZM', zm)} {self.flag('DM', dm)} {self.flag('IM', im)} {self.flag('DAZ', daz)} {close_bracket} "
             f"{open_bracket} {self.flag('PE', pe)} {self.flag('UE', ue)} {self.flag('OE', oe)} "
