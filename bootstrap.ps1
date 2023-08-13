@@ -10,12 +10,11 @@ Install the registry setup file.
 #>
 [CmdletBinding(DefaultParameterSetName = 'Dotfiles')]
 param(
-  [Alias('Y')]
-  [Parameter(ParameterSetName = 'Dotfiles', Mandatory)]
+  [Parameter(ParameterSetName = 'Dotfiles')]
   [switch]$Dotfiles,
-  [Parameter(ParameterSetName = 'Registry', Mandatory)]
+  [Parameter(ParameterSetName = 'Registry')]
   [switch]$Registry,
-  [Parameter(ParameterSetName = 'Environment', Mandatory)]
+  [Parameter(ParameterSetName = 'Environment')]
   [switch]$Environment
 )
 
@@ -56,3 +55,7 @@ if ($Dotfiles) {
   Install-Dotfiles
   return
 }
+
+Install-Environment
+Install-Dotfiles
+Install-Registry
