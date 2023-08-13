@@ -26,31 +26,26 @@ class Registers(Module):
     def __init__(self, /, **kwargs):
         super().__init__(**kwargs)
 
-        frame = gdb.selected_frame()
-        architecture = frame.architecture()
-
-        int_type = architecture.integer_type(64, False)
-
         self.general_purpose_registers = []  # type: list[GeneralPurposeRegister]
         self.segment_registers = []  # type: list[SegmentRegister]
 
-        for descriptor in architecture.registers("general"):
+        for descriptor in self.architecture.registers("general"):
             if descriptor.name == "eflags":
-                self.eflags_register = EflagsRegister(descriptor, int_type, self.o)
+                self.eflags_register = EflagsRegister(descriptor, self.uint64_t, self.o)
             elif descriptor.name == "rip":
                 continue
             elif descriptor.name.endswith("s"):
                 self.segment_registers.append(
-                    SegmentRegister(descriptor, int_type, self.o)
+                    SegmentRegister(descriptor, self.uint64_t, self.o)
                 )
             else:
                 self.general_purpose_registers.append(
-                    GeneralPurposeRegister(descriptor, int_type, self.o)
+                    GeneralPurposeRegister(descriptor, self.uint64_t, self.o)
                 )
 
-        for descriptor in architecture.registers("sse"):
+        for descriptor in self.architecture.registers("sse"):
             if descriptor.name == "mxcsr":
-                self.mxcsr_register = MxcsrRegister(descriptor, int_type, self.o)
+                self.mxcsr_register = MxcsrRegister(descriptor, self.uint64_t, self.o)
 
     def render(self, width, height, write):
         frame = gdb.selected_frame()
@@ -74,10 +69,6 @@ class Registers(Module):
     def write_general_purpose_registers(
         self, per_row, frame, write
     ):  # type: (int, gdb.Frame, WriteWrapper) -> None
-        left = len(self.general_purpose_registers)
-        stop = min(left, per_row)
-        row = 0
-
         def write_row():
             for col in range(0, stop):
                 register = self.general_purpose_registers[row * per_row + col]
@@ -95,16 +86,19 @@ class Registers(Module):
                     register = self.general_purpose_registers[row * per_row + col]
                     write(register.get_value_decimal())
 
+        registers_left = len(self.general_purpose_registers)
+        stop = min(registers_left, per_row)
+        row = 0
         write_row()
-        left -= per_row
-        stop = min(left, per_row)
-        row += 1
+        registers_left -= per_row
+        stop = min(registers_left, per_row)
+        row = 1
 
         while stop > 0:
             write("\n")
             write_row()
-            left -= per_row
-            stop = min(left, per_row)
+            registers_left -= per_row
+            stop = min(registers_left, per_row)
             row += 1
 
     def write_segment_registers(

@@ -9,8 +9,6 @@ from gdbdash.utils import FONT_BOLD, RESET_COLOR, fetch_instructions, fetch_pc
 from .module import Module
 
 if TYPE_CHECKING:
-    from gdbdash.utils import Instruction
-
     from .assembly import AssemblyOptions
 
 try:
@@ -43,9 +41,7 @@ class Assembly(Module):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-        self.frame = None  # type: gdb.Frame | None
-        self.instructions = []  # type: list[Instruction]
+        self.fetch_new_instructions(self.frame)
 
     def render(self, width, hight, write):
         inferior = gdb.selected_inferior()
@@ -112,9 +108,7 @@ class Assembly(Module):
             count = len(lines) - 3
         else:
             self.function_name = function.name
-            self.function_address = int(
-                function.value().address.cast(architecture.integer_type(64, False))
-            )
+            self.function_address = int(function.value().address.cast(self.uint64_t))
             count = disassembly.count("\n") - 2
 
         self.instructions = fetch_instructions(

@@ -16,9 +16,6 @@ class Alignment(Module):
 
     ORDER = 100
 
-    def __init__(self, /, **kwargs):
-        super().__init__(**kwargs)
-
     def render(self, width, height, write):
         block_size = self.options["block-size"].value
 

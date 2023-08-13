@@ -22,6 +22,10 @@ class Module(Command, Togglable, Configurable, Outputable, Orderable):
         self.name = self.__class__.__name__
         self.normalized_name = self.name.lower()
 
+        self.frame = gdb.selected_frame()
+        self.architecture = self.frame.architecture()
+        self.uint64_t = self.architecture.integer_type(64, False)
+
         super().__init__(
             command_name=f"dashboard {self.normalized_name}",
             command_class=gdb.COMMAND_USER,
@@ -38,7 +42,7 @@ class Module(Command, Togglable, Configurable, Outputable, Orderable):
             write("\n")
             return
 
-        before = self.o["divider-fill-char"].value * (width // 16)
+        before = self.o["divider-fill-char"].value * (width >> 4)
         name = f" {self.name} "
         after = self.o["divider-fill-char"].value * (width - len(before) - len(name))
 

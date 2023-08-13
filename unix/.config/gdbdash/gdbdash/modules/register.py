@@ -15,12 +15,12 @@ class Register:
     def __init__(
         self,
         descriptor,  # type: RegisterDescriptor
-        int_type,  # type: Type
+        uint64_t,  # type: Type
         options,  # type: DashboardOptions
     ):
         self.descriptor = descriptor
         self.name = descriptor.name
-        self.int_type = int_type
+        self.uint64_t = uint64_t
         self.options = options
 
 
@@ -104,7 +104,7 @@ class GeneralPurposeRegister(Register):
 
     def get_value(self, frame):  # type: (gdb.Frame) -> str
         self.value = frame.read_register(self.descriptor)
-        value = self.value.cast(self.int_type)
+        value = self.value.cast(self.uint64_t)
 
         value64 = int(value)
 
