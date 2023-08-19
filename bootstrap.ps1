@@ -2,11 +2,14 @@
 .DESCRIPTION
 Bootstrap Windows specific dotfiles.
 
-.PARAMETER Yes
-Do not prompt for confirmation.
+.PARAMETER Dotfiles
+Install dotfiles to predefined locations.
 
 .PARAMETER Registry
-Install the registry setup file.
+Write registry configuration.
+
+.PARAMETER Environment
+Setup environment variables.
 #>
 [CmdletBinding(DefaultParameterSetName = 'Dotfiles')]
 param(
