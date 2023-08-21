@@ -47,6 +47,8 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
             and value is not gdbdash.modules.Module
         ]
 
+        self.disable_if_config_disabled()
+
     @cached_property
     def modules_dict(self):
         modules_dict = dict()  # type: DashboardModulesDict
@@ -71,10 +73,13 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
             self.render()
 
     def render(self):
+        self.try_load_config()
+
+        if not self.enabled:
+            return
+
         width = 160
         height = 24
-
-        self.try_load_config()
 
         def render_file(
             output, modules
@@ -124,8 +129,7 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
         gdb.events.stop.disconnect(self.on_stop_handler)
 
     def on_stop_handler(self, event):  # type: (StopEvent) -> None
-        if is_running():
-            self.render()
+        self.render()
 
     def on_output_changed(self, old_output):
         modules = []  # type: list[gdbdash.modules.Module]
@@ -186,6 +190,13 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
             if config_modified_time > self.config_modified_time:
                 self.config_modified_time = config_modified_time
                 self.load(self.config_path)
+
+    def disable_if_config_disabled(self):
+        if self.config_path.is_file():
+            with open(self.config_path) as f:
+                config = json.load(f)
+            if not config["dashboard"]["enabled"]:
+                self.disable()
 
     @cached_property
     def options(self):  # type: () -> DashboardOptions
