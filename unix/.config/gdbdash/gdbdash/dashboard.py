@@ -179,12 +179,6 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
                 self.config_modified_time = config_modified_time
                 self.load(self.config_path)
 
-    def disable_if_config_disabled(self):
-        if self.config_path.is_file():
-            with open(self.config_path) as f:
-                config = json.load(f)
-            self.enabled = config["dashboard"]["enabled"]
-
     @cached_property
     def options(self):  # type: () -> DashboardOptions
         return {
