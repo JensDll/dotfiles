@@ -47,7 +47,7 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
             and value is not gdbdash.modules.Module
         ]
 
-        self.disable_if_config_disabled()
+        gdb.events.stop.connect(self.on_stop_handler)
 
     @cached_property
     def modules_dict(self):
@@ -116,18 +116,6 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
                 module.divider(width, height, write)
                 module.render(width, height, write)
 
-    def enable(self):
-        if self.enabled:
-            return
-        super().enable()
-        gdb.events.stop.connect(self.on_stop_handler)
-
-    def disable(self):
-        if not self.enabled:
-            return
-        super().disable()
-        gdb.events.stop.disconnect(self.on_stop_handler)
-
     def on_stop_handler(self, event):  # type: (StopEvent) -> None
         self.render()
 
@@ -195,8 +183,7 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
         if self.config_path.is_file():
             with open(self.config_path) as f:
                 config = json.load(f)
-            if not config["dashboard"]["enabled"]:
-                self.disable()
+            self.enabled = config["dashboard"]["enabled"]
 
     @cached_property
     def options(self):  # type: () -> DashboardOptions
