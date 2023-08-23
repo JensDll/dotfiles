@@ -19,7 +19,7 @@ class Alignment(Module):
     def render(self, width, height, write):
         block_size = self.options["block-size"].value
 
-        blocks_per_row = max((width - 20) // (block_size * 3), 1)
+        blocks_per_row = max((width - 20) // ((block_size * 3) + 1), 1)
         per_row = blocks_per_row * block_size
 
         inferior = gdb.selected_inferior()
@@ -48,7 +48,7 @@ class Alignment(Module):
                         color = self.o["text-highlight"].value
                     elif idx == instruction_end:
                         color = RESET_COLOR
-                    # in reality is bytes and not int
+                    # In reality is bytes and not int
                     write(f" {color}{memory[idx].hex()}")  # type: ignore
             write("\n")
 

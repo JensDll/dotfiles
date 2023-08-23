@@ -106,8 +106,9 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
             try:
                 width, height = get_terminal_size(output)
             except OSError:
-                # File descriptor is not a terminal, try rendering to file
-                render_file(output, modules)
+                if output:
+                    # File descriptor is not a terminal, try rendering to file
+                    render_file(output, modules)
                 continue
 
             write = partial(gdb.write, stream=output)
