@@ -46,3 +46,7 @@ fi
 if [[ $(type -t linode-cli) = file ]]; then
   source <(linode-cli completion bash)
 fi
+
+if [[ $(type -t pip) = file ]]; then
+  source <(pip completion --bash)
+fi
