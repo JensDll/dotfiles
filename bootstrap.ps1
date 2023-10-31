@@ -37,7 +37,7 @@ function Install-Environment() {
   $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 
   if (Test-Path $vswhere) {
-    $vsInstallDir = & $vswhere -latest -property installationPath
+    $vsInstallDir = & $vswhere -prerelease -property installationPath | Select-Object -First 1
     [System.Environment]::SetEnvironmentVariable('VSINSTALLDIR', "$vsInstallDir\", [System.EnvironmentVariableTarget]::User)
   }
 
