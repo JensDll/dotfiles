@@ -38,7 +38,7 @@ function Install-Environment() {
 
   if (Test-Path $vswhere) {
     $vsInstallDir = & $vswhere -latest -property installationPath
-    [System.Environment]::SetEnvironmentVariable('VSINSTALLDIR', $vsInstallDir, [System.EnvironmentVariableTarget]::User)
+    [System.Environment]::SetEnvironmentVariable('VSINSTALLDIR', "$vsInstallDir\", [System.EnvironmentVariableTarget]::User)
   }
 
   # https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
