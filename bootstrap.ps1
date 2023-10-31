@@ -13,11 +13,8 @@ Setup environment variables.
 #>
 [CmdletBinding(DefaultParameterSetName = 'Dotfiles')]
 param(
-  [Parameter(ParameterSetName = 'Dotfiles')]
   [switch]$Dotfiles,
-  [Parameter(ParameterSetName = 'Registry')]
   [switch]$Registry,
-  [Parameter(ParameterSetName = 'Environment')]
   [switch]$Environment
 )
 
@@ -37,6 +34,13 @@ function Install-Registry() {
 }
 
 function Install-Environment() {
+  $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+
+  if (Test-Path $vswhere) {
+    $vsInstallDir = & $vswhere -latest -property installationPath
+    [System.Environment]::SetEnvironmentVariable('VSINSTALLDIR', $vsInstallDir, [System.EnvironmentVariableTarget]::User)
+  }
+
   # https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
   [System.Environment]::SetEnvironmentVariable('XDG_DATA_HOME', "$HOME\.local\share", [System.EnvironmentVariableTarget]::User)
   [System.Environment]::SetEnvironmentVariable('XDG_CONFIG_HOME', "$HOME\.config", [System.EnvironmentVariableTarget]::User)
@@ -46,19 +50,18 @@ function Install-Environment() {
 
 if ($Registry) {
   Install-Registry
-  return
 }
 
 if ($Environment) {
   Install-Environment
-  return
 }
 
 if ($Dotfiles) {
   Install-Dotfiles
-  return
 }
 
-Install-Environment
-Install-Dotfiles
-Install-Registry
+if (-not $Dotfiles -and -not $Registry -and -not $Environment) {
+  Install-Environment
+  Install-Dotfiles
+  Install-Registry
+}
