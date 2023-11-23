@@ -17,7 +17,7 @@ alias grep='grep --color=auto'
 alias cls='clear'
 
 # https://neovim.io/doc/user
-if flatpak list --app --columns=application | grep io.neovim.nvim > /dev/null; then
+if flatpak list --app --columns=application 2> /dev/null | grep io.neovim.nvim > /dev/null; then
   alias vi='flatpak run io.neovim.nvim'
   alias vim='flatpak run io.neovim.nvim'
   alias nvim='flatpak run io.neovim.nvim'
