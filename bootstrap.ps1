@@ -46,21 +46,29 @@ function Install-Environment() {
   [System.Environment]::SetEnvironmentVariable('XDG_CONFIG_HOME', "$HOME\.config", [System.EnvironmentVariableTarget]::User)
   [System.Environment]::SetEnvironmentVariable('XDG_STATE_HOME', "$HOME\.local\state", [System.EnvironmentVariableTarget]::User)
   [System.Environment]::SetEnvironmentVariable('XDG_CACHE_HOME', "$HOME\.cache", [System.EnvironmentVariableTarget]::User)
+
+  # https://github.com/cpm-cmake/CPM.cmake
+  [System.Environment]::SetEnvironmentVariable('CPM_SOURCE_CACHE', "$HOME\.cache\CPM", [System.EnvironmentVariableTarget]::User)
 }
+
+$installedAny = $false
 
 if ($Registry) {
   Install-Registry
+  $installedAny = $true
 }
 
 if ($Environment) {
   Install-Environment
+  $installedAny = $true
 }
 
 if ($Dotfiles) {
   Install-Dotfiles
+  $installedAny = $true
 }
 
-if (-not $Dotfiles -and -not $Registry -and -not $Environment) {
+if (-not $installedAny) {
   Install-Environment
   Install-Dotfiles
   Install-Registry
