@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class Alignment(Module):
     """Print block formatted memory around the program counter"""
 
-    ORDER = 100
+    ORDER = 1
 
     def render(self, width, height, write):
         block_size = self.options["block-size"].value

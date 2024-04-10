@@ -3,7 +3,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 import gdb  # pyright: ignore [reportMissingModuleSource]
-from gdbdash.commands import IntOption
+from gdbdash.commands import BoolOption, IntOption
 from gdbdash.utils import FONT_BOLD, RESET_COLOR, fetch_instructions, fetch_pc
 
 from .module import Module
@@ -37,7 +37,7 @@ except ImportError:
 class Assembly(Module):
     """Print assembly information"""
 
-    ORDER = 200
+    ORDER = 2
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -94,9 +94,9 @@ class Assembly(Module):
             match = re.search(r"(\w+):$", lines[0])
 
             if match:
-                self.function_name = match.group(1)
+                self._function_name = match.group(1)
             else:
-                self.function_name = "?"
+                self._function_name = "?"
 
             match = re.search(r"0x([0-9a-fA-F]+)", lines[1])
 
@@ -107,7 +107,7 @@ class Assembly(Module):
 
             count = len(lines) - 3
         else:
-            self.function_name = function.name
+            self._function_name = function.name
             self.function_address = int(function.value().address.cast(self.uint64_t))
             count = disassembly.count("\n") - 2
 
@@ -187,6 +187,12 @@ class Assembly(Module):
         for i in range(start, end):
             self.write_instruction(inferior, self.instructions[i], write)
 
+    @property
+    def function_name(self):
+        if self.options["short-function"].value:
+            return self._function_name.split("(", 1)[0]
+        return self._function_name
+
     @cached_property
     def options(self):  # type: () -> AssemblyOptions
         return {
@@ -195,5 +201,8 @@ class Assembly(Module):
             ),
             "instructions-after": IntOption(
                 "Number of instructions displayed after the program counter", 5
+            ),
+            "short-function": BoolOption(
+                "Display only the function name without arguments", False
             ),
         }

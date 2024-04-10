@@ -89,7 +89,7 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
             if next_module is None:
                 return
 
-            with open(output, "w") as f:
+            with open(output, "a") as f:
                 next_module.divider(width, height, f.write)
                 next_module.render(width, height, f.write)
                 for module in modules:
@@ -147,6 +147,8 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
         values["dashboard"]["modules"] = {
             module.normalized_name: {
                 "enabled": module.enabled,
+                "order": module.ORDER,
+                "output": module.output,
                 "options": {
                     option_name: option.value
                     for option_name, option in module.options.items()
@@ -163,15 +165,28 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
             config = json.load(f)
 
         json_dashboard = config["dashboard"]
+        json_modules = json_dashboard["modules"]
+
         self.enabled = json_dashboard["enabled"]
         for option_name, option in json_dashboard["options"].items():
             self.options[option_name].value = option
 
+        modules_dict = dict()  # type: DashboardModulesDict
+
         for module in itertools.chain.from_iterable(self.modules_dict.values()):
-            json_module = config["dashboard"]["modules"][module.normalized_name]
+            json_module = json_modules[module.normalized_name]
+
             module.enabled = json_module["enabled"]
+            module.__class__.ORDER = json_module["order"]
+            module.output = json_module["output"]
             for option_name, option in json_module["options"].items():
                 module.options[option_name].value = option
+
+            modules = modules_dict.setdefault(module.output, [])
+            modules.append(module)
+            modules.sort(key=lambda module: module.ORDER)
+
+        self.modules_dict = modules_dict
 
     def try_load_config(self):
         if self.config_path.is_file():

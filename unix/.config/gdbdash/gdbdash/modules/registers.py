@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 class Registers(Module):
     """Print register information"""
 
-    ORDER = 300
+    ORDER = 3
 
     def __init__(self, /, **kwargs):
         super().__init__(**kwargs)
@@ -53,15 +53,15 @@ class Registers(Module):
         self.write_general_purpose_registers(width // 25, frame, write)
 
         if self.options["show-segment"].value:
-            write("\n\n")
+            write("\n")
             self.write_segment_registers(frame, write)
 
         if self.options["show-eflags"].value:
-            write("\n\n")
+            write("\n")
             self.write_eflags_register(frame, write)
 
         if self.options["show-mxcsr"].value:
-            write("\n\n")
+            write("\n")
             self.write_mxcsr_register(frame, write)
 
         write("\n")
