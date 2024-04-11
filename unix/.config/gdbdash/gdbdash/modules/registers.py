@@ -10,6 +10,7 @@ from .register import (
     GeneralPurposeRegister,
     MxcsrRegister,
     SegmentRegister,
+    VectorRegister,
 )
 
 if TYPE_CHECKING:
@@ -28,6 +29,7 @@ class Registers(Module):
 
         self.general_purpose_registers = []  # type: list[GeneralPurposeRegister]
         self.segment_registers = []  # type: list[SegmentRegister]
+        self.vector_registers = []  # type: list[VectorRegister]
 
         for descriptor in self.architecture.registers("general"):
             if descriptor.name == "eflags":
@@ -43,9 +45,13 @@ class Registers(Module):
                     GeneralPurposeRegister(descriptor, self.uint64_t, self.o)
                 )
 
-        for descriptor in self.architecture.registers("sse"):
+        for descriptor in self.architecture.registers("vector"):
             if descriptor.name == "mxcsr":
                 self.mxcsr_register = MxcsrRegister(descriptor, self.uint64_t, self.o)
+            elif descriptor.name.startswith("ymm"):
+                self.vector_registers.append(
+                    VectorRegister(descriptor, self.uint64_t, self.o)
+                )
 
     def render(self, width, height, write):
         frame = gdb.selected_frame()
@@ -63,6 +69,10 @@ class Registers(Module):
         if self.options["show-mxcsr"].value:
             write("\n")
             self.write_mxcsr_register(frame, write)
+
+        if self.options["show-vector"].value:
+            write("\n")
+            self.write_vector_registers(frame, write)
 
         write("\n")
 
@@ -117,6 +127,14 @@ class Registers(Module):
     ):  # type: (gdb.Frame, WriteWrapper) -> None
         write(self.mxcsr_register.get_value(frame))
 
+    def write_vector_registers(
+        self, frame, write
+    ):  # type: (gdb.Frame, WriteWrapper) -> None
+        for register in self.vector_registers[:-1]:
+            write(register.get_value(frame))
+            write("\n")
+        write(self.vector_registers[-1].get_value(frame))
+
     @cached_property
     def options(self):  # type: () -> RegisterOptions
         return {
@@ -126,7 +144,8 @@ class Registers(Module):
             "show-decimal": BoolOption(
                 "Visibility of general purpose registers decimal value", True
             ),
-            "show-segment": BoolOption("Visibility of segment registers", True),
+            "show-segment": BoolOption("Visibility of segment registers", False),
             "show-eflags": BoolOption("Visibility of eflags register", True),
-            "show-mxcsr": BoolOption("Visibility of mxcsr register", True),
+            "show-mxcsr": BoolOption("Visibility of mxcsr register", False),
+            "show-vector": BoolOption("Visibility of vector registers", False),
         }

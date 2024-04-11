@@ -159,3 +159,4 @@ cython_debug/
 .gdb_history
 dev.gdb
 gdbdash.json
+.dash

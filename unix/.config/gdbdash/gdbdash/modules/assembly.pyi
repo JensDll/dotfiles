@@ -10,6 +10,7 @@ AssemblyOptions = typing.TypedDict(
         "instructions-before": IntOption,
         "instructions-after": IntOption,
         "short-function": BoolOption,
+        "no-function": BoolOption,
     },
 )
 

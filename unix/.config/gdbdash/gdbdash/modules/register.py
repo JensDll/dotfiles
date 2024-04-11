@@ -323,3 +323,52 @@ class MxcsrRegister(FlagsRegister):
             f"{open_bracket} {self.flag('PE', pe)} {self.flag('UE', ue)} {self.flag('OE', oe)} "
             f"{self.flag('ZE', ze)} {self.flag('DE', de)} {self.flag('IE', ie)} {close_bracket}"
         )
+
+
+class VectorRegister(Register):
+    MAP_XMM = {
+        "ymm0": "xmm0",
+        "ymm1": "xmm1",
+        "ymm2": "xmm2",
+        "ymm3": "xmm3",
+        "ymm4": "xmm4",
+        "ymm5": "xmm5",
+        "ymm6": "xmm6",
+        "ymm7": "xmm7",
+        "ymm8": "xmm8",
+        "ymm9": "xmm9",
+        "ymm10": "xmm10",
+        "ymm11": "xmm11",
+        "ymm12": "xmm12",
+        "ymm13": "xmm13",
+        "ymm14": "xmm14",
+        "ymm15": "xmm15",
+    }
+
+    def get_value(self, frame):  # type: (gdb.Frame) -> str
+        value = frame.read_register(self.descriptor)
+        int8 = value["v32_int8"]
+
+        any_change_xmm = False
+        any_change_ymm = False
+
+        xmm = []
+        ymm = []
+
+        for i in reversed(range(16)):
+            xmm_value = int(int8[i])
+            ymm_value = int(int8[i + 16])
+
+            any_change_xmm |= getattr(self, f"xmm{i}", xmm_value) != xmm_value
+            any_change_ymm |= getattr(self, f"ymm{i}", ymm_value) != ymm_value
+
+            setattr(self, f"xmm{i}", xmm_value)
+            setattr(self, f"ymm{i}", ymm_value)
+
+            xmm.append(f"{xmm_value:>4}")
+            ymm.append(f"{ymm_value:>4}")
+
+        return (
+            f"{self.options['text-highlight'] if any_change_ymm else self.options['text-secondary']}{self.name:<6}{RESET_COLOR}{' '.join(ymm)}  "
+            f"{self.options['text-highlight'] if any_change_xmm else self.options['text-secondary']}{VectorRegister.MAP_XMM[self.name]:<6}{RESET_COLOR}{' '.join(xmm)}"
+        )

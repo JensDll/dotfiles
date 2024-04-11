@@ -189,6 +189,8 @@ class Assembly(Module):
 
     @property
     def function_name(self):
+        if self.options["no-function"].value:
+            return ""
         if self.options["short-function"].value:
             return self._function_name.split("(", 1)[0]
         return self._function_name
@@ -205,4 +207,5 @@ class Assembly(Module):
             "short-function": BoolOption(
                 "Display only the function name without arguments", False
             ),
+            "no-function": BoolOption("Do not display the function name", False),
         }
