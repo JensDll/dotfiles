@@ -5,7 +5,7 @@ import gdb  # pyright: ignore [reportMissingModuleSource]
 from gdbdash.commands import BoolOption
 
 from .module import Module
-from .register import (
+from .registers_display import (
     EflagsRegister,
     GeneralPurposeRegister,
     MxcsrRegister,
