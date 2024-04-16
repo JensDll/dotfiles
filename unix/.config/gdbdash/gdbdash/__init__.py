@@ -1,4 +1,4 @@
-import gdb  # pyright: ignore [reportMissingModuleSource]
+import gdb
 
 from .dashboard import Dashboard
 

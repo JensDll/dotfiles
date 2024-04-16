@@ -1,7 +1,7 @@
 from functools import cached_property
 from typing import TYPE_CHECKING
 
-import gdb  # pyright: ignore [reportMissingModuleSource]
+import gdb
 from gdbdash.commands import IntOption
 from gdbdash.utils import RESET_COLOR, fetch_instructions, fetch_pc
 

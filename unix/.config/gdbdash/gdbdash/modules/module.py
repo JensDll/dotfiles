@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 
-import gdb  # pyright: ignore [reportMissingModuleSource]
+import gdb
 from gdbdash.commands import Command, Configurable, Orderable, Outputable, Togglable
 from gdbdash.utils import RESET_COLOR
 

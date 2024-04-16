@@ -1,13 +1,10 @@
 from typing import TYPE_CHECKING
 
-import gdb  # pyright: ignore [reportMissingModuleSource]
+import gdb
 from gdbdash.utils import FONT_UNDERLINE, RESET_COLOR
 
 if TYPE_CHECKING:
-    from gdb import (  # pyright: ignore [reportMissingModuleSource]
-        RegisterDescriptor,
-        Type,
-    )
+    from gdb import RegisterDescriptor, Type
     from gdbdash.dashboard import DashboardOptions
 
 

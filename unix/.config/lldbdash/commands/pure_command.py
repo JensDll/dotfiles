@@ -1,10 +1,8 @@
 import typing
 
-from .create_handlers import create_handlers
+from .handler_container import HandlerContainer
 
 
-class PureCommand:
-    handle_count = 0
-
+class PureCommand(HandlerContainer):
     def __init__(self, *handlers: typing.Callable):
-        self.handlers = create_handlers(PureCommand, *handlers)
+        super().__init__(*handlers)

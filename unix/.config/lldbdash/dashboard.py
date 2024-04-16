@@ -1,4 +1,5 @@
 import shutil
+import typing
 
 import lldb
 import lldbdash.modules
@@ -7,18 +8,17 @@ from .common import file_streams
 
 
 class Dashboard:
-    modules: list[lldbdash.modules.Module]
+    modules: typing.ClassVar[list[lldbdash.modules.Module]]
 
     def __init__(
         self, target: lldb.SBTarget, extra_args: lldb.SBStructuredData, dict: dict
     ):
-        pass
+        self.size = shutil.get_terminal_size((160, 24))
 
     def handle_stop(self, exe_ctx: lldb.SBExecutionContext, stream: lldb.SBStream):
-        size = shutil.get_terminal_size((160, 24))
         for module in Dashboard.modules:
             module.render(
-                size,
+                self.size,
                 exe_ctx,
                 (
                     stream

@@ -1,7 +1,7 @@
 from functools import cached_property
 from typing import TYPE_CHECKING
 
-import gdb  # pyright: ignore [reportMissingModuleSource]
+import gdb
 from gdbdash.commands import BoolOption
 
 from .module import Module
