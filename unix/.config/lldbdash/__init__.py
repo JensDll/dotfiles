@@ -16,7 +16,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, internal_dict: dict):
     lldbdash.dashboard.Dashboard.modules = modules
 
     debugger.HandleCommand(
-        "command container add --help 'The command container for the LLDB dashboard commands.' dashboard"
+        "command container add --help 'The command container for the LLDB dashboard.' dashboard"
     )
 
     register_modules(debugger, modules)
@@ -33,7 +33,7 @@ def register_modules(
         container = f"dashboard {module.name}"
 
         debugger.HandleCommand(
-            f"command container add --help 'The command container for the {module.name} module commands.' {container}"
+            f"command container add --help 'The command container for the {module.name} module.' {container}"
         )
 
         if settings := module.settings:
@@ -41,10 +41,14 @@ def register_modules(
 
             debugger.HandleCommand(f"command container add {settings_container}")
             debugger.HandleCommand(f"command container add {settings_container} set")
+            debugger.HandleCommand(f"command container add {settings_container} show")
 
             for name, setting in settings.items():
                 debugger.HandleCommand(
                     f"command script add --class {setting.handlers[0]} {settings_container} set {name}"
+                )
+                debugger.HandleCommand(
+                    f"command script add --class {setting.show_command.handlers[0]} {settings_container} show {name}"
                 )
 
             list_settings = lldbdash.commands.ListSettingsCommand(
@@ -69,5 +73,8 @@ def register_modules(
         debugger.HandleCommand(f"command container add {set_container}")
 
         debugger.HandleCommand(
-            f"command script add --class {module.output.handlers[0]} {set_container} output"
+            f"command script add --class {module.output.handlers[0]} --completion-type disk-file {set_container} output"
+        )
+        debugger.HandleCommand(
+            f"command script add --class {module.output.show_command.handlers[0]} {show_container} output"
         )

@@ -1,8 +1,9 @@
-import os
+import shutil
 
 import lldb
-import lldbdash.common
 import lldbdash.modules
+
+from .common import file_streams
 
 
 class Dashboard:
@@ -14,12 +15,14 @@ class Dashboard:
         pass
 
     def handle_stop(self, exe_ctx: lldb.SBExecutionContext, stream: lldb.SBStream):
-        size = os.terminal_size((160, 24))
-
-        try:
-            size = os.get_terminal_size(0)
-        except OSError:
-            stream.write("Failed to get terminal size\n")
-
+        size = shutil.get_terminal_size((160, 24))
         for module in Dashboard.modules:
-            module.render(size, exe_ctx, stream)
+            module.render(
+                size,
+                exe_ctx,
+                (
+                    stream
+                    if module.output.value == "0"
+                    else file_streams[module.output.value]["stream"]
+                ),
+            )

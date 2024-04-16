@@ -3,6 +3,8 @@ import os
 import lldb
 import lldbdash.commands
 
+from .on_change_output import on_change_output
+
 
 class RegisterModule:
     settings = {
@@ -29,6 +31,7 @@ class RegisterModule:
     output = lldbdash.commands.StrCommand(
         "0",
         help="The render location of the register module.",
+        on_change=on_change_output,
     )
     enabled = lldbdash.commands.ToggleCommand(
         True,

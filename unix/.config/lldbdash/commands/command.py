@@ -1,35 +1,34 @@
 import typing
 
+from .create_handlers import create_handlers
+from .show_command import ShowCommand
+
 T = typing.TypeVar("T")
+
+OnChange = typing.Callable[[T, T], None]
+
+
+def default_on_change(prev_value: T, value: T):
+    pass
 
 
 class Command(typing.Generic[T]):
     handle_count = 0
 
-    def __init__(self, value: T, *handlers: typing.Callable):
-        self.value = value
-        self.prev_value = value
+    def __init__(
+        self,
+        initial_value: T,
+        *handlers: typing.Callable,
+        show_format: str,
+        show_help: typing.Optional[str],
+        show_long_help: typing.Optional[str],
+        on_change: OnChange,
+    ):
+        self.value = initial_value
+        self.on_change = on_change
         self.handlers = create_handlers(Command, *handlers)
+        self.show_command = ShowCommand(self, show_format, show_help, show_long_help)
 
     def set_value(self, value: T):
-        self.prev_value = self.value
+        self.on_change(self.value, value)
         self.value = value
-
-
-class EmptyCommand:
-    handle_count = 0
-
-    def __init__(self, *handlers: typing.Callable):
-        self.handlers = create_handlers(EmptyCommand, *handlers)
-
-
-def create_handlers(cls, *handlers: typing.Callable) -> list[str]:
-    result = []
-
-    for handler in handlers:
-        handler_name = f"handle_{cls.handle_count}"
-        setattr(cls, handler_name, handler)
-        cls.handle_count += 1
-        result.append(f"{cls.__module__}.{cls.__name__}.{handler_name}")
-
-    return result
