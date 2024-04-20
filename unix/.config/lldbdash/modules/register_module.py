@@ -1,4 +1,5 @@
 import os
+import typing
 
 import lldb
 import lldbdash.commands
@@ -7,7 +8,21 @@ from .on_change_output import on_change_output
 
 
 class RegisterModule:
-    settings = {
+    Settings = typing.TypedDict(
+        "Settings",
+        {
+            "show-32": lldbdash.commands.BoolCommand,
+            "show-decimal": lldbdash.commands.BoolCommand,
+            "show-segment": lldbdash.commands.BoolCommand,
+            "show-eflags": lldbdash.commands.BoolCommand,
+            "show-mxcsr": lldbdash.commands.BoolCommand,
+            "show-vector": lldbdash.commands.BoolCommand,
+        },
+    )
+
+    name = "register"
+
+    settings: Settings = {
         "show-32": lldbdash.commands.BoolCommand(
             True, help="Visibility of general purpose registers 32-bit version"
         ),
@@ -27,7 +42,6 @@ class RegisterModule:
             True, help="Visibility of vector registers"
         ),
     }
-    name = "register"
     output = lldbdash.commands.StrCommand(
         "0",
         help="The render location of the register module.",

@@ -16,6 +16,8 @@ class Dashboard:
         self.size = shutil.get_terminal_size((160, 24))
 
     def handle_stop(self, exe_ctx: lldb.SBExecutionContext, stream: lldb.SBStream):
+        stream.write("--------------------------------------------\n")
+
         for module in Dashboard.modules:
             module.render(
                 self.size,
@@ -26,3 +28,5 @@ class Dashboard:
                     else file_streams[module.output.value]["stream"]
                 ),
             )
+
+        stream.write("--------------------------------------------\n")

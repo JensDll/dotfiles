@@ -52,7 +52,7 @@ def register_modules(
                 )
 
             list_settings = lldbdash.commands.ListSettingsCommand(
-                settings, help=f"List the settings values of the {module.name} module."
+                settings, help=f"Lists settings of the {module.name} module."
             )
 
             debugger.HandleCommand(

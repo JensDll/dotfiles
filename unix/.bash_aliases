@@ -62,3 +62,10 @@ fi
 if [[ $(type -t pip) = file ]]; then
   source <(pip completion --bash)
 fi
+
+if [[ $(type -t pnpm) = file ]]; then
+  source <(pnpm completion bash)
+  if [[ $(type -t _pnpm_completion) = function ]]; then
+    complete -F _pnpm_completion pnpm
+  fi
+fi

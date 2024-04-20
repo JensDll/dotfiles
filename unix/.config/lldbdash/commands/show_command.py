@@ -11,7 +11,7 @@ if typing.TYPE_CHECKING:
 class ShowCommand(PureCommand):
     def __init__(
         self,
-        command,  # type: Command
+        command: "Command",
         format: str,
         help: typing.Optional[str] = None,
         long_help: typing.Optional[str] = None,
