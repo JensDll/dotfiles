@@ -71,7 +71,7 @@ class InstructionPrinter:
     def __init__(self, frame: lldb.SBFrame, target: lldb.SBTarget):
         self.frame = frame
         self.target = target
-        self.instructions = Instruction.list(self.frame.GetSymbol(), self.target)
+        self.instructions = Instruction.list(frame.GetSymbol(), target)
 
     @classmethod
     def new_or_cached(cls, frame: lldb.SBFrame, target: lldb.SBTarget):
@@ -106,8 +106,8 @@ class InstructionPrinter:
     def print(self, stream: lldb.SBStream):
         pc_idx = self.find_pc_idx()
 
-        pc_idx = self.fetch_before(pc_idx)
-        self.fetch_after(pc_idx)
+        pc_idx = self.fetch_blocks_start(pc_idx)
+        self.fetch_blocks_end(pc_idx)
 
         before = AssemblyModule.settings["instructions-before"].value
         after = AssemblyModule.settings["instructions-after"].value
@@ -136,7 +136,7 @@ class InstructionPrinter:
         for i in range(start, end):
             self.instructions[i].print(stream, dimensions)
 
-    def fetch_before(self, pc_idx: int):
+    def fetch_blocks_start(self, pc_idx: int):
         before = AssemblyModule.settings["instructions-before"].value - pc_idx
 
         while before > 0:
@@ -162,7 +162,7 @@ class InstructionPrinter:
 
         return pc_idx
 
-    def fetch_after(self, pc_idx: int):
+    def fetch_blocks_end(self, pc_idx: int):
         after = (
             AssemblyModule.settings["instructions-after"].value
             - len(self.instructions)

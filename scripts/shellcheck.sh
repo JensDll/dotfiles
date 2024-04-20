@@ -7,5 +7,5 @@ root="$(
 declare -r root
 declare -r unix="$root/unix"
 
-shellcheck --external-sources "$root"/**/*.sh "$unix"/.local/bin/* "$unix"/.local/share/bash-completion/completions/* \
+shellcheck "$root"/**/*.sh "$unix"/.local/bin/* "$unix"/.local/share/bash-completion/completions/* \
   "$unix/.bash_aliases" "$unix/.bash_logout" "$unix/.bashrc" "$unix/.profile"
