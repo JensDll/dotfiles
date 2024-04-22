@@ -4,18 +4,17 @@ import typing
 
 import lldb
 import lldbdash.commands
-import lldbdash.common
+from lldbdash.common import Output
 
 
 class Module(typing.Protocol):
     settings: dict[str, lldbdash.commands.Command]
     name: str
-    output: lldbdash.commands.StrCommand
     enabled: lldbdash.commands.ToggleCommand
 
     @staticmethod
     def render(
-        size: os.terminal_size, exe_ctx: lldb.SBExecutionContext, stream: lldb.SBStream
+        size: os.terminal_size, exe_ctx: lldb.SBExecutionContext, stream: Output
     ) -> None: ...
 
 

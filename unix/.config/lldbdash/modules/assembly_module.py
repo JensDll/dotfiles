@@ -5,7 +5,7 @@ import typing
 import lldb
 import lldb.utils
 import lldbdash.commands
-from lldbdash.common import FONT_BOLD, RESET_COLOR
+from lldbdash.common import FONT_BOLD, RESET_COLOR, Output
 
 from .on_change_output import on_change_output
 
@@ -49,13 +49,9 @@ class Instruction:
         )
         return list(map(lambda inst: cls(target, symbol, inst), instructions))
 
-    def print(
-        self,
-        stream: lldb.SBStream,
-        dim: PrintDimensions,
-    ):
+    def print(self, out: Output, dim: PrintDimensions):
         name = self.get_name()
-        stream.Print(
+        out.Print(
             f"{self.addr:#0x}  {name:<{dim.name_width}}  {self.opcode:<{dim.opcode_width}}  "
             f"{self.mnemonic:<{dim.mnemonic_width}} {self.operands}{self.comment}\n"
         )
@@ -92,8 +88,7 @@ class InstructionPrinter:
 
         for i in range(start, end):
             instruction = self.instructions[i]
-            name = instruction.get_name()
-            name_width = max(name_width, len(name))
+            name_width = max(name_width, len(instruction.get_name()))
             opcode_width = max(opcode_width, len(instruction.opcode))
             mnemonic_width = max(mnemonic_width, len(instruction.mnemonic))
 
@@ -103,7 +98,7 @@ class InstructionPrinter:
             mnemonic_width=mnemonic_width,
         )
 
-    def print(self, stream: lldb.SBStream):
+    def print(self, out: Output):
         pc_idx = self.find_pc_idx()
 
         pc_idx = self.fetch_blocks_start(pc_idx)
@@ -120,21 +115,21 @@ class InstructionPrinter:
 
         dimensions = self.find_print_dimensions(start, end)
 
-        self.print_instructions(stream, dimensions, start, pc_idx)
-        stream.Print(FONT_BOLD)
-        self.instructions[pc_idx].print(stream, dimensions)
-        stream.Print(RESET_COLOR)
-        self.print_instructions(stream, dimensions, pc_idx + 1, end)
+        self.print_instructions(out, dimensions, start, pc_idx)
+        out.Print(FONT_BOLD)
+        self.instructions[pc_idx].print(out, dimensions)
+        out.Print(RESET_COLOR)
+        self.print_instructions(out, dimensions, pc_idx + 1, end)
 
     def print_instructions(
         self,
-        stream: lldb.SBStream,
+        out: Output,
         dimensions: Instruction.PrintDimensions,
         start: int,
         end: int,
     ):
         for i in range(start, end):
-            self.instructions[i].print(stream, dimensions)
+            self.instructions[i].print(out, dimensions)
 
     def fetch_blocks_start(self, pc_idx: int):
         before = AssemblyModule.settings["instructions-before"].value - pc_idx
@@ -197,6 +192,7 @@ class AssemblyModule:
             "instructions-before": lldbdash.commands.IntCommand,
             "instructions-after": lldbdash.commands.IntCommand,
             "flavor": lldbdash.commands.StrCommand,
+            "output": lldbdash.commands.StrCommand,
         },
     )
 
@@ -210,12 +206,13 @@ class AssemblyModule:
             10, help="Number of instructions after the program counter."
         ),
         "flavor": lldbdash.commands.StrCommand("intel", help="The disassembly flavor."),
+        "output": lldbdash.commands.StrCommand(
+            "0",
+            help="The render location of the assembly module.",
+            on_change=on_change_output,
+        ),
     }
-    output = lldbdash.commands.StrCommand(
-        "0",
-        help="The render location of the assembly module.",
-        on_change=on_change_output,
-    )
+
     enabled = lldbdash.commands.ToggleCommand(
         True,
         enable_help="Enable the assembly module",
@@ -223,10 +220,8 @@ class AssemblyModule:
     )
 
     @staticmethod
-    def render(
-        size: os.terminal_size, exe_ctx: lldb.SBExecutionContext, stream: lldb.SBStream
-    ):
+    def render(size: os.terminal_size, exe_ctx: lldb.SBExecutionContext, out: Output):
         target: lldb.SBTarget = exe_ctx.GetTarget()
         frame: lldb.SBFrame = exe_ctx.GetFrame()
         printer = InstructionPrinter.new_or_cached(frame, target)
-        printer.print(stream)
+        printer.print(out)

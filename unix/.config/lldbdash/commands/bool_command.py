@@ -63,8 +63,5 @@ class BoolCommand(Command[bool]):
             on_change=on_change,
         )
 
-    def __str__(self):
-        return str(self.value)
-
     def __bool__(self):
         return self.value

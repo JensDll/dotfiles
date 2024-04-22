@@ -30,3 +30,6 @@ class Command(HandlerContainer, typing.Generic[T]):
     def set_value(self, value: T):
         self.on_change(self.value, value)
         self.value = value
+
+    def __str__(self):
+        return str(self.value)

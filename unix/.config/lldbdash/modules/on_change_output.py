@@ -1,9 +1,5 @@
 import lldb
-from lldbdash.common import file_streams
-
-
-def is_file(output: str):
-    return output != "0"
+from lldbdash.common import file_streams, is_file
 
 
 def on_change_output(prev_output: str, current_output: str):

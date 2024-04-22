@@ -52,6 +52,3 @@ class StrCommand(Command[str]):
             show_long_help=show_long_help,
             on_change=on_change,
         )
-
-    def __str__(self):
-        return self.value
