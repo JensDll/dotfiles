@@ -1,12 +1,13 @@
 import typing
 
 import lldb
+from lldbdash.common import Settings
 
 from .pure_command import PureCommand
 
 
 class ListSettingsCommand(PureCommand):
-    def __init__(self, settings: dict, help: typing.Optional[str] = None):
+    def __init__(self, settings: Settings, help: typing.Optional[str] = None):
         class Handle:
             def __init__(self, debugger: lldb.SBDebugger, internal_dict: dict):
                 pass
@@ -19,7 +20,7 @@ class ListSettingsCommand(PureCommand):
                 _result: lldb.SBCommandReturnObject,
             ):
                 for key, value in settings.items():
-                    _result.Print(f"{key}: {value}\n")
+                    _result.Print(f"{key}: {repr(value.value)}\n")
 
             def get_short_help(self):
                 return help

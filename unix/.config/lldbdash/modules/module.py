@@ -4,11 +4,11 @@ import typing
 
 import lldb
 import lldbdash.commands
-from lldbdash.common import Output
+from lldbdash.common import Output, Settings
 
 
 class Module(typing.Protocol):
-    settings: dict[str, lldbdash.commands.Command]
+    settings: Settings
     name: str
     enabled: lldbdash.commands.ToggleCommand
 

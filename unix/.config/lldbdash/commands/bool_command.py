@@ -46,7 +46,9 @@ class BoolCommand(Command[bool]):
                     self.set_value(False)
                     return
 
-                _result.SetError(f"Invalid argument {arg} must be convertible to bool")
+                _result.SetError(
+                    f"Invalid argument '{arg}' must be convertible to bool. Valid arguments are (true, on, 1, enable) and (false, off, 0, disable)."
+                )
 
             def get_short_help(self):
                 return help

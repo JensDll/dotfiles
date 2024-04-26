@@ -1,5 +1,3 @@
-import typing
-
 import lldb
 import lldbdash.commands
 import lldbdash.dashboard
@@ -63,9 +61,7 @@ def register_dashboard(debugger: lldb.SBDebugger):
         f"command script add --class lldbdash.dashboard.LoadCommand {container} load",
     )
 
-    settings = typing.cast(
-        dict[str, lldbdash.commands.Command], lldbdash.dashboard.Dashboard.settings
-    )
+    settings = lldbdash.dashboard.Dashboard.get_settings()
 
     register_settings(
         settings,

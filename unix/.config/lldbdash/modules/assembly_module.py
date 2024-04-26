@@ -5,7 +5,8 @@ import typing
 import lldb
 import lldb.utils
 import lldbdash.commands
-from lldbdash.common import FONT_BOLD, RESET_COLOR, Output
+from lldbdash.common import FONT_UNDERLINE, RESET_COLOR, Output
+from lldbdash.dashboard import Dashboard as D
 
 from .on_change_output import on_change_output
 
@@ -39,21 +40,50 @@ class Instruction:
         opcode: bytearray = target.ReadMemory(addr, self.size, error)
         self.opcode = " ".join(f"{byte:02X}" for byte in opcode)
 
-        self.name: str = symbol.GetName()
+        name: str = symbol.GetDisplayName()
+        if len(name) > 30:
+            name = name[:30] + "..."
+        self.name: str = name
         self.offset: int = self.addr - symbol.GetStartAddress().GetLoadAddress(target)
 
     @classmethod
     def list(cls, symbol: lldb.SBSymbol, target: lldb.SBTarget):
         instructions = symbol.GetInstructions(
-            target, AssemblyModule.settings["flavor"].value
+            target, AssemblyModule.settings["disassembly-flavor"].value
         )
         return list(map(lambda inst: cls(target, symbol, inst), instructions))
 
     def print(self, out: Output, dim: PrintDimensions):
-        name = self.get_name()
-        out.Print(
-            f"{self.addr:#0x}  {name:<{dim.name_width}}  {self.opcode:<{dim.opcode_width}}  "
-            f"{self.mnemonic:<{dim.mnemonic_width}} {self.operands}{self.comment}\n"
+        color = D.settings["text-secondary"]
+
+        out.write(f"{color}{self.addr:#0x}{RESET_COLOR}  ")
+
+        if AssemblyModule.settings["show-opcode"].value:
+            out.write(f"{self.opcode:<{dim.opcode_width}}  ")
+
+        out.write(
+            f"{color}{self.get_name():<{dim.name_width}}{RESET_COLOR}  "
+            f"{AssemblyModule.settings['text-mnemonic']}{self.mnemonic:<{dim.mnemonic_width}}{RESET_COLOR}  "
+            f"{self.operands}"
+            f"{AssemblyModule.settings['text-comment']}{self.comment}{RESET_COLOR}\n"
+        )
+
+    def print_highlight(self, out: Output, dim: PrintDimensions):
+        color = D.settings["text-highlight"]
+
+        out.write(f"{color}{self.addr:#0x}{RESET_COLOR}  ")
+
+        if AssemblyModule.settings["show-opcode"].value:
+            out.write(f"{self.opcode:<{dim.opcode_width}}  ")
+
+        out.write(f"{color}{self.get_name():<{dim.name_width}}{RESET_COLOR}  ")
+        out.write(
+            f"{AssemblyModule.settings['text-mnemonic']}{FONT_UNDERLINE}{self.mnemonic}{RESET_COLOR}  "
+        )
+        out.write(" " * (dim.mnemonic_width - len(self.mnemonic)))
+        out.write(self.operands)
+        out.write(
+            f"{AssemblyModule.settings['text-comment']}{self.comment}{RESET_COLOR}\n"
         )
 
     def get_name(self):
@@ -99,9 +129,7 @@ class InstructionPrinter:
         )
 
     def print(self, out: Output):
-        pc_idx = self.find_pc_idx()
-
-        pc_idx = self.fetch_blocks_start(pc_idx)
+        pc_idx = self.fetch_blocks_start(self.find_pc_idx())
         self.fetch_blocks_end(pc_idx)
 
         before = AssemblyModule.settings["instructions-before"].value
@@ -116,9 +144,7 @@ class InstructionPrinter:
         dimensions = self.find_print_dimensions(start, end)
 
         self.print_instructions(out, dimensions, start, pc_idx)
-        out.Print(FONT_BOLD)
-        self.instructions[pc_idx].print(out, dimensions)
-        out.Print(RESET_COLOR)
+        self.instructions[pc_idx].print_highlight(out, dimensions)
         self.print_instructions(out, dimensions, pc_idx + 1, end)
 
     def print_instructions(
@@ -185,38 +211,52 @@ class InstructionPrinter:
             after -= len(instructions)
 
 
-class AssemblyModule:
-    Settings = typing.TypedDict(
-        "Settings",
+if typing.TYPE_CHECKING:
+    ModuleSettings = typing.TypedDict(
+        "ModuleSettings",
         {
             "instructions-before": lldbdash.commands.IntCommand,
             "instructions-after": lldbdash.commands.IntCommand,
-            "flavor": lldbdash.commands.StrCommand,
+            "disassembly-flavor": lldbdash.commands.StrCommand,
+            "show-opcode": lldbdash.commands.BoolCommand,
+            "text-comment": lldbdash.commands.StrCommand,
+            "text-mnemonic": lldbdash.commands.StrCommand,
             "output": lldbdash.commands.StrCommand,
         },
     )
 
-    name = "assembly"
 
-    settings: Settings = {
+class AssemblyModule:
+    name = "assembly"
+    settings: "ModuleSettings" = {
         "instructions-before": lldbdash.commands.IntCommand(
             10, help="Number of instructions before the program counter."
         ),
         "instructions-after": lldbdash.commands.IntCommand(
             10, help="Number of instructions after the program counter."
         ),
-        "flavor": lldbdash.commands.StrCommand("intel", help="The disassembly flavor."),
+        "disassembly-flavor": lldbdash.commands.StrCommand(
+            "intel", help="The disassembly flavor."
+        ),
+        "show-opcode": lldbdash.commands.BoolCommand(
+            True, help="Whether to show the opcode."
+        ),
+        "text-comment": lldbdash.commands.StrCommand(
+            "\033[38;2;14;188;108m", help="The color of instruction comments."
+        ),
+        "text-mnemonic": lldbdash.commands.StrCommand(
+            "\033[38;2;17;168;193m", help="The color of instruction mnemonics."
+        ),
         "output": lldbdash.commands.StrCommand(
             "0",
             help="The render location of the assembly module.",
             on_change=on_change_output,
         ),
     }
-
     enabled = lldbdash.commands.ToggleCommand(
         True,
-        enable_help="Enable the assembly module",
-        disable_help="Disable the assembly module",
+        enable_help="Enable the assembly module.",
+        disable_help="Disable the assembly module.",
     )
 
     @staticmethod

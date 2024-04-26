@@ -27,7 +27,7 @@ class ShowCommand(PureCommand):
                 _exe_ctx: lldb.SBExecutionContext,
                 _result: lldb.SBCommandReturnObject,
             ):
-                _result.Print(f"{format.format(command.value)}\n")
+                _result.Print(f"{format.format(repr(command.value))}\n")
 
             def get_short_help(self):
                 return help
