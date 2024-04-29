@@ -1,5 +1,6 @@
 import lldb
 import lldbdash.commands
+import lldbdash.common
 import lldbdash.dashboard
 import lldbdash.modules
 
@@ -100,7 +101,7 @@ def register_modules(debugger: lldb.SBDebugger):
 
 
 def register_settings(
-    settings: dict[str, lldbdash.commands.Command],
+    settings: lldbdash.common.Settings,
     debugger: lldb.SBDebugger,
     container: str,
     list_command: lldbdash.commands.ListSettingsCommand,

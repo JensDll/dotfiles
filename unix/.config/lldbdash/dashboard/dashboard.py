@@ -51,10 +51,11 @@ class Dashboard:
         size = shutil.get_terminal_size((160, 24))
         for module in Dashboard.modules:
             output = out
-            if module_output := module.settings["output"].value != "0":
+            module_output = module.settings["output"].value
+            if module_output != "0":
                 output = g_file_streams[module_output]["stream"]
             if show_divider:
-                self.print_divider(size, module, out)
+                self.print_divider(size, module, output)
             module.render(size, exe_ctx, output)
 
     def print_divider(self, size: "terminal_size", module: "Module", out: Output):
