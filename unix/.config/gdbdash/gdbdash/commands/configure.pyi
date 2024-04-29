@@ -1,8 +1,9 @@
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
-from typing import Mapping, Protocol, Sequence
+from functools import cached_property
+from typing import Any, Mapping, Protocol, Sequence
 
-import gdb  # pyright: ignore [reportMissingModuleSource]
+import gdb
 from gdbdash.utils import GdbBool, GdbInt
 
 from .command import CommandProtocol
@@ -26,13 +27,13 @@ class StrOption:
     choices: int = gdb.COMPLETE_NONE
 
 Option = BoolOption | IntOption | StrOption
-Options = Mapping[str, Option]
+Options = Mapping[str, Any]
 
 class ConfigurableProtocol(CommandProtocol, Protocol):
     options: Options
 
 class Configurable(metaclass=ABCMeta):
     def __init__(self, /, **kwargs) -> None: ...
-    @property
+    @cached_property
     @abstractmethod
     def options(self) -> Options: ...

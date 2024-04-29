@@ -1,0 +1,8 @@
+# options: default, att, intel
+settings set target.x86-disassembly-flavor intel
+# options: never, no-debuginfo, no-source, always
+settings set stop-disassembly-display never
+
+command alias cls shell clear
+
+command script import ~/.config/lldbdash

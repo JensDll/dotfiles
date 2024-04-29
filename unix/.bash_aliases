@@ -32,6 +32,15 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 # https://manpages.debian.org/date
 alias today='date +%d.%m.%y'
 
+for i in {15..25}; do
+  if [[ $(type -t lldb-"$i") = file ]]; then
+    # shellcheck disable=SC2139
+    # https://lldb.llvm.org/index.html
+    alias lldb="lldb-$i"
+    break
+  fi
+done
+
 # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-type
 
 if [[ $(type -t kubectl) = file ]]; then
@@ -52,4 +61,11 @@ fi
 
 if [[ $(type -t pip) = file ]]; then
   source <(pip completion --bash)
+fi
+
+if [[ $(type -t pnpm) = file ]]; then
+  source <(pnpm completion bash)
+  if [[ $(type -t _pnpm_completion) = function ]]; then
+    complete -F _pnpm_completion pnpm
+  fi
 fi

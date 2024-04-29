@@ -2,7 +2,7 @@ import re
 from functools import cached_property
 from typing import TYPE_CHECKING
 
-import gdb  # pyright: ignore [reportMissingModuleSource]
+import gdb
 from gdbdash.commands import BoolOption, IntOption
 from gdbdash.utils import FONT_BOLD, RESET_COLOR, fetch_instructions, fetch_pc
 
@@ -43,7 +43,7 @@ class Assembly(Module):
         super().__init__(**kwargs)
         self.fetch_new_instructions(self.frame)
 
-    def render(self, width, hight, write):
+    def render(self, width, height, write):
         inferior = gdb.selected_inferior()
         frame = gdb.selected_frame()
         pc = fetch_pc(frame)

@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Sequence
 
-import gdb  # pyright: ignore [reportMissingModuleSource]
+import gdb
 from gdbdash.utils import GdbBool, GdbInt, complete
 
 from .command import Command

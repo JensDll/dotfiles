@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-import gdb  # pyright: ignore [reportMissingModuleSource]
+import gdb
 from gdbdash.utils import GdbBool, complete
 
 from .command import Command

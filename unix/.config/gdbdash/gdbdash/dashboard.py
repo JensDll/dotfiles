@@ -6,7 +6,7 @@ from inspect import isclass
 from os import get_terminal_size
 from typing import TYPE_CHECKING
 
-import gdb  # pyright: ignore [reportMissingModuleSource]
+import gdb
 import gdbdash.modules
 import gdbdash.utils
 from gdbdash.commands import (
@@ -22,7 +22,6 @@ from gdbdash.commands import (
 if TYPE_CHECKING:
     from typing import Iterator
 
-    from gdb.events import StopEvent  # pyright: ignore [reportMissingModuleSource]
     from gdbdash.utils import FileDescriptorOrPath
 
     from .dashboard import DashboardModulesDict, DashboardOptions
@@ -117,7 +116,7 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
                 module.divider(width, height, write)
                 module.render(width, height, write)
 
-    def on_stop_handler(self, event):  # type: (StopEvent) -> None
+    def on_stop_handler(self, event):
         self.render()
 
     def on_output_changed(self, old_output):
@@ -160,8 +159,8 @@ class Dashboard(Command, Togglable, Configurable, Outputable, Dumpable):
         with open(path, "w") as f:
             json.dump(values, f, indent=2)
 
-    def load(self, path):
-        with open(path) as f:
+    def load(self, config_path):
+        with open(config_path) as f:
             config = json.load(f)
 
         json_dashboard = config["dashboard"]
