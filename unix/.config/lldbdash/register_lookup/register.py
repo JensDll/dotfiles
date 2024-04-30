@@ -1,7 +1,7 @@
 import lldb
 
 
-class GpRegister:
+class GeneralPurposeRegister:
     def __init__(self, values: list[lldb.SBValue], prev_value: int):
         self.name: str = "'".join([value.GetName() for value in values])
         self.value_int: int = values[0].GetValueAsSigned()
@@ -13,6 +13,15 @@ class GpRegister:
             (self.value_uint >> 8) & 0xFF,
             self.value_uint & 0xFF,
         )
+
+
+class SegmentRegister:
+    def __init__(self, value: lldb.SBValue, prev_value: int):
+        self.name: str = value.GetName()
+        self.value_int: int = value.GetValueAsSigned()
+        self.value_uint: int = value.GetValueAsUnsigned()
+        self.changed: bool = prev_value != self.value_uint
+        self.hex_str: str = f"{self.value_uint:04x}"
 
 
 class RflagsRegister:
@@ -60,14 +69,52 @@ class RflagsRegister:
         self.of_changed = (prev_value >> 11) & 1 != self.of
 
 
+class MxcsrRegister:
+    def __init__(self, value: lldb.SBValue, prev_value: int):
+        self.name: str = value.GetName()
+        self.value_int: int = value.GetValueAsSigned()
+        self.value_uint: int = value.GetValueAsUnsigned()
+        self.changed: bool = prev_value != self.value_uint
+        self.ie = self.value_uint & 1  # Invalid operation flags
+        self.ie_changed = prev_value & 1 != self.ie
+        self.de = (self.value_uint >> 1) & 1  # Denormal flag
+        self.de_changed = (prev_value >> 1) & 1 != self.de
+        self.ze = (self.value_uint >> 2) & 1  # Divide-by-zero flag
+        self.ze_changed = (prev_value >> 2) & 1 != self.ze
+        self.oe = (self.value_uint >> 3) & 1  # Overflow flag
+        self.oe_changed = (prev_value >> 3) & 1 != self.oe
+        self.ue = (self.value_uint >> 4) & 1  # Underflow flag
+        self.ue_changed = (prev_value >> 4) & 1 != self.ue
+        self.pe = (self.value_uint >> 5) & 1  # Precision flag
+        self.pe_changed = (prev_value >> 5) & 1 != self.pe
+        self.daz = (self.value_uint >> 6) & 1  # Denormals are zero
+        self.daz_changed = (prev_value >> 6) & 1 != self.daz
+        self.im = (self.value_uint >> 7) & 1  # Invalid operation mask
+        self.im_changed = (prev_value >> 7) & 1 != self.im
+        self.dm = (self.value_uint >> 8) & 1  # Denormal mask
+        self.dm_changed = (prev_value >> 8) & 1 != self.dm
+        self.zm = (self.value_uint >> 9) & 1  # Divide-by-zero mask
+        self.zm_changed = (prev_value >> 9) & 1 != self.zm
+        self.om = (self.value_uint >> 10) & 1  # Overflow mask
+        self.om_changed = (prev_value >> 10) & 1 != self.om
+        self.um = (self.value_uint >> 11) & 1  # Underflow mask
+        self.um_changed = (prev_value >> 11) & 1 != self.um
+        self.pm = (self.value_uint >> 12) & 1  # Precision mask
+        self.pm_changed = (prev_value >> 12) & 1 != self.pm
+        self.rc = (self.value_uint >> 13) & 3  # Rounding control
+        self.rc_changed = (prev_value >> 13) & 3 != self.rc
+        self.ftz = (self.value_uint >> 15) & 1  # Flush to zero
+        self.ftz_changed = (prev_value >> 15) & 1 != self.ftz
+
+
 class AvxRegister:
     def __init__(self, ymm: lldb.SBValue, xmm: lldb.SBValue, prev_values: list[int]):
         self.name_ymm: str = ymm.GetName()
         self.name_xmm: str = xmm.GetName()
         self.values: list[int] = [child.GetValueAsUnsigned() for child in ymm]
         self.changed_xmm: bool = any(
-            prev_values[i] != self.values[i] for i in range(15)
+            prev_values[i] != self.values[i] for i in range(16)
         )
         self.changed_ymm: bool = any(
-            prev_values[i] != self.values[i] for i in range(15, 32)
+            prev_values[i] != self.values[i] for i in range(16, 32)
         )

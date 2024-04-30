@@ -4,7 +4,13 @@ import typing
 import lldb
 from lldbdash.common import not_none
 
-from .register import AvxRegister, GpRegister, RflagsRegister
+from .register import (
+    AvxRegister,
+    GeneralPurposeRegister,
+    MxcsrRegister,
+    RflagsRegister,
+    SegmentRegister,
+)
 from .register_set import get_avx_reg_set, get_fp_reg_set, get_gp_reg_set
 
 Entries = dict[str, "RegisterLookup.Entry"]
@@ -36,7 +42,16 @@ class RegisterLookup:
         if entry is None:
             return
         values: list[lldb.SBValue] = [reg_set.GetChildAtIndex(i) for i in entry.indices]
-        register = GpRegister(values, entry.prev_values[0])
+        register = GeneralPurposeRegister(values, entry.prev_values[0])
+        entry.prev_values[0] = register.value_uint
+        return register
+
+    def read_segment(self, reg_set: lldb.SBValue, name: str):
+        entry = self.entries.get(name, None)
+        if entry is None:
+            return
+        value: lldb.SBValue = reg_set.GetChildAtIndex(entry.indices[0])
+        register = SegmentRegister(value, entry.prev_values[0])
         entry.prev_values[0] = register.value_uint
         return register
 
@@ -46,6 +61,15 @@ class RegisterLookup:
             return
         value: lldb.SBValue = reg_set.GetChildAtIndex(entry.indices[0])
         register = RflagsRegister(value, entry.prev_values[0])
+        entry.prev_values[0] = register.value_uint
+        return register
+
+    def read_mxcsr(self, reg_set: lldb.SBValue):
+        entry = self.entries.get("mxcsr", None)
+        if entry is None:
+            return
+        value: lldb.SBValue = reg_set.GetChildAtIndex(entry.indices[0])
+        register = MxcsrRegister(value, entry.prev_values[0])
         entry.prev_values[0] = register.value_uint
         return register
 
@@ -87,10 +111,11 @@ def init_gp(entries: Entries, frame: lldb.SBFrame):
             indices, [gp_reg_set.GetChildAtIndex(indices[0]).GetValueAsUnsigned()]
         )
 
-    if (index := gp_index.get("rflags", None)) is not None:
-        entries["rflags"] = RegisterLookup.Entry(
-            [index], [gp_reg_set.GetChildAtIndex(index).GetValueAsUnsigned()]
-        )
+    for reg in ["cs", "ds", "ss", "es", "fs", "gs", "rflags"]:
+        if (index := gp_index.get(reg, None)) is not None:
+            entries[reg] = RegisterLookup.Entry(
+                [index], [gp_reg_set.GetChildAtIndex(index).GetValueAsUnsigned()]
+            )
 
 
 def init_avx(entries: Entries, frame: lldb.SBFrame):
@@ -127,7 +152,8 @@ def init_fp(entries: Entries, frame: lldb.SBFrame):
             [child.GetValueAsUnsigned() for child in fp_reg_set.GetChildAtIndex(index)],
         )
 
-    if (index := fp_index.get("mxcsr", None)) is not None:
-        entries["mxcsr"] = RegisterLookup.Entry(
-            [index], [fp_reg_set.GetChildAtIndex(index).GetValueAsUnsigned()]
-        )
+    for reg in ["mxcsr"]:
+        if (index := fp_index.get(reg, None)) is not None:
+            entries[reg] = RegisterLookup.Entry(
+                [index], [fp_reg_set.GetChildAtIndex(index).GetValueAsUnsigned()]
+            )
