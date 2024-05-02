@@ -38,45 +38,35 @@ class RegisterLookup:
         return cls._instance
 
     def read_gp(self, reg_set: lldb.SBValue, name: str):
-        entry = self.entries.get(name, None)
-        if entry is None:
-            return
+        entry = self.entries[name]
         values: list[lldb.SBValue] = [reg_set.GetChildAtIndex(i) for i in entry.indices]
         register = GeneralPurposeRegister(values, entry.prev_values[0])
         entry.prev_values[0] = register.value_uint
         return register
 
     def read_segment(self, reg_set: lldb.SBValue, name: str):
-        entry = self.entries.get(name, None)
-        if entry is None:
-            return
+        entry = self.entries[name]
         value: lldb.SBValue = reg_set.GetChildAtIndex(entry.indices[0])
         register = SegmentRegister(value, entry.prev_values[0])
         entry.prev_values[0] = register.value_uint
         return register
 
     def read_rflags(self, reg_set: lldb.SBValue):
-        entry = self.entries.get("rflags", None)
-        if entry is None:
-            return
+        entry = self.entries["rflags"]
         value: lldb.SBValue = reg_set.GetChildAtIndex(entry.indices[0])
         register = RflagsRegister(value, entry.prev_values[0])
         entry.prev_values[0] = register.value_uint
         return register
 
     def read_mxcsr(self, reg_set: lldb.SBValue):
-        entry = self.entries.get("mxcsr", None)
-        if entry is None:
-            return
+        entry = self.entries["mxcsr"]
         value: lldb.SBValue = reg_set.GetChildAtIndex(entry.indices[0])
         register = MxcsrRegister(value, entry.prev_values[0])
         entry.prev_values[0] = register.value_uint
         return register
 
     def read_avx(self, avx_reg_set: lldb.SBValue, fp_reg_set: lldb.SBValue, name: str):
-        entry = self.entries.get(name, None)
-        if entry is None:
-            return
+        entry = self.entries[name]
         ymm: lldb.SBValue = avx_reg_set.GetChildAtIndex(entry.indices[0])
         xmm: lldb.SBValue = fp_reg_set.GetChildAtIndex(entry.indices[1])
         register = AvxRegister(ymm, xmm, entry.prev_values)
@@ -112,10 +102,12 @@ def init_gp(entries: Entries, frame: lldb.SBFrame):
         )
 
     for reg in ["cs", "ds", "ss", "es", "fs", "gs", "rflags"]:
-        if (index := gp_index.get(reg, None)) is not None:
-            entries[reg] = RegisterLookup.Entry(
-                [index], [gp_reg_set.GetChildAtIndex(index).GetValueAsUnsigned()]
-            )
+        index = gp_index.get(reg, None)
+        if index is None:
+            continue
+        entries[reg] = RegisterLookup.Entry(
+            [index], [gp_reg_set.GetChildAtIndex(index).GetValueAsUnsigned()]
+        )
 
 
 def init_avx(entries: Entries, frame: lldb.SBFrame):
@@ -153,7 +145,9 @@ def init_fp(entries: Entries, frame: lldb.SBFrame):
         )
 
     for reg in ["mxcsr"]:
-        if (index := fp_index.get(reg, None)) is not None:
-            entries[reg] = RegisterLookup.Entry(
-                [index], [fp_reg_set.GetChildAtIndex(index).GetValueAsUnsigned()]
-            )
+        index = fp_index.get(reg, None)
+        if index is None:
+            continue
+        entries[reg] = RegisterLookup.Entry(
+            [index], [fp_reg_set.GetChildAtIndex(index).GetValueAsUnsigned()]
+        )

@@ -3,7 +3,7 @@ import typing
 
 import lldb
 import lldbdash.commands
-from lldbdash.common import FONT_UNDERLINE, RESET_COLOR, Output, batched, not_none
+from lldbdash.common import FONT_UNDERLINE, RESET_COLOR, Output, batched
 from lldbdash.dashboard import Dashboard as D
 from lldbdash.register_lookup import (
     AvxRegister,
@@ -37,19 +37,19 @@ class RegisterModule:
     name = "register"
     settings: "ModuleSettings" = {
         "show-decimal": lldbdash.commands.BoolCommand(
-            True, help="Visibility of general purpose registers decimal value"
+            True, help="Display general purpose registers decimal value."
         ),
         "show-segment": lldbdash.commands.BoolCommand(
-            True, help="Visibility of segment registers"
+            True, help="Display segment registers."
         ),
         "show-rflags": lldbdash.commands.BoolCommand(
-            True, help="Visibility of rflags register"
+            True, help="Display rflags register."
         ),
         "show-mxcsr": lldbdash.commands.BoolCommand(
-            True, help="Visibility of mxcsr register"
+            True, help="Display mxcsr register."
         ),
         "show-vector": lldbdash.commands.BoolCommand(
-            True, help="Visibility of vector registers"
+            True, help="Display vector registers."
         ),
         "output": lldbdash.commands.StrCommand(
             "0",
@@ -66,7 +66,7 @@ class RegisterModule:
     @staticmethod
     def render(size: os.terminal_size, exe_ctx: lldb.SBExecutionContext, out: Output):
         frame: lldb.SBFrame = exe_ctx.GetFrame()
-        lookup = RegisterLookup.new_or_cached(frame)
+        registers = RegisterLookup.new_or_cached(frame)
 
         gp_reg_set = get_gp_reg_set(frame)
         fp_reg_set = get_fp_reg_set(frame)
@@ -74,77 +74,65 @@ class RegisterModule:
 
         write_gp(
             out,
-            filter(
-                not_none,
-                [
-                    lookup.read_gp(gp_reg_set, "rax"),
-                    lookup.read_gp(gp_reg_set, "rbx"),
-                    lookup.read_gp(gp_reg_set, "rcx"),
-                    lookup.read_gp(gp_reg_set, "rdx"),
-                    lookup.read_gp(gp_reg_set, "rdi"),
-                    lookup.read_gp(gp_reg_set, "rsi"),
-                    lookup.read_gp(gp_reg_set, "rbp"),
-                    lookup.read_gp(gp_reg_set, "rsp"),
-                    lookup.read_gp(gp_reg_set, "r8"),
-                    lookup.read_gp(gp_reg_set, "r9"),
-                    lookup.read_gp(gp_reg_set, "r10"),
-                    lookup.read_gp(gp_reg_set, "r11"),
-                    lookup.read_gp(gp_reg_set, "r12"),
-                    lookup.read_gp(gp_reg_set, "r13"),
-                    lookup.read_gp(gp_reg_set, "r14"),
-                    lookup.read_gp(gp_reg_set, "r15"),
-                ],
-            ),
+            [
+                registers.read_gp(gp_reg_set, "rax"),
+                registers.read_gp(gp_reg_set, "rbx"),
+                registers.read_gp(gp_reg_set, "rcx"),
+                registers.read_gp(gp_reg_set, "rdx"),
+                registers.read_gp(gp_reg_set, "rdi"),
+                registers.read_gp(gp_reg_set, "rsi"),
+                registers.read_gp(gp_reg_set, "rbp"),
+                registers.read_gp(gp_reg_set, "rsp"),
+                registers.read_gp(gp_reg_set, "r8"),
+                registers.read_gp(gp_reg_set, "r9"),
+                registers.read_gp(gp_reg_set, "r10"),
+                registers.read_gp(gp_reg_set, "r11"),
+                registers.read_gp(gp_reg_set, "r12"),
+                registers.read_gp(gp_reg_set, "r13"),
+                registers.read_gp(gp_reg_set, "r14"),
+                registers.read_gp(gp_reg_set, "r15"),
+            ],
             size.columns // 40,
         )
 
         if RegisterModule.settings["show-segment"]:
             write_segment(
                 out,
-                filter(
-                    not_none,
-                    [
-                        lookup.read_segment(gp_reg_set, "cs"),
-                        lookup.read_segment(gp_reg_set, "ss"),
-                        lookup.read_segment(gp_reg_set, "ds"),
-                        lookup.read_segment(gp_reg_set, "es"),
-                        lookup.read_segment(gp_reg_set, "fs"),
-                        lookup.read_segment(gp_reg_set, "gs"),
-                    ],
-                ),
+                [
+                    registers.read_segment(gp_reg_set, "cs"),
+                    registers.read_segment(gp_reg_set, "ss"),
+                    registers.read_segment(gp_reg_set, "ds"),
+                    registers.read_segment(gp_reg_set, "es"),
+                    registers.read_segment(gp_reg_set, "fs"),
+                    registers.read_segment(gp_reg_set, "gs"),
+                ],
             )
 
         if RegisterModule.settings["show-rflags"]:
-            rflags = lookup.read_rflags(gp_reg_set)
-            if rflags:
-                write_rflags(out, rflags)
+            write_rflags(out, registers.read_rflags(gp_reg_set))
 
         if RegisterModule.settings["show-vector"]:
             write_avx(
                 out,
-                filter(
-                    not_none,
-                    [
-                        lookup.read_avx(avx_reg_set, fp_reg_set, f"ymm{i}")
-                        for i in range(16)
-                    ],
-                ),
+                [
+                    registers.read_avx(avx_reg_set, fp_reg_set, f"ymm{i}")
+                    for i in range(16)
+                ],
             )
 
         if RegisterModule.settings["show-mxcsr"]:
-            mxcsr = lookup.read_mxcsr(fp_reg_set)
-            if mxcsr:
-                write_mxcsr(out, mxcsr)
+            write_mxcsr(out, registers.read_mxcsr(fp_reg_set))
 
 
-def write_gp(out: Output, regs: typing.Iterable[GeneralPurposeRegister], per_row: int):
+def write_gp(out: Output, regs: list[GeneralPurposeRegister], per_row: int):
+    show_decimal = RegisterModule.settings["show-decimal"].value
     for batch in batched(regs, per_row):
         for i in range(len(batch) - 1):
             write_gp_hex(out, batch[i])
             out.write("  ")
         write_gp_hex(out, batch[-1])
         out.write("\n")
-        if RegisterModule.settings["show-decimal"]:
+        if show_decimal:
             for i in range(len(batch) - 1):
                 write_gp_decimal(out, batch[i])
                 out.write("  ")
@@ -169,13 +157,11 @@ def write_gp_decimal(out: Output, reg: GeneralPurposeRegister):
 
 
 def write_rflags(out: Output, flags: RflagsRegister):
-    open_bracket = f"{D.settings['text-secondary']}{{{RESET_COLOR}"
-    close_bracket = f"{D.settings['text-secondary']}}}{RESET_COLOR}"
-    out.write(
-        D.settings["text-highlight"].value
-        if flags.changed
-        else D.settings["text-secondary"].value
-    )
+    highlight = D.settings["text-highlight"].value
+    secondary = D.settings["text-secondary"].value
+    open_bracket = f"{secondary}{{{RESET_COLOR}"
+    close_bracket = f"{secondary}}}{RESET_COLOR}"
+    out.write(highlight if flags.changed else secondary)
     out.write(flags.name)
     out.write(RESET_COLOR)
     out.write(f" {open_bracket} ")
@@ -216,13 +202,11 @@ def write_rflags(out: Output, flags: RflagsRegister):
 
 
 def write_mxcsr(out: Output, flags: MxcsrRegister):
-    open_bracket = f"{D.settings['text-secondary']}{{{RESET_COLOR}"
-    close_bracket = f"{D.settings['text-secondary']}}}{RESET_COLOR}"
-    out.write(
-        D.settings["text-highlight"].value
-        if flags.changed
-        else D.settings["text-secondary"].value
-    )
+    highlight = D.settings["text-highlight"].value
+    secondary = D.settings["text-secondary"].value
+    open_bracket = f"{secondary}{{{RESET_COLOR}"
+    close_bracket = f"{secondary}}}{RESET_COLOR}"
+    out.write(highlight if flags.changed else secondary)
     out.write(flags.name)
     out.write(RESET_COLOR)
     out.write(f" {open_bracket} ")
@@ -267,22 +251,25 @@ def write_flag(out: Output, name: str, value: int, changed: bool):
     out.write(RESET_COLOR)
 
 
-def write_avx(out: Output, regs: typing.Iterable[AvxRegister]):
+def write_avx(out: Output, regs: list[AvxRegister]):
+    highlight = D.settings["text-highlight"].value
+    secondary = D.settings["text-secondary"].value
+
+    out.write(f"     {secondary}")
+    for i in reversed(range(16, 32)):
+        out.write(f" {i:>3}")
+    out.write("      ")
+    for i in reversed(range(16)):
+        out.write(f" {i:>3}")
+    out.write(f"{RESET_COLOR}\n")
+
     for reg in regs:
-        out.write(
-            D.settings["text-highlight"].value
-            if reg.changed_ymm
-            else D.settings["text-secondary"].value
-        )
+        out.write(highlight if reg.changed_ymm else secondary)
         out.write(f"{reg.name_ymm:>5}")
         out.write(RESET_COLOR)
         for i in reversed(range(16, 32)):
             out.write(f" {reg.values[i]:>3}")
-        out.write(
-            D.settings["text-highlight"].value
-            if reg.changed_xmm
-            else D.settings["text-secondary"].value
-        )
+        out.write(highlight if reg.changed_xmm else secondary)
         out.write(f" {reg.name_xmm:>5}")
         out.write(RESET_COLOR)
         for i in reversed(range(16)):
@@ -290,15 +277,13 @@ def write_avx(out: Output, regs: typing.Iterable[AvxRegister]):
         out.write("\n")
 
 
-def write_segment(out: Output, regs: typing.Iterable[SegmentRegister]):
+def write_segment(out: Output, regs: list[SegmentRegister]):
+    highlight = D.settings["text-highlight"].value
+    secondary = D.settings["text-secondary"].value
     for i, reg in enumerate(regs):
         if i:
             out.write("  ")
-        out.write(
-            D.settings["text-highlight"].value
-            if reg.changed
-            else D.settings["text-secondary"].value
-        )
+        out.write(highlight if reg.changed else secondary)
         out.write(reg.name)
         out.write(RESET_COLOR)
         out.write(f" {reg.hex_str}")
