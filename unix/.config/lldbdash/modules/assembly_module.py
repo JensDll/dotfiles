@@ -8,7 +8,9 @@ import lldbdash.commands
 from lldbdash.common import FONT_UNDERLINE, RESET_COLOR, Output
 from lldbdash.dashboard import Dashboard as D
 
+from .branch_map import BRANCH_MAP
 from .on_change_output import on_change_output
+from .register import RegisterReader, RflagsRegister
 
 
 class Instruction:
@@ -44,6 +46,7 @@ class Instruction:
         if len(name) > 30:
             name = name[:30] + "..."
         self.name: str = name
+
         self.offset: int = self.addr - symbol.GetStartAddress().GetLoadAddress(target)
 
     @classmethod
@@ -53,37 +56,89 @@ class Instruction:
         )
         return list(map(lambda inst: cls(target, symbol, inst), instructions))
 
-    def print(self, out: Output, dim: PrintDimensions):
-        color = D.settings["text-secondary"]
+    def print(
+        self,
+        out: Output,
+        dim: PrintDimensions,
+        flags: RflagsRegister,
+        reader: RegisterReader,
+        color: str,
+        mnemonic: str,
+    ):
+        predict_branching = AssemblyModule.settings["predict-branching"].value
+        branch_taken_marker = AssemblyModule.settings["branch-taken-marker"].value
+        branch_not_taken_marker = AssemblyModule.settings[
+            "branch-not-taken-marker"
+        ].value
 
+        does_branch = BRANCH_MAP.get(self.mnemonic)
+        does_branch_result = does_branch(flags, reader) if does_branch else False
+
+        # Address
         out.write(f"{color}{self.addr:#0x}{RESET_COLOR}  ")
 
+        # Opcode
         if AssemblyModule.settings["show-opcode"].value:
-            out.write(f"{self.opcode:<{dim.opcode_width}}  ")
+            out.write(f"{self.opcode:<{dim.opcode_width}}{RESET_COLOR}  ")
 
-        out.write(
-            f"{color}{self.get_name():<{dim.name_width}}{RESET_COLOR}  "
-            f"{AssemblyModule.settings['text-mnemonic']}{self.mnemonic:<{dim.mnemonic_width}}{RESET_COLOR}  "
-            f"{self.operands}"
-            f"{AssemblyModule.settings['text-comment']}{self.comment}{RESET_COLOR}\n"
-        )
-
-    def print_highlight(self, out: Output, dim: PrintDimensions):
-        color = D.settings["text-highlight"]
-
-        out.write(f"{color}{self.addr:#0x}{RESET_COLOR}  ")
-
-        if AssemblyModule.settings["show-opcode"].value:
-            out.write(f"{self.opcode:<{dim.opcode_width}}  ")
-
+        # Name
         out.write(f"{color}{self.get_name():<{dim.name_width}}{RESET_COLOR}  ")
-        out.write(
-            f"{AssemblyModule.settings['text-mnemonic']}{FONT_UNDERLINE}{self.mnemonic}{RESET_COLOR}  "
-        )
-        out.write(" " * (dim.mnemonic_width - len(self.mnemonic)))
+
+        # Branching
+        if predict_branching:
+            if does_branch is not None:
+                out.write(
+                    branch_taken_marker
+                    if does_branch_result
+                    else branch_not_taken_marker
+                )
+                out.write(" ")
+            else:
+                out.write("  ")
+
+        # Mnemonic
+        out.write(mnemonic)
+        out.write(" " * (dim.mnemonic_width - len(self.mnemonic) + 1))
+
+        # Operands
         out.write(self.operands)
-        out.write(
-            f"{AssemblyModule.settings['text-comment']}{self.comment}{RESET_COLOR}\n"
+
+        # Comment
+        out.write(AssemblyModule.settings["text-comment"].value)
+        out.write(self.comment)
+        out.write(RESET_COLOR)
+        out.write("\n")
+
+    def print_normal(
+        self,
+        out: Output,
+        dim: PrintDimensions,
+        flags: RflagsRegister,
+        reader: RegisterReader,
+    ):
+        self.print(
+            out=out,
+            dim=dim,
+            flags=flags,
+            color=D.settings["text-secondary"].value,
+            mnemonic=f"{AssemblyModule.settings['text-mnemonic']}{self.mnemonic}{RESET_COLOR}",
+            reader=reader,
+        )
+
+    def print_highlight(
+        self,
+        out: Output,
+        dim: PrintDimensions,
+        flags: RflagsRegister,
+        reader: RegisterReader,
+    ):
+        self.print(
+            out=out,
+            dim=dim,
+            flags=flags,
+            color=D.settings["text-highlight"].value,
+            mnemonic=f"{AssemblyModule.settings['text-mnemonic']}{FONT_UNDERLINE}{self.mnemonic}{RESET_COLOR}",
+            reader=reader,
         )
 
     def get_name(self):
@@ -143,19 +198,28 @@ class InstructionPrinter:
 
         dimensions = self.find_print_dimensions(start, end)
 
-        self.print_instructions(out, dimensions, start, pc_idx)
-        self.instructions[pc_idx].print_highlight(out, dimensions)
-        self.print_instructions(out, dimensions, pc_idx + 1, end)
+        reader = RegisterReader.new_or_cached(self.frame)
+        flags = reader.read_rflags()
+
+        self.print_instructions(out, dimensions, flags, reader, start, pc_idx)
+        self.instructions[pc_idx].print_highlight(
+            out=out, dim=dimensions, flags=flags, reader=reader
+        )
+        self.print_instructions(out, dimensions, flags, reader, pc_idx + 1, end)
 
     def print_instructions(
         self,
         out: Output,
         dimensions: Instruction.PrintDimensions,
+        flags: RflagsRegister,
+        reader: RegisterReader,
         start: int,
         end: int,
     ):
         for i in range(start, end):
-            self.instructions[i].print(out, dimensions)
+            self.instructions[i].print_normal(
+                out=out, dim=dimensions, flags=flags, reader=reader
+            )
 
     def fetch_blocks_start(self, pc_idx: int):
         before = AssemblyModule.settings["instructions-before"].value - pc_idx
@@ -221,6 +285,9 @@ if typing.TYPE_CHECKING:
             "show-opcode": lldbdash.commands.BoolCommand,
             "text-comment": lldbdash.commands.StrCommand,
             "text-mnemonic": lldbdash.commands.StrCommand,
+            "predict-branching": lldbdash.commands.BoolCommand,
+            "branch-taken-marker": lldbdash.commands.StrCommand,
+            "branch-not-taken-marker": lldbdash.commands.StrCommand,
             "output": lldbdash.commands.StrCommand,
         },
     )
@@ -246,6 +313,13 @@ class AssemblyModule:
         ),
         "text-mnemonic": lldbdash.commands.StrCommand(
             "\033[38;2;17;168;193m", help="The color of instruction mnemonics."
+        ),
+        "predict-branching": lldbdash.commands.BoolCommand(True),
+        "branch-taken-marker": lldbdash.commands.StrCommand(
+            f"\033[38;2;14;188;108my{RESET_COLOR}"
+        ),
+        "branch-not-taken-marker": lldbdash.commands.StrCommand(
+            f"\033[38;2;215;89;76mn{RESET_COLOR}"
         ),
         "output": lldbdash.commands.StrCommand(
             "0",

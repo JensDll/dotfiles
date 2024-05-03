@@ -5,19 +5,16 @@ import lldb
 import lldbdash.commands
 from lldbdash.common import FONT_UNDERLINE, RESET_COLOR, Output, batched
 from lldbdash.dashboard import Dashboard as D
-from lldbdash.register_lookup import (
+
+from .on_change_output import on_change_output
+from .register import (
     AvxRegister,
     GeneralPurposeRegister,
     MxcsrRegister,
-    RegisterLookup,
+    RegisterReader,
     RflagsRegister,
     SegmentRegister,
-    get_avx_reg_set,
-    get_fp_reg_set,
-    get_gp_reg_set,
 )
-
-from .on_change_output import on_change_output
 
 if typing.TYPE_CHECKING:
     ModuleSettings = typing.TypedDict(
@@ -40,7 +37,7 @@ class RegisterModule:
             True, help="Display general purpose registers decimal value."
         ),
         "show-segment": lldbdash.commands.BoolCommand(
-            True, help="Display segment registers."
+            True, help="Display segment reader."
         ),
         "show-rflags": lldbdash.commands.BoolCommand(
             True, help="Display rflags register."
@@ -49,7 +46,7 @@ class RegisterModule:
             True, help="Display mxcsr register."
         ),
         "show-vector": lldbdash.commands.BoolCommand(
-            True, help="Display vector registers."
+            True, help="Display vector reader."
         ),
         "output": lldbdash.commands.StrCommand(
             "0",
@@ -66,31 +63,27 @@ class RegisterModule:
     @staticmethod
     def render(size: os.terminal_size, exe_ctx: lldb.SBExecutionContext, out: Output):
         frame: lldb.SBFrame = exe_ctx.GetFrame()
-        registers = RegisterLookup.new_or_cached(frame)
-
-        gp_reg_set = get_gp_reg_set(frame)
-        fp_reg_set = get_fp_reg_set(frame)
-        avx_reg_set = get_avx_reg_set(frame)
+        reader = RegisterReader.new_or_cached(frame)
 
         write_gp(
             out,
             [
-                registers.read_gp(gp_reg_set, "rax"),
-                registers.read_gp(gp_reg_set, "rbx"),
-                registers.read_gp(gp_reg_set, "rcx"),
-                registers.read_gp(gp_reg_set, "rdx"),
-                registers.read_gp(gp_reg_set, "rdi"),
-                registers.read_gp(gp_reg_set, "rsi"),
-                registers.read_gp(gp_reg_set, "rbp"),
-                registers.read_gp(gp_reg_set, "rsp"),
-                registers.read_gp(gp_reg_set, "r8"),
-                registers.read_gp(gp_reg_set, "r9"),
-                registers.read_gp(gp_reg_set, "r10"),
-                registers.read_gp(gp_reg_set, "r11"),
-                registers.read_gp(gp_reg_set, "r12"),
-                registers.read_gp(gp_reg_set, "r13"),
-                registers.read_gp(gp_reg_set, "r14"),
-                registers.read_gp(gp_reg_set, "r15"),
+                reader.read_gp("rax"),
+                reader.read_gp("rbx"),
+                reader.read_gp("rcx"),
+                reader.read_gp("rdx"),
+                reader.read_gp("rdi"),
+                reader.read_gp("rsi"),
+                reader.read_gp("rbp"),
+                reader.read_gp("rsp"),
+                reader.read_gp("r8"),
+                reader.read_gp("r9"),
+                reader.read_gp("r10"),
+                reader.read_gp("r11"),
+                reader.read_gp("r12"),
+                reader.read_gp("r13"),
+                reader.read_gp("r14"),
+                reader.read_gp("r15"),
             ],
             size.columns // 40,
         )
@@ -99,29 +92,26 @@ class RegisterModule:
             write_segment(
                 out,
                 [
-                    registers.read_segment(gp_reg_set, "cs"),
-                    registers.read_segment(gp_reg_set, "ss"),
-                    registers.read_segment(gp_reg_set, "ds"),
-                    registers.read_segment(gp_reg_set, "es"),
-                    registers.read_segment(gp_reg_set, "fs"),
-                    registers.read_segment(gp_reg_set, "gs"),
+                    reader.read_segment("cs"),
+                    reader.read_segment("ss"),
+                    reader.read_segment("ds"),
+                    reader.read_segment("es"),
+                    reader.read_segment("fs"),
+                    reader.read_segment("gs"),
                 ],
             )
 
         if RegisterModule.settings["show-rflags"]:
-            write_rflags(out, registers.read_rflags(gp_reg_set))
+            write_rflags(out, reader.read_rflags())
 
         if RegisterModule.settings["show-vector"]:
             write_avx(
                 out,
-                [
-                    registers.read_avx(avx_reg_set, fp_reg_set, f"ymm{i}")
-                    for i in range(16)
-                ],
+                [reader.read_avx(f"ymm{i}") for i in range(16)],
             )
 
         if RegisterModule.settings["show-mxcsr"]:
-            write_mxcsr(out, registers.read_mxcsr(fp_reg_set))
+            write_mxcsr(out, reader.read_mxcsr())
 
 
 def write_gp(out: Output, regs: list[GeneralPurposeRegister], per_row: int):
@@ -153,7 +143,7 @@ def write_gp_hex(out: Output, reg: GeneralPurposeRegister):
 
 
 def write_gp_decimal(out: Output, reg: GeneralPurposeRegister):
-    out.write(f"{reg.value_int:>{len(reg.hex_str)+19}}")
+    out.write(f"{reg.value:>{len(reg.hex_str)+19}}")
 
 
 def write_rflags(out: Output, flags: RflagsRegister):

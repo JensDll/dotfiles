@@ -9,7 +9,7 @@ def get_reg_set(frame: lldb.SBFrame, kind: str) -> lldb.SBValue:
         if kind in name:
             return reg_set
 
-    raise ValueError(f"Register set '{kind}' not found")
+    raise ValueError(f'Register set "{kind}" not found')
 
 
 def get_gp_reg_set(frame: lldb.SBFrame):
