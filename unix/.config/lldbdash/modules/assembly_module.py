@@ -297,29 +297,33 @@ class AssemblyModule:
     name = "assembly"
     settings: "ModuleSettings" = {
         "instructions-before": lldbdash.commands.IntCommand(
-            10, help="Number of instructions before the program counter."
+            10, help="The number of instructions displayed before the program counter."
         ),
         "instructions-after": lldbdash.commands.IntCommand(
-            10, help="Number of instructions after the program counter."
+            10, help="The number of instructions displayed after the program counter."
         ),
         "disassembly-flavor": lldbdash.commands.StrCommand(
-            "intel", help="The disassembly flavor."
+            "intel", help="The disassembly flavor (default, att, intel)."
         ),
         "show-opcode": lldbdash.commands.BoolCommand(
-            True, help="Whether to show the opcode."
+            True, help="Whether to display the opcode."
         ),
         "text-comment": lldbdash.commands.StrCommand(
-            "\033[38;2;14;188;108m", help="The color of instruction comments."
+            "\033[38;2;14;188;108m", help="The color of the instruction comment."
         ),
         "text-mnemonic": lldbdash.commands.StrCommand(
-            "\033[38;2;17;168;193m", help="The color of instruction mnemonics."
+            "\033[38;2;17;168;193m", help="The color of the instruction mnemonic."
         ),
-        "predict-branching": lldbdash.commands.BoolCommand(True),
+        "predict-branching": lldbdash.commands.BoolCommand(
+            True, help="Whether to show branch information."
+        ),
         "branch-taken-marker": lldbdash.commands.StrCommand(
-            f"\033[38;2;14;188;108my{RESET_COLOR}"
+            f"\033[38;2;14;188;108my{RESET_COLOR}",
+            help='The branch taken marker displayed when "predict-branching" is enabled.',
         ),
         "branch-not-taken-marker": lldbdash.commands.StrCommand(
-            f"\033[38;2;215;89;76mn{RESET_COLOR}"
+            f"\033[38;2;215;89;76mn{RESET_COLOR}",
+            help='The branch not taken marker displayed when "predict-branching" is enabled.',
         ),
         "output": lldbdash.commands.StrCommand(
             "0",

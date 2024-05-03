@@ -21,6 +21,7 @@ if typing.TYPE_CHECKING:
             "text-secondary": lldbdash.commands.StrCommand,
             "divider-fill-char": lldbdash.commands.StrCommand,
             "show-divider": lldbdash.commands.BoolCommand,
+            "auto-apply-config": lldbdash.commands.BoolCommand,
         },
     )
 
@@ -36,6 +37,9 @@ class Dashboard:
         "text-secondary": lldbdash.commands.StrCommand("\033[38;2;114;114;110m"),
         "divider-fill-char": lldbdash.commands.StrCommand("─"),
         "show-divider": lldbdash.commands.BoolCommand(True),
+        "auto-apply-config": lldbdash.commands.BoolCommand(
+            True, help="Auto apply config changes when edited during debug session."
+        ),
     }
     enabled: typing.ClassVar[lldbdash.commands.ToggleCommand]
 
@@ -74,7 +78,7 @@ class Dashboard:
 
     def apply_config(self):
         path = pathlib.Path.cwd() / Dashboard.settings["config-file"].value
-        if path.is_file():
+        if path.is_file() and Dashboard.settings["auto-apply-config"].value:
             config_modified_time = path.stat().st_mtime
             if config_modified_time > self.config_modified_time:
                 self.config_modified_time = config_modified_time

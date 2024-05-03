@@ -34,19 +34,19 @@ class RegisterModule:
     name = "register"
     settings: "ModuleSettings" = {
         "show-decimal": lldbdash.commands.BoolCommand(
-            True, help="Display general purpose registers decimal value."
+            True, help="Display the general purpose register decimal value."
         ),
         "show-segment": lldbdash.commands.BoolCommand(
-            True, help="Display segment reader."
+            True, help="Display the segment registers."
         ),
         "show-rflags": lldbdash.commands.BoolCommand(
-            True, help="Display rflags register."
+            True, help="Display the rflags register."
         ),
         "show-mxcsr": lldbdash.commands.BoolCommand(
-            True, help="Display mxcsr register."
+            True, help="Display the mxcsr register."
         ),
         "show-vector": lldbdash.commands.BoolCommand(
-            True, help="Display vector reader."
+            True, help="Display the vector registers."
         ),
         "output": lldbdash.commands.StrCommand(
             "0",

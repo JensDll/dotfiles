@@ -66,12 +66,12 @@ class RegisterReader:
             ["r14", "r14d", "r14w", "r14l"],
             ["r15", "r15d", "r15w", "r15l"],
         ):
-            indices = list[int](filter(not_none, (gp_index.get(r, None) for r in regs)))
+            indices = list[int](filter(not_none, (gp_index.get(r) for r in regs)))
             values = [self.gp_reg_set.GetChildAtIndex(indices[0]).GetValueAsUnsigned()]
             self.entries[regs[0]] = Entry(indices, values, pc)
 
         for reg in ["cs", "ds", "ss", "es", "fs", "gs", "rflags"]:
-            index = gp_index.get(reg, None)
+            index = gp_index.get(reg)
             if index is None:
                 continue
             values = [self.gp_reg_set.GetChildAtIndex(index).GetValueAsUnsigned()]
@@ -79,7 +79,7 @@ class RegisterReader:
 
         for i in range(16):
             xmm = f"xmm{i}"
-            index = fp_index.get(xmm, None)
+            index = fp_index.get(xmm)
             if index is None:
                 continue
             values = [
@@ -89,7 +89,7 @@ class RegisterReader:
             self.entries[xmm] = Entry([index], values, pc)
 
         for reg in ["mxcsr"]:
-            index = fp_index.get(reg, None)
+            index = fp_index.get(reg)
             if index is None:
                 continue
             values = [self.fp_reg_set.GetChildAtIndex(index).GetValueAsUnsigned()]
@@ -98,7 +98,7 @@ class RegisterReader:
         for i in range(16):
             ymm = f"ymm{i}"
             xmm = f"xmm{i}"
-            index = avx_index.get(ymm, None)
+            index = avx_index.get(ymm)
             if index is None:
                 continue
             values = [
