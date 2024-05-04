@@ -136,14 +136,14 @@ def write_gp_hex(out: Output, reg: GeneralPurposeRegister):
         if reg.changed
         else D.settings["text-secondary"].value
     )
-    out.write(f"{reg.name:>18}")
+    out.write(f"{reg.get_name_64():>18}")
     out.write(RESET_COLOR)
     out.write(" ")
-    out.write(reg.hex_str)
+    out.write(reg.get_hex_64())
 
 
 def write_gp_decimal(out: Output, reg: GeneralPurposeRegister):
-    out.write(f"{reg.value:>{len(reg.hex_str)+19}}")
+    out.write(f"{reg.value_int:>38}")
 
 
 def write_rflags(out: Output, flags: RflagsRegister):

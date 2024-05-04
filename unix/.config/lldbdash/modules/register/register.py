@@ -2,15 +2,21 @@ import lldb
 
 
 class GeneralPurposeRegister:
-    def __init__(self, name: str, value_int: int, value_uint: int, prev_value: int):
-        self.name = name
-        self.value = value_int
-        self.changed = value_uint != prev_value
-        self.hex_str = "{:08x}'{:04x}'{:02x}'{:02x}".format(
-            value_uint >> 32,
-            (value_uint >> 16) & 0xFFFF,
-            (value_uint >> 8) & 0xFF,
-            value_uint & 0xFF,
+    def __init__(self, values: list[lldb.SBValue], prev_value: int):
+        self.values = values
+        self.value_int = values[0].GetValueAsSigned()
+        self.value_uint = values[0].GetValueAsUnsigned()
+        self.changed = self.value_uint != prev_value
+
+    def get_name_64(self):
+        return "'".join(value.GetName() for value in self.values)
+
+    def get_hex_64(self) -> str:
+        return "{:08x}'{:04x}'{:02x}'{:02x}".format(
+            self.value_uint >> 32,
+            (self.value_uint >> 16) & 0xFFFF,
+            (self.value_uint >> 8) & 0xFF,
+            self.value_uint & 0xFF,
         )
 
 

@@ -66,9 +66,43 @@ class RegisterReader:
             ["r14", "r14d", "r14w", "r14l"],
             ["r15", "r15d", "r15w", "r15l"],
         ):
-            indices = list[int](filter(not_none, (gp_index.get(r) for r in regs)))
-            values = [self.gp_reg_set.GetChildAtIndex(indices[0]).GetValueAsUnsigned()]
-            self.entries[regs[0]] = Entry(indices, values, pc)
+            idx_64 = gp_index.get(regs[0])
+            idx_32 = gp_index.get(regs[1])
+            idx_16 = gp_index.get(regs[2])
+            idx_8 = gp_index.get(regs[3])
+
+            if idx_64 is not None:
+                self.entries[regs[0]] = Entry(
+                    [
+                        idx_64,
+                        typing.cast(int, idx_32),
+                        typing.cast(int, idx_16),
+                        typing.cast(int, idx_8),
+                    ],
+                    [self.gp_reg_set.GetChildAtIndex(idx_64).GetValueAsUnsigned()],
+                    pc,
+                )
+
+            if idx_32 is not None:
+                self.entries[regs[1]] = Entry(
+                    [idx_32, typing.cast(int, idx_16), typing.cast(int, idx_8)],
+                    [self.gp_reg_set.GetChildAtIndex(idx_32).GetValueAsUnsigned()],
+                    pc,
+                )
+
+            if idx_16 is not None:
+                self.entries[regs[2]] = Entry(
+                    [idx_16, typing.cast(int, idx_8)],
+                    [self.gp_reg_set.GetChildAtIndex(idx_16).GetValueAsUnsigned()],
+                    pc,
+                )
+
+            if idx_8 is not None:
+                self.entries[regs[3]] = Entry(
+                    [idx_8],
+                    [self.gp_reg_set.GetChildAtIndex(idx_8).GetValueAsUnsigned()],
+                    pc,
+                )
 
         for reg in ["cs", "ds", "ss", "es", "fs", "gs", "rflags"]:
             index = gp_index.get(reg)
@@ -121,11 +155,11 @@ class RegisterReader:
         for reg_set in frame.GetRegisters():
             name: str = reg_set.GetName().lower()
             if "general purpose" in name:
-                self.gp_reg_set = reg_set
+                self.gp_reg_set: lldb.SBValue = reg_set
             elif "advanced vector extensions" in name:
-                self.avx_reg_set = reg_set
+                self.avx_reg_set: lldb.SBValue = reg_set
             elif "floating point" in name:
-                self.fp_reg_set = reg_set
+                self.fp_reg_set: lldb.SBValue = reg_set
 
     def read_gp(self, name: str):
         entry, pc_changed = self.get_entry(name)
@@ -134,12 +168,7 @@ class RegisterReader:
         ]
         if pc_changed:
             entry.values[0] = values[0].GetValueAsUnsigned()
-        return GeneralPurposeRegister(
-            name="'".join(value.GetName() for value in values),
-            value_int=values[0].GetValueAsSigned(),
-            value_uint=entry.values[0],
-            prev_value=entry.prev_values[0],
-        )
+        return GeneralPurposeRegister(values, entry.prev_values[0])
 
     def read_segment(self, name: str):
         entry, pc_changed = self.get_entry(name)
