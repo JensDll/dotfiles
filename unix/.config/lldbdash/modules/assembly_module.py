@@ -50,11 +50,11 @@ class Instruction:
         self.offset: int = self.addr - symbol.GetStartAddress().GetLoadAddress(target)
 
     @classmethod
-    def list(cls, symbol: lldb.SBSymbol, target: lldb.SBTarget):
+    def list(cls, symbol: lldb.SBSymbol, target: lldb.SBTarget) -> list["Instruction"]:
         instructions = symbol.GetInstructions(
             target, AssemblyModule.settings["disassembly-flavor"].value
         )
-        return list(map(lambda inst: cls(target, symbol, inst), instructions))
+        return [cls(target, symbol, inst) for inst in instructions]
 
     def print(
         self,
@@ -72,7 +72,7 @@ class Instruction:
         ].value
 
         does_branch = BRANCH_MAP.get(self.mnemonic)
-        does_branch_result = does_branch(flags, reader) if does_branch else False
+        does_branch_result = does_branch and does_branch(flags, reader)
 
         # Address
         out.write(f"{color}{self.addr:#0x}{RESET_COLOR}  ")
