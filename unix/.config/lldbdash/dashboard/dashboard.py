@@ -22,8 +22,14 @@ if typing.TYPE_CHECKING:
             "divider-fill-char": lldbdash.commands.StrCommand,
             "show-divider": lldbdash.commands.BoolCommand,
             "auto-apply-config": lldbdash.commands.BoolCommand,
+            "output": lldbdash.commands.StrCommand,
         },
     )
+
+
+def on_change_output(prev_output: str, output: str):
+    for module in Dashboard.modules:
+        module.settings["output"].set_value(output)
 
 
 class Dashboard:
@@ -39,6 +45,11 @@ class Dashboard:
         "show-divider": lldbdash.commands.BoolCommand(True),
         "auto-apply-config": lldbdash.commands.BoolCommand(
             True, help="Auto apply config changes when edited during debug session."
+        ),
+        "output": lldbdash.commands.StrCommand(
+            "0",
+            help="The render location of the dashboard.",
+            on_change=on_change_output,
         ),
     }
     enabled: typing.ClassVar[lldbdash.commands.ToggleCommand]

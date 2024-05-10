@@ -99,8 +99,8 @@ declare -r temp_dir
 trap '__cleanup $temp_dir' EXIT
 
 # https://manpages.debian.org/gpg/gpg
-if ! gpg --list-public-keys '5A939A71A46792CF57866A51996DDA075594ADB8' >/dev/null 2>&1; then
-  gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys '5A939A71A46792CF57866A51996DDA075594ADB8'
+if [[ -n $(gpg --auto-key-locate local --locate-keys 5A939A71A46792CF57866A51996DDA075594ADB8) ]]; then
+  gpg --receive-keys 5A939A71A46792CF57866A51996DDA075594ADB8
 fi
 
 declare -r binary="ccache-$version-linux-x86_64.tar.xz"
