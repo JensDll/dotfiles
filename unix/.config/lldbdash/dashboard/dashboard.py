@@ -89,7 +89,7 @@ class Dashboard:
 
     def apply_config(self):
         path = pathlib.Path.cwd() / Dashboard.settings["config-file"].value
-        if path.is_file() and Dashboard.settings["auto-apply-config"].value:
+        if Dashboard.settings["auto-apply-config"].value and path.is_file():
             config_modified_time = path.stat().st_mtime
             if config_modified_time > self.config_modified_time:
                 self.config_modified_time = config_modified_time

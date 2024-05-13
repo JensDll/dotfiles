@@ -12,8 +12,8 @@ __usage() {
   # https://manpages.debian.org/coreutils/cat
   cat <<EOF
 Usage: $(basename "${BASH_SOURCE[0]}") <version> [options]
-Options: [defaults in brackets after descriptions]
-  --help|-h|-?    print this message
+Options: [default value in bracket after description]
+  --help|-h|-?    print this message and exit
   --prefix        directory in which to install    [$HOME/.local/bin]
 EOF
 
