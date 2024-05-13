@@ -13,6 +13,8 @@ shopt -s expand_aliases
 source "$unix/.bash_aliases"
 
 __bootstrap() {
+  chmod 700 "$unix/.gnupg"
+
   # https://manpages.debian.org/rsync/rsync
   rsync --no-perms --archive --verbose --human-readable --safe-links --copy-links --exclude-from="$root/.rsyncignore" "$unix/" "$HOME"
 
