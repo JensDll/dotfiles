@@ -11,6 +11,15 @@ elif [[ $OSTYPE = darwin* ]]; then
   alias ll='ls -A -l'
 fi
 
+# https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-command
+if ! command -vp poweroff > /dev/null; then
+  alias poweroff='shutdown -h now'
+fi
+
+if ! command -vp reboot > /dev/null; then
+  alias reboot='shutdown -r now'
+fi
+
 # https://manpages.debian.org/tree
 alias lt='tree --dirsfirst -C -L 1 -apug'
 
