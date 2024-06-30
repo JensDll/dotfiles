@@ -11,7 +11,7 @@ elif [[ $OSTYPE = darwin* ]]; then
   alias ll='ls -A -l'
 fi
 
-# https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-command
+# https://www.gnu.org/software/bash/manual/bash.html#index-command
 if ! command -v poweroff > /dev/null; then
   alias poweroff='sudo shutdown -h now'
 fi
@@ -54,7 +54,7 @@ for i in {15..25}; do
   fi
 done
 
-# https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-type
+# https://www.gnu.org/software/bash/manual/bash.html#index-type
 
 if [[ $(type -t kubectl) = file ]]; then
   alias k=kubectl

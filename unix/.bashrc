@@ -2,20 +2,20 @@
 # shellcheck disable=SC1090
 # shellcheck disable=SC1091
 
-# https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Is-this-Shell-Interactive_003f
+# https://www.gnu.org/software/bash/manual/bash.html#Is-this-Shell-Interactive_003f
 if [[ -z $PS1 ]]; then
   # Skip when running non-interactive
   return
 fi
 
-# https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-HISTCONTROL
+# https://www.gnu.org/software/bash/manual/bash.html#index-HISTCONTROL
 HISTCONTROL=ignoreboth
-# https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-HISTSIZE
+# https://www.gnu.org/software/bash/manual/bash.html#index-HISTSIZE
 HISTSIZE=1000
-# https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-HISTFILESIZE
+# https://www.gnu.org/software/bash/manual/bash.html#index-HISTFILESIZE
 HISTFILESIZE=2000
 
-# https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-shopt
+# https://www.gnu.org/software/bash/manual/bash.html#index-shopt
 shopt -s histappend
 shopt -s checkwinsize
 
@@ -36,8 +36,8 @@ if [[ -f /opt/homebrew/bin/brew ]]; then
   source /opt/homebrew/etc/bash_completion.d/git-prompt.sh
 fi
 
-# https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-PS1
-# https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Controlling-the-Prompt
+# https://www.gnu.org/software/bash/manual/bash.html#index-PS1
+# https://www.gnu.org/software/bash/manual/bash.html#Controlling-the-Prompt
 #   \u  The username of the current user
 #   \h  The hostname up to the first '.'
 #   \w  The value of the PWD shell variable, with $HOME abbreviated with a tilde (uses the $PROMPT_DIRTRIM variable)
@@ -64,7 +64,7 @@ if [[ -x /usr/bin/dircolors ]]; then
   fi
 fi
 
-# https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-shopt
+# https://www.gnu.org/software/bash/manual/bash.html#index-shopt
 if ! shopt -oq posix; then
   if [[ -f /usr/share/bash-completion/bash_completion ]]; then
     source /usr/share/bash-completion/bash_completion

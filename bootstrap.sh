@@ -24,7 +24,7 @@ __bootstrap() {
 }
 
 __bootstrap_nvim() {
-  # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-mapfile
+  # https://www.gnu.org/software/bash/manual/bash.html#index-mapfile
   # https://neovim.io/doc/user/builtin.html#writefile()
   # https://neovim.io/doc/user/builtin.html#stdpath()
   mapfile -t < <(nvim --noplugin --headless --cmd 'call writefile([stdpath("config"), stdpath("data")], "/dev/stdout", "b")' --cmd 'quit')
@@ -61,7 +61,7 @@ EOF
 if [[ $1 = --yes || $1 = -y ]]; then
   __bootstrap
 else
-  # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-read
+  # https://www.gnu.org/software/bash/manual/bash.html#index-read
   read -r -p 'This may overwrite existing files in your home directory. Are you sure? (Y/n) '
 
   declare -l reply="${REPLY:-y}"
