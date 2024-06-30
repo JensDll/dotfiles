@@ -13,11 +13,11 @@ fi
 
 # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-command
 if ! command -v poweroff > /dev/null; then
-  alias poweroff='shutdown -h now'
+  alias poweroff='sudo shutdown -h now'
 fi
 
 if ! command -v reboot > /dev/null; then
-  alias reboot='shutdown -r now'
+  alias reboot='sudo shutdown -r now'
 fi
 
 # https://manpages.debian.org/tree
