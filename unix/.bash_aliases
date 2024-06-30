@@ -3,9 +3,13 @@
 # shellcheck disable=SC1091
 
 # https://manpages.debian.org/ls
-alias ls='ls --color=auto -F --group-directories-first'
-alias ll='ls --all -l'
-alias la='ls --almost-all'
+if [[ $OSTYPE = linux-gnu ]]; then
+  alias ls='ls --color=auto -F --group-directories-first'
+  alias ll='ls -A -l'
+elif [[ $OSTYPE = darwin* ]]; then
+  alias ls='ls --color=auto -F'
+  alias ll='ls -A -l'
+fi
 
 # https://manpages.debian.org/tree
 alias lt='tree --dirsfirst -C -L 1 -apug'

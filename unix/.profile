@@ -21,6 +21,4 @@ if [ -f "$HOME/.cargo/env" ]; then
   PATH="$HOME/.cargo/bin:$PATH"
 fi
 
-PATH="/opt/texlive/2023/bin/x86_64-linux:$PATH:/home/jens/.local/share/JetBrains/Toolbox/scripts"
-
 export PATH

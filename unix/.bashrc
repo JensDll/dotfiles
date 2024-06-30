@@ -30,6 +30,12 @@ shopt -s checkwinsize
 # https://manpages.debian.org/terminfo
 [[ -x /usr/bin/tput ]] && tput setaf 1> /dev/null 2>&1 && color_prompt=yes
 
+# https://docs.brew.sh
+if [[ -f /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+  source /opt/homebrew/etc/bash_completion.d/git-prompt.sh
+fi
+
 # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-PS1
 # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Controlling-the-Prompt
 #   \u  The username of the current user
@@ -40,6 +46,7 @@ shopt -s checkwinsize
 # See https://en.wikipedia.org/wiki/ANSI_escape_code for information about the ANSI color syntax
 if [[ $color_prompt = yes ]]; then
   PS1='${debian_chroot:+($debian_chroot)}\[\033[1;32m\]\u@\h\[\033[00m\]:\[\033[1;34m\]\w\[\033[36m\]$(__git_ps1 "(%s)")\[\033[00m\]\$ '
+  export COLORTERM=truecolor
 else
   PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
