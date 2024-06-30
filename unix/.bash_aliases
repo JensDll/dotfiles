@@ -12,11 +12,11 @@ elif [[ $OSTYPE = darwin* ]]; then
 fi
 
 # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-command
-if ! command -vp poweroff > /dev/null; then
+if ! command -v poweroff > /dev/null; then
   alias poweroff='shutdown -h now'
 fi
 
-if ! command -vp reboot > /dev/null; then
+if ! command -v reboot > /dev/null; then
   alias reboot='shutdown -r now'
 fi
 
