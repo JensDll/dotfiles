@@ -61,8 +61,10 @@ class Dashboard:
         Dashboard.instance = self
 
     def handle_stop(self, exe_ctx: lldb.SBExecutionContext, out: Output):
-        show_divider = Dashboard.settings["show-divider"].value
         self.apply_config()
+        if not Dashboard.enabled:
+            return
+        show_divider = Dashboard.settings["show-divider"].value
         size = shutil.get_terminal_size((160, 24))
         for module in Dashboard.modules:
             output = out
