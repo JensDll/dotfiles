@@ -158,6 +158,7 @@ cython_debug/
 # Other stuff
 .gdb_history
 gdbdash.json
+lldbdash.json
 .dash
 *.gdb
 *.lldb
