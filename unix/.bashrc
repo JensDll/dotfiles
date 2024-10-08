@@ -77,17 +77,25 @@ if [[ -f $HOME/.bash_aliases ]]; then
   source "$HOME/.bash_aliases"
 fi
 
-export NVM_DIR="$HOME/.nvm"
+NVM_DIR="$HOME/.nvm"
 [[ -s $NVM_DIR/nvm.sh ]] && source "$NVM_DIR/nvm.sh"
 [[ -s $NVM_DIR/bash_completion ]] && source "$NVM_DIR/bash_completion"
 
-export PYENV_ROOT="$HOME/.pyenv"
+PYENV_ROOT="$HOME/.pyenv"
 if [[ -d $PYENV_ROOT ]]; then
   export PATH="$PYENV_ROOT/bin:$PATH"
   eval "$(pyenv init -)"
 fi
 
-export GVM_DIR="$HOME/.gvm"
+GVM_DIR="$HOME/.gvm"
 [[ -s "$GVM_DIR/scripts/gvm" ]] && source "$GVM_DIR/scripts/gvm"
 
-export CPM_SOURCE_CACHE="$HOME/.cache/CPM"
+CPM_SOURCE_CACHE="$HOME/.cache/CPM"
+
+if [[ -d $HOME/texlive/2024 ]]; then
+  PATH="$HOME/texlive/2024/bin/x86_64-linux:$PATH"
+  INFOPATH="$HOME/texlive/2024/texmf-dist/doc/info:$INFOPATH"
+  MANPATH="$$HOME/texlive/2024/texmf-dist/doc/man:$MANPATH"
+fi
+
+export NVM_DIR PYENV_ROOT GVM_DIR CPM_SOURCE_CACHE PATH INFOPATH MANPATH
