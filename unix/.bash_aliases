@@ -86,7 +86,8 @@ fi
 
 if [[ $(type -t flatpak) = file ]]; then
   alias fp='flatpak'
-  if [[ $(type -t __flatpak) = function ]]; then
+  if [[ -f /usr/share/bash-completion/completions/flatpak ]]; then
+    source /usr/share/bash-completion/completions/flatpak
     complete -o nospace -F __flatpak fp
   fi
 fi
