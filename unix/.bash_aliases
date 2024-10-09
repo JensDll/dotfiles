@@ -55,6 +55,7 @@ for i in {15..25}; do
 done
 
 # https://www.gnu.org/software/bash/manual/bash.html#index-type
+# https://www.gnu.org/software/bash/manual/bash.html#index-complete
 
 if [[ $(type -t kubectl) = file ]]; then
   alias k=kubectl
@@ -80,5 +81,12 @@ if [[ $(type -t pnpm) = file ]]; then
   source <(pnpm completion bash)
   if [[ $(type -t _pnpm_completion) = function ]]; then
     complete -F _pnpm_completion pnpm
+  fi
+fi
+
+if [[ $(type -t flatpak) = file ]]; then
+  alias fp='flatpak'
+  if [[ $(type -t __flatpak) = function ]]; then
+    complete -o nospace -F __flatpak fp
   fi
 fi
