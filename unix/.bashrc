@@ -95,7 +95,7 @@ CPM_SOURCE_CACHE="$HOME/.cache/CPM"
 if [[ -d $HOME/texlive/2024 ]]; then
   PATH="$HOME/texlive/2024/bin/x86_64-linux:$PATH"
   INFOPATH="$HOME/texlive/2024/texmf-dist/doc/info:$INFOPATH"
-  MANPATH="$$HOME/texlive/2024/texmf-dist/doc/man:$MANPATH"
+  MANPATH="$HOME/texlive/2024/texmf-dist/doc/man:$MANPATH"
 fi
 
 export NVM_DIR PYENV_ROOT GVM_DIR CPM_SOURCE_CACHE PATH INFOPATH MANPATH
