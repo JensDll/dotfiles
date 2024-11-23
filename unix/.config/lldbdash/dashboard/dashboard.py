@@ -39,6 +39,10 @@ def is_running(exe_ctx: lldb.SBExecutionContext):
     )
 
 
+def get_size():
+    return shutil.get_terminal_size((160, 24))
+
+
 class Dashboard:
     modules: typing.ClassVar[list["Module"]]
     instance: typing.ClassVar["Dashboard"]
@@ -72,7 +76,7 @@ class Dashboard:
         if not Dashboard.enabled:
             return
         show_divider = Dashboard.settings["show-divider"].value
-        size = shutil.get_terminal_size((160, 24))
+        size = get_size()
         for module in Dashboard.modules:
             output = out
             module_output = module.settings["output"].value

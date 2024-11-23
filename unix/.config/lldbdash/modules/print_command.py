@@ -1,9 +1,8 @@
-import shutil
 import typing
 
 import lldb
 from lldbdash.commands import PureCommand
-from lldbdash.dashboard import is_running
+from lldbdash.dashboard import get_size, is_running
 
 if typing.TYPE_CHECKING:
     from lldbdash.modules import Module
@@ -30,9 +29,7 @@ class PrintCommand(PureCommand):
                 if not is_running(_exe_ctx):
                     _result.SetError("Dashboard is not running")
                     return
-
-                size = shutil.get_terminal_size((160, 24))
-
+                size = get_size()
                 module.render(size, _exe_ctx, _result)
 
             def get_short_help(self):
