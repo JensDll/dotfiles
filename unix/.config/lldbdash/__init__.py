@@ -99,6 +99,14 @@ def register_modules(debugger: lldb.SBDebugger):
             f"command script add --class {module.enabled.handlers[1]} {container} disable"
         )
 
+        print_command = lldbdash.modules.PrintCommand(
+            module, f"Print the {module.name} module"
+        )
+
+        debugger.HandleCommand(
+            f"command script add --class {print_command.handlers[0]} {container} print"
+        )
+
 
 def register_settings(
     settings: lldbdash.common.Settings,

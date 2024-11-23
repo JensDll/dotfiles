@@ -32,6 +32,13 @@ def on_change_output(prev_output: str, output: str):
         module.settings["output"].set_value(output)
 
 
+def is_running(exe_ctx: lldb.SBExecutionContext):
+    state: int = exe_ctx.GetProcess().GetState()
+    return Dashboard.instance and (
+        state == lldb.eStateStopped or state == lldb.eStateCrashed
+    )
+
+
 class Dashboard:
     modules: typing.ClassVar[list["Module"]]
     instance: typing.ClassVar["Dashboard"]
