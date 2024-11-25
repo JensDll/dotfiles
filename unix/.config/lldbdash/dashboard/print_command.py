@@ -17,8 +17,7 @@ class PrintCommand:
         if not is_running(exe_ctx):
             result.SetError("Dashboard is not running")
             return
-
-        Dashboard.instance.handle_stop(exe_ctx, result)
+        Dashboard.instance.print(exe_ctx, result)
 
     def get_short_help(self):
         return "Print the dashboard."

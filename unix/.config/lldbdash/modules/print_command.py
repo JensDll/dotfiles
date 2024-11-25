@@ -2,7 +2,7 @@ import typing
 
 import lldb
 from lldbdash.commands import PureCommand
-from lldbdash.dashboard import get_size, is_running
+from lldbdash.dashboard import is_running, terminal_window_size
 
 if typing.TYPE_CHECKING:
     from lldbdash.modules import Module
@@ -29,8 +29,7 @@ class PrintCommand(PureCommand):
                 if not is_running(_exe_ctx):
                     _result.SetError("Dashboard is not running")
                     return
-                size = get_size()
-                module.render(size, _exe_ctx, _result)
+                module.render(terminal_window_size(), _exe_ctx, _result)
 
             def get_short_help(self):
                 return help

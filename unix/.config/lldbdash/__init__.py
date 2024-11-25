@@ -100,7 +100,7 @@ def register_modules(debugger: lldb.SBDebugger):
         )
 
         print_command = lldbdash.modules.PrintCommand(
-            module, f"Print the {module.name} module"
+            module, help=f"Print the {module.name} module."
         )
 
         debugger.HandleCommand(

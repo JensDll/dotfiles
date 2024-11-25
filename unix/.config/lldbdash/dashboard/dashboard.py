@@ -39,7 +39,7 @@ def is_running(exe_ctx: lldb.SBExecutionContext):
     )
 
 
-def get_size():
+def terminal_window_size():
     return shutil.get_terminal_size((160, 24))
 
 
@@ -75,8 +75,15 @@ class Dashboard:
         self.apply_config()
         if not Dashboard.enabled:
             return
+        self.print_modules(exe_ctx, out)
+
+    def print(self, exe_ctx: lldb.SBExecutionContext, out: Output):
+        self.apply_config()
+        self.print_modules(exe_ctx, out)
+
+    def print_modules(self, exe_ctx: lldb.SBExecutionContext, out: Output):
         show_divider = Dashboard.settings["show-divider"].value
-        size = get_size()
+        size = terminal_window_size()
         for module in Dashboard.modules:
             output = out
             module_output = module.settings["output"].value
