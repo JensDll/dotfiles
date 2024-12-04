@@ -1,6 +1,7 @@
 import typing
 
-from .register import RegisterReader, RflagsRegister
+from .register import RflagsRegister
+from .register_reader import RegisterReader
 
 DoesBranch = typing.Callable[
     [RflagsRegister, RegisterReader],

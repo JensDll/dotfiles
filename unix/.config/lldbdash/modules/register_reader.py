@@ -2,7 +2,6 @@ import dataclasses
 import typing
 
 import lldb
-from lldbdash.common import not_none
 
 from .register import (
     AvxRegister,

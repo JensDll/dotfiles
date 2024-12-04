@@ -10,7 +10,8 @@ from lldbdash.dashboard import Dashboard as D
 
 from .branch_map import BRANCH_MAP
 from .on_change_output import on_change_output
-from .register import RegisterReader, RflagsRegister
+from .register import RflagsRegister
+from .register_reader import RegisterReader
 
 
 class Instruction:

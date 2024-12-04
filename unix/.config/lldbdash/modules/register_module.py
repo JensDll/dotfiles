@@ -11,10 +11,10 @@ from .register import (
     AvxRegister,
     GeneralPurposeRegister,
     MxcsrRegister,
-    RegisterReader,
     RflagsRegister,
     SegmentRegister,
 )
+from .register_reader import RegisterReader
 
 if typing.TYPE_CHECKING:
     ModuleSettings = typing.TypedDict(
