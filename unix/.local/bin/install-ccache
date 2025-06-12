@@ -4,14 +4,18 @@
 
 # https://ccache.dev
 
-declare -r reset="\033[0m"
-declare -r red="\033[0;31m"
-declare -r green="\033[0;32m"
+script_root="$(
+  cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null 2>&1 || exit
+  pwd -P
+)"
+
+source "$script_root/../../../scripts/common.sh"
 
 __usage() {
-  # https://manpages.debian.org/coreutils/cat
   cat <<EOF
 Usage: $(basename "${BASH_SOURCE[0]}") <version> [options]
+Arguments:
+  <version>       version of the release
 Options: [default value in bracket after description]
   --help|-h|-?    print this message and exit
   --prefix        directory in which to install    [$HOME/.local/bin]
@@ -24,23 +28,8 @@ EOF
   fi
 }
 
-__success() {
-  # https://manpages.debian.org/coreutils/echo
-  echo -e "${green}Success: $*${reset}"
-}
-
-__error() {
-  echo -e "${red}Error: $*${reset}" 1>&2
-}
-
-__error_and_exit() {
-  echo -e "${red}Error: $*${reset}" 1>&2
-  exit 1
-}
-
 __cleanup() {
-  echo "Cleaning up temporary directory: $1"
-  # https://manpages.debian.org/coreutils/rm
+  echo "Removing temporary directory: $1"
   rm --recursive "$1"
 }
 
@@ -91,14 +80,11 @@ __parse_parameters() {
 __parse_parameters "$@"
 declare -r version prefix
 
-# https://manpages.debian.org/coreutils/mktemp
 temp_dir=$(mktemp --directory)
 declare -r temp_dir
 
-# https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html#index-trap
 trap '__cleanup $temp_dir' EXIT
 
-# https://manpages.debian.org/gpg/gpg
 if [[ -n $(gpg --auto-key-locate local --locate-keys 5A939A71A46792CF57866A51996DDA075594ADB8) ]]; then
   gpg --receive-keys 5A939A71A46792CF57866A51996DDA075594ADB8
 fi
@@ -111,7 +97,6 @@ declare -r signature="ccache-$version-linux-x86_64.tar.xz.asc"
 declare -r signature_uri="https://github.com/ccache/ccache/releases/download/v$version/$signature"
 declare -r signature_output="$temp_dir/$signature"
 
-# https://manpages.debian.org/curl/curl
 if ! curl --location --fail --fail-early \
   --output "$signature_output" "$signature_uri" \
   --output "$binary_output" "$binary_uri"; then
@@ -122,14 +107,11 @@ if ! gpg --verify "$signature_output" "$binary_output"; then
   __error_and_exit "Signature verification failed"
 fi
 
-# https://manpages.debian.org/tar/tar
 tar --extract --xz --file "$binary_output" --directory "$temp_dir"
 
 declare -r executable="${binary_output%.tar.xz}/ccache"
 
-# https://manpages.debian.org/coreutils/mkdir
 mkdir --parents "$prefix"
-# https://manpages.debian.org/coreutils/mv
 mv --target-directory="$prefix" "$executable"
 
 __success "Installed $executable to $prefix"

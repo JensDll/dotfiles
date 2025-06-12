@@ -9,13 +9,11 @@ declare -r unix="$root/unix"
 
 shopt -s expand_aliases
 
-# shellcheck source=./unix/.bash_aliases
 source "$unix/.bash_aliases"
 
 __bootstrap() {
   chmod 700 "$unix/.gnupg"
 
-  # https://manpages.debian.org/rsync/rsync
   rsync --no-perms --archive --verbose --human-readable --safe-links --copy-links --exclude-from="$root/.rsyncignore" "$unix/" "$HOME"
 
   if type -f nvim > /dev/null 2>&1; then
@@ -24,7 +22,6 @@ __bootstrap() {
 }
 
 __bootstrap_nvim() {
-  # https://www.gnu.org/software/bash/manual/bash.html#index-mapfile
   # https://neovim.io/doc/user/builtin.html#writefile()
   # https://neovim.io/doc/user/builtin.html#stdpath()
   mapfile -t < <(nvim --noplugin --headless --cmd 'call writefile([stdpath("config"), stdpath("data")], "/dev/stdout", "b")' --cmd 'quit')
@@ -61,7 +58,6 @@ EOF
 if [[ $1 = --yes || $1 = -y ]]; then
   __bootstrap
 else
-  # https://www.gnu.org/software/bash/manual/bash.html#index-read
   read -r -p 'This may overwrite existing files in your home directory. Are you sure? (Y/n) '
 
   declare -l reply="${REPLY:-y}"

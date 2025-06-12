@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+
+script_root="$(
+  cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null 2>&1 || exit
+  pwd -P
+)"
+
+source "$script_root/../../../scripts/common.sh"
+
+shopt -s extglob
+
+__usage() {
+  cat <<EOF
+Usage: $(basename "${BASH_SOURCE[0]}") <version> <prefix> [options]
+Arguments:
+  <version>       version of the release
+  <prefix>        directory in which to install
+Options: [default value in bracket after description]
+  --help|-h|-?    print this message and exit
+  --link          symbolic link location of the executable   [$HOME/.local/bin]
+EOF
+
+  if [[ $1 == --success ]]; then
+    exit 0
+  else
+    exit 2
+  fi
+}
+
+__parse_parameters() {
+  local -a arguments
+
+  while [[ $# -gt 0 ]]; do
+    local -l option="${1/#--/-}"
+
+    link="$HOME/.local/bin"
+
+    case "$option" in
+    -\? | -help | -h)
+      __usage --success
+      ;;
+    -link)
+      shift
+      link="$1"
+      ;;
+    -link=*)
+      link="${option:6}"
+      ;;
+    -*)
+      __error "Unknown option: $1"
+      __usage
+      ;;
+    *)
+      arguments+=("$1")
+      ;;
+    esac
+
+    shift
+  done
+
+  # Remove leading v
+  version="${arguments[0]#v}"
+  # Remove trailing /
+  prefix="${arguments[1]%%+(\/)}"
+  # Replace leading ~ with $HOME
+  link=${link/#\~/$HOME}
+
+  if [[ -z $version ]]; then
+    __error "Missing value for argument: <version>"
+    __usage
+  fi
+
+  if [[ -z $prefix ]]; then
+    __error "Missing value for argument: <prefix>"
+    __usage
+  fi
+}
+
+__parse_parameters "$@"
+declare -r version prefix link
+
+__cleanup() {
+  echo "Removing temporary directory: $1"
+  rm --recursive "$1"
+}
+
+temp_dir=$(mktemp --directory)
+declare -r temp_dir
+
+trap '__cleanup $temp_dir' EXIT
+
+declare -r file="lua-language-server-$version-$id-x64.tar.gz"
+declare -r file_uri="https://github.com/LuaLS/lua-language-server/releases/download/$version/$file"
+declare -r file_output="$temp_dir/$file"
+
+if ! curl --location --fail --fail-early \
+  --output "$file_output" "$file_uri"; then
+  __error_and_exit "Failed to download $file"
+fi
+
+tar --recursive-unlink --extract --file "$file_output" --directory "$prefix" --one-top-level
+
+declare -r executable="$prefix/lua-language-server-$version-$id-x64/bin/lua-language-server"
+
+chmod +x "$executable"
+
+ln --symbolic --force "$executable" "$link"
+
+ls --color=auto -l "$link/lua-language-server"

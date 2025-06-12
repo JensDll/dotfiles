@@ -9,7 +9,6 @@ declare -r unix="$root/unix"
 
 shopt -s expand_aliases
 
-# shellcheck source=./unix/.bash_aliases
 source "$unix/.bash_aliases"
 
 pushd "$root" > /dev/null || exit
