@@ -4,6 +4,8 @@
 
 # https://ccache.dev
 
+set -e
+
 script_root="$(
   cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null 2>&1 || exit
   pwd -P
@@ -26,11 +28,6 @@ EOF
   else
     exit 2
   fi
-}
-
-__cleanup() {
-  echo "Removing temporary directory: $1"
-  rm --recursive "$1"
 }
 
 __parse_parameters() {
@@ -80,6 +77,11 @@ __parse_parameters() {
 __parse_parameters "$@"
 declare -r version prefix
 
+__cleanup() {
+  echo "Removing temporary directory: $1"
+  rm --recursive "$1"
+}
+
 temp_dir=$(mktemp --directory)
 declare -r temp_dir
 
@@ -97,11 +99,9 @@ declare -r signature="ccache-$version-linux-x86_64.tar.xz.asc"
 declare -r signature_uri="https://github.com/ccache/ccache/releases/download/v$version/$signature"
 declare -r signature_output="$temp_dir/$signature"
 
-if ! curl --location --fail --fail-early \
+curl --location --fail --fail-early \
   --output "$signature_output" "$signature_uri" \
-  --output "$binary_output" "$binary_uri"; then
-  __error_and_exit "Failed to download ccache binary and signature"
-fi
+  --output "$binary_output" "$binary_uri"
 
 if ! gpg --verify "$signature_output" "$binary_output"; then
   __error_and_exit "Signature verification failed"
