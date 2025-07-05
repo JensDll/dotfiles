@@ -1,0 +1,8 @@
+{
+    "workspace.library": [
+        "/app/share/nvim/runtime",
+        "${3rd}/luv/library",
+        "/home/jens/.var/app/io.neovim.nvim/data/nvim/lazy",
+        "${3rd}/luassert/library"
+    ]
+}
