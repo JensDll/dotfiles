@@ -6,6 +6,8 @@ end, { desc = 'Toggle file explorer' })
 
 vim.api.nvim_create_autocmd('User', {
   pattern = 'MiniFilesBufferCreate',
+  group = DOTFILES_AUGROUP,
+  desc = 'Cursor keymaps for mini.files',
   callback = function(args)
     local buf_id = args.data.buf_id
 

@@ -5,8 +5,8 @@ return {
   },
   {
     'stevearc/conform.nvim',
-    event = { 'BufWritePre' },
-    cmd = { 'ConformInfo' },
+    event = 'BufWritePre',
+    cmd = 'ConformInfo',
     keys = {
       {
         '<leader>f',
@@ -20,6 +20,9 @@ return {
     opts = {
       formatters_by_ft = {
         lua = { 'stylua' },
+        cmake = { 'cmake_format' },
+        cpp = { 'clang-format' },
+        hpp = { 'clang-format' },
       },
       default_format_opts = {
         lsp_format = 'never',
@@ -31,7 +34,7 @@ return {
   },
   {
     'akinsho/bufferline.nvim',
-    event = { 'VeryLazy' },
+    event = 'VeryLazy',
     ---@type bufferline.UserConfig
     opts = {
       options = {
@@ -73,6 +76,7 @@ return {
   },
   {
     'lewis6991/gitsigns.nvim',
+    event = 'VeryLazy',
     opts = {},
   },
 }
