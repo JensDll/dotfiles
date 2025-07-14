@@ -23,6 +23,7 @@ return {
         cmake = { 'cmake_format' },
         cpp = { 'clang-format' },
         hpp = { 'clang-format' },
+        javascript = { 'prettier' },
       },
       default_format_opts = {
         lsp_format = 'never',
@@ -52,7 +53,8 @@ return {
     ---@type blink.cmp.Config
     opts = {
       keymap = {
-        preset = 'super-tab',
+        preset = 'default',
+        ['<C-z>'] = { 'select_and_accept' },
       },
       appearance = {
         nerd_font_variant = 'mono',

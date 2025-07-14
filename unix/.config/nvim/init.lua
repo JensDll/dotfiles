@@ -27,11 +27,17 @@ vim.schedule(function()
   vim.o.clipboard = 'unnamedplus'
 end)
 
-vim.env.PATH = vim.env.PATH .. ':' .. vim.fn.expand('$HOME/.local/bin')
+vim.env.PATH = vim.env.PATH .. ':' .. vim.fn.expand('$HOME/.local/bin') .. ':' .. vim.env.NVM_BIN
 
-vim.o.foldenable = false
-vim.o.foldmethod = 'expr'
-vim.o.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+vim.api.nvim_cmd({
+  cmd = 'aunmenu',
+  args = { 'PopUp.How-to\\ disable\\ mouse' },
+}, {})
+
+vim.api.nvim_cmd({
+  cmd = 'aunmenu',
+  args = { 'PopUp.-2-' },
+}, {})
 
 require('config.keymap')
 require('config.autocmd')

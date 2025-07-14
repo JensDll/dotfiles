@@ -22,12 +22,15 @@ vim.keymap.set('n', '<Leader>d', function()
   vim.diagnostic.open_float()
 end, { desc = 'Show diagnostics for the current line' })
 
-vim.keymap.set('n', '<A-s>', '<Plug>(nvim.lsp.ctrl-s)')
+vim.keymap.set('n', '<A-s>', '<Plug>(nvim.lsp.ctrl-s)', { desc = 'Cycle next signature' })
 
 vim.api.nvim_create_autocmd('LspAttach', {
   callback = function(args)
     vim.keymap.set({ 'n', 'i', 's' }, '<A-s>', function()
       vim.lsp.buf.signature_help()
-    end, { buffer = args.buf })
+    end, {
+      buffer = args.buf,
+      desc = 'vim.lsp.buf.signature_help()',
+    })
   end,
 })

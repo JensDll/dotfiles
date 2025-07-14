@@ -1,3 +1,31 @@
+local function echo(...)
+  vim.api.nvim_echo({ { 'Lua Language Server\n', 'WarningMsg' }, ... }, true, {})
+end
+
+local function append_lazy_paths(paths)
+  if not package.loaded['lazy'] then
+    return
+  end
+
+  local root = require('lazy.core.config').options.root
+  local dir, error = vim.uv.fs_scandir(root)
+
+  if not dir then
+    echo({ 'Not configuring lazy.nvim paths\n', 'WarningMsg' }, { error, 'WarningMsg' })
+    return
+  end
+
+  local function iter()
+    return vim.uv.fs_scandir_next(dir)
+  end
+
+  for name, file_type in iter do
+    if file_type == 'directory' then
+      table.insert(paths, root .. '/' .. name)
+    end
+  end
+end
+
 return {
   cmd = { 'lua-language-server' },
   filetypes = { 'lua' },
@@ -22,29 +50,8 @@ return {
       end
     end
 
-    local library = { vim.env.VIMRUNTIME, '${3rd}/luv/library' }
-
-    local lazy_root = require('lazy.core.config').options.root
-
-    local req, err = vim.uv.fs_scandir(lazy_root)
-
-    if err then
-      vim.api.nvim_echo({
-        { 'Not configuring Lua Language Server\n', 'WarningMsg' },
-        { err, 'WarningMsg' },
-      }, true, {})
-      return
-    end
-
-    local function iter()
-      return vim.uv.fs_scandir_next(req)
-    end
-
-    for name, file_type in iter do
-      if file_type == 'directory' then
-        table.insert(library, lazy_root .. '/' .. name)
-      end
-    end
+    local paths = { vim.env.VIMRUNTIME, '${3rd}/luv/library' }
+    append_lazy_paths(paths)
 
     -- https://luals.github.io/wiki/settings
     client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
@@ -57,7 +64,7 @@ return {
       },
       workspace = {
         checkThirdParty = 'Disable',
-        library = library,
+        library = paths,
       },
     })
   end,
