@@ -8,9 +8,9 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
-vim.o.foldenable = false
 vim.o.foldmethod = 'expr'
 vim.o.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+vim.o.foldlevel = vim.o.foldnestmax
 
 vim.api.nvim_create_autocmd('LspAttach', {
   callback = function(args)

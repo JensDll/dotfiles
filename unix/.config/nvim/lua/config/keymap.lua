@@ -1,8 +1,6 @@
 vim.keymap.set('n', '<Esc>', '<Cmd>nohlsearch<CR>')
 
-vim.keymap.set('n', '<Leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic quickfix list' })
-
-vim.keymap.set({ 'n', 'v', 'i' }, '<C-s>', '<Cmd>write<CR>', { desc = 'Save changes' })
+vim.keymap.set({ 'n', 'x', 'i' }, '<C-s>', '<Cmd>write<CR>', { desc = 'Save changes' })
 
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
@@ -18,19 +16,14 @@ vim.keymap.set('n', '<Leader>c', function()
   end)
 end, { desc = 'Execute the typed command and display its output in a new buffer' })
 
-vim.keymap.set('n', '<Leader>d', function()
-  vim.diagnostic.open_float()
-end, { desc = 'Show diagnostics for the current line' })
+vim.keymap.set({ 'n', 'x' }, '<C-_>', function()
+  return require('vim._comment').operator()
+end, { expr = true })
 
-vim.keymap.set('n', '<A-s>', '<Plug>(nvim.lsp.ctrl-s)', { desc = 'Cycle next signature' })
+vim.keymap.set('i', '<C-_>', function()
+  return '<Esc>' .. require('vim._comment').operator() .. '_i'
+end, { expr = true })
 
-vim.api.nvim_create_autocmd('LspAttach', {
-  callback = function(args)
-    vim.keymap.set({ 'n', 'i', 's' }, '<A-s>', function()
-      vim.lsp.buf.signature_help()
-    end, {
-      buffer = args.buf,
-      desc = 'vim.lsp.buf.signature_help()',
-    })
-  end,
-})
+vim.keymap.set({ 'o' }, '<C-_>', function()
+  require('vim._comment').textobject()
+end)

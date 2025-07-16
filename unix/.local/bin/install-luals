@@ -1,16 +1,25 @@
 #!/usr/bin/env bash
 
 set -e
-
-script_root="$(
-  cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null 2>&1 || exit
-  pwd -P
-)"
-declare -r script_root
-
-source "$script_root/../../../scripts/common.sh"
-
 shopt -s extglob
+
+declare -r reset="\033[0m"
+declare -r red="\033[0;31m"
+declare -r green="\033[0;32m"
+declare -rl id=$(uname)
+
+__success() {
+  echo -e "${green}$*${reset}"
+}
+
+__error() {
+  echo -e "${red}Error: $*${reset}" 1>&2
+}
+
+__error_and_exit() {
+  echo -e "${red}Error: $*${reset}" 1>&2
+  exit 1
+}
 
 __usage() {
   cat <<EOF

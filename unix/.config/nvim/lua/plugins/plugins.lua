@@ -24,6 +24,10 @@ return {
         cpp = { 'clang-format' },
         hpp = { 'clang-format' },
         javascript = { 'prettier' },
+        typescript = { 'prettier' },
+        yaml = { 'prettier' },
+        json = { 'prettier' },
+        sh = { 'shfmt' },
       },
       default_format_opts = {
         lsp_format = 'never',
@@ -53,8 +57,7 @@ return {
     ---@type blink.cmp.Config
     opts = {
       keymap = {
-        preset = 'default',
-        ['<C-z>'] = { 'select_and_accept' },
+        preset = 'super-tab',
       },
       appearance = {
         nerd_font_variant = 'mono',

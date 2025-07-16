@@ -3,9 +3,6 @@
   name = jens
   # https://git-scm.com/docs/git-config#Documentation/git-config.txt-useremail
   email = jens@doellmann.com
-[core]
-  # https://git-scm.com/docs/git-config#Documentation/git-config.txt-coreeditor
-  editor = nvim
 [init]
   # https://git-scm.com/docs/git-config#Documentation/git-config.txt-initdefaultBranch
   defaultBranch = main
