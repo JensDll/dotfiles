@@ -76,6 +76,9 @@ return {
       fuzzy = {
         implementation = 'prefer_rust_with_warning',
       },
+      cmdline = {
+        enabled = false,
+      },
     },
     opts_extend = { 'sources.default' },
   },
@@ -83,5 +86,14 @@ return {
     'lewis6991/gitsigns.nvim',
     event = 'VeryLazy',
     opts = {},
+  },
+  {
+    'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
+    lazy = false,
+    build = ':TSUpdate',
+    config = function()
+      require('nvim-treesitter').install({ 'javascript', 'typescript', 'bash', 'cpp' })
+    end,
   },
 }

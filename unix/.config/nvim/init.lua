@@ -13,8 +13,6 @@ vim.o.smartcase = true
 
 vim.o.cursorline = true
 
-vim.o.scrolloff = 10
-
 vim.o.confirm = true
 
 vim.o.mouse = 'a'
