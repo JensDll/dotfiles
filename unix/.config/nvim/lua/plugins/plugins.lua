@@ -22,12 +22,12 @@ return {
         lua = { 'stylua' },
         cmake = { 'cmake_format' },
         cpp = { 'clang-format' },
-        hpp = { 'clang-format' },
         javascript = { 'prettier' },
         typescript = { 'prettier' },
         yaml = { 'prettier' },
         json = { 'prettier' },
         sh = { 'shfmt' },
+        bash = { 'shfmt' },
       },
       default_format_opts = {
         lsp_format = 'never',
@@ -35,11 +35,15 @@ return {
       format_on_save = {
         timeout_ms = 500,
       },
+      notify_no_formatters = false,
     },
   },
   {
     'akinsho/bufferline.nvim',
     event = 'VeryLazy',
+    keys = {
+      { '<Leader>bp', '<Cmd>BufferLineTogglePin<CR>', desc = 'Toggle Pin' },
+    },
     ---@type bufferline.UserConfig
     opts = {
       options = {
@@ -95,5 +99,17 @@ return {
     config = function()
       require('nvim-treesitter').install({ 'javascript', 'typescript', 'bash', 'cpp' })
     end,
+  },
+  {
+    'catppuccin/nvim',
+    name = 'catppuccin',
+    lazy = false,
+    priority = 1000,
+    ---@type CatppuccinOptions
+    opts = {
+      no_italic = true,
+      no_bold = true,
+      no_underline = true,
+    },
   },
 }

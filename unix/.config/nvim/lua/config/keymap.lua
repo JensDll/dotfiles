@@ -2,6 +2,8 @@ vim.keymap.set('n', '<Esc>', '<Cmd>nohlsearch<CR>')
 
 vim.keymap.set({ 'n', 'x', 'i' }, '<C-s>', '<Cmd>write<CR>', { desc = 'Save changes' })
 
+vim.keymap.set('n', '<Leader>q', '<Cmd>quit<CR>', { desc = ':quit' })
+
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
 vim.keymap.set('n', '<Leader>c', function()

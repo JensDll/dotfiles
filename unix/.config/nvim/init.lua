@@ -39,3 +39,8 @@ require('config.keymap')
 require('config.autocmd')
 require('config.lazy')
 require('config.lsp')
+
+vim.api.nvim_cmd({
+  cmd = 'colorscheme',
+  args = { 'catppuccin' },
+}, {})

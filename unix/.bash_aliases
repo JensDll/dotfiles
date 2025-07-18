@@ -22,13 +22,11 @@ alias cls='clear'
 
 alias gdb='gdb --quiet'
 
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-
 alias today='date +%d.%m.%y'
 
 alias his='history'
 
-for i in {15..25}; do
+for i in {24..18}; do
   if __has lldb-"${i}"; then
     # shellcheck disable=SC2139
     alias lldb="lldb-${i}"

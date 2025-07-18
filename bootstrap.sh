@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 
+set -e
+
 root="$(
-  cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null 2>&1 || exit
+  cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null || exit
   pwd -P
 )"
-declare -r root
-declare -r unix="$root/unix"
+declare -r root unix="${root}"/unix
 
 __bootstrap() {
-  chmod 700 "$unix"/.gnupg
-  rsync --no-perms --archive --verbose --human-readable --safe-links --copy-links --exclude-from="$root/.rsyncignore" "$unix/" "$HOME"
-  ln --symbolic --force "$unix"/.config/* ~/.config/
+  chmod 700 "${unix}"/.gnupg
+  rsync --no-perms --archive --verbose --human-readable --safe-links --copy-links --exclude-from="${root}"/.rsyncignore "${unix}"/ "${HOME}"
+  ln --symbolic --force "${unix}"/.config/* ~/.config/
 }
 
 if [[ $1 = --yes || $1 = -y ]]; then
@@ -20,7 +21,7 @@ else
 
   declare -l reply="${REPLY:-y}"
 
-  if [[ $reply = y ]]; then
+  if [[ ${reply} = y ]]; then
     __bootstrap
   fi
 fi
