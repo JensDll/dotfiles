@@ -19,6 +19,8 @@ HISTFILESIZE=2000
 shopt -s histappend
 shopt -s checkwinsize
 
+export PROMPT_COMMAND='history -a'
+
 [[ -z ${debian_chroot:-} && -r /etc/debian_chroot ]] && debian_chroot=$(cat /etc/debian_chroot)
 
 [[ ${TERM} = xterm-color || ${TERM} = *-256color ]] && color_prompt=yes

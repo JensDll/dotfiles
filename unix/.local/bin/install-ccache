@@ -92,7 +92,7 @@ declare -r temp_dir
 trap '__dispose $temp_dir' EXIT
 
 declare -r public_key="release-signing-public-key.txt"
-declare -r public_key_uri="https://ccache.dev/release-signing-public-key.txt"
+declare -r public_key_uri="https://ccache.dev/${public_key}"
 declare -r public_key_output="${temp_dir}/${public_key}"
 
 declare -r binary="ccache-${version}-linux-x86_64.tar.xz"

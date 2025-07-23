@@ -2,6 +2,13 @@ vim.keymap.set('n', '<Esc>', '<Cmd>nohlsearch<CR>')
 
 vim.keymap.set({ 'n', 'x', 'i' }, '<C-s>', '<Cmd>write<CR>', { desc = 'Save changes' })
 
+vim.keymap.set(
+  'c',
+  '<C-s>',
+  [[execute "silent write !pkexec tee '%'" | :edit!]],
+  { desc = 'Save changes when file not owned by user' }
+)
+
 vim.keymap.set('n', '<Leader>q', '<Cmd>quit<CR>', { desc = ':quit' })
 
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
@@ -26,6 +33,6 @@ vim.keymap.set('i', '<C-_>', function()
   return '<Esc>' .. require('vim._comment').operator() .. '_i'
 end, { expr = true })
 
-vim.keymap.set({ 'o' }, '<C-_>', function()
+vim.keymap.set('o', '<C-_>', function()
   require('vim._comment').textobject()
 end)

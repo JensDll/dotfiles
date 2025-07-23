@@ -27,4 +27,7 @@ require('lazy').setup({
   rocks = {
     enabled = false,
   },
+  dev = {
+    path = vim.fn.stdpath('config') .. '/lazy',
+  },
 })
