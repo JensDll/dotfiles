@@ -36,7 +36,7 @@ export PROMPT_COMMAND='history -a'
 #   \]  End a sequence of non-printing characters
 # See https://en.wikipedia.org/wiki/ANSI_escape_code for information about the ANSI color syntax
 if [[ ${color_prompt} = yes ]]; then
-  PS1='${debian_chroot:+($debian_chroot)}\[\033[1;32m\]\u@\h\[\033[00m\]:\[\033[1;34m\]\w\[\033[36m\]$(__git_ps1 "(%s)")\[\033[00m\]\$ '
+  PS1='${debian_chroot:+($debian_chroot)}\[\033[38:5:10m\]\u@\h\[\033[38:5:15m\]:\[\033[38:5:12m\]\w\[\033[38:5:14m\]$(__git_ps1 "(%s)")\[\033[38:5:15m\]\$ '
   export COLORTERM=truecolor
 else
   PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '

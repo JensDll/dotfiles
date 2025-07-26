@@ -2,12 +2,9 @@ vim.keymap.set('n', '<Esc>', '<Cmd>nohlsearch<CR>')
 
 vim.keymap.set({ 'n', 'x', 'i' }, '<C-s>', '<Cmd>write<CR>', { desc = 'Save changes' })
 
-vim.keymap.set(
-  'c',
-  '<C-s>',
-  [[execute "silent write !pkexec tee '%'" | :edit!]],
-  { desc = 'Save changes when file not owned by user' }
-)
+vim.keymap.set('c', '<C-s>', [[execute "silent write !pkexec tee '%:p'" | :edit!]], {
+  desc = "Save changes to the file it's not owned by the current user",
+})
 
 vim.keymap.set('n', '<Leader>q', '<Cmd>quit<CR>', { desc = ':quit' })
 
@@ -36,3 +33,7 @@ end, { expr = true })
 vim.keymap.set('o', '<C-_>', function()
   require('vim._comment').textobject()
 end)
+
+vim.keymap.set('x', '<C-c>', 'y', {
+  desc = 'Visual mode yank',
+})

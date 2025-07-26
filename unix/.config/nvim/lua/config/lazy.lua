@@ -19,6 +19,7 @@ require('lazy').setup({
     { import = 'plugins' },
   },
   install = {
+    missing = false,
     colorscheme = {},
   },
   change_detection = {
