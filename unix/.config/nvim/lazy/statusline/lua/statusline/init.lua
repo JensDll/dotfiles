@@ -13,6 +13,10 @@ local function win_buf_id()
   return vim.api.nvim_win_get_buf(vim.g.statusline_winid)
 end
 
+local function win_is_active()
+  return vim.g.statusline_winid == vim.api.nvim_get_current_win()
+end
+
 local segments = {
   function()
     return ' '
@@ -23,18 +27,25 @@ local segments = {
   function()
     local filetype = vim.api.nvim_get_option_value('filetype', { buf = win_buf_id() })
     local icon, hl = MiniIcons.get('filetype', filetype)
-    return '%#' .. hl .. '#' .. icon .. '%*'
+    if win_is_active() then
+      return string.format('%%#%s#%s%%*', hl, icon)
+    end
+    return icon
   end,
   function()
     return '%f %h%w%m%r'
   end,
   function()
-    return '%L lines'
+    return '%L Lines'
   end,
   function()
     local count = vim.diagnostic.count(win_buf_id())
-    local warn_count, error_count = count[vim.diagnostic.severity.WARN] or 0, count[vim.diagnostic.severity.ERROR] or 0
-    return '%#DiagnosticWarn#' .. warn_count .. ' W  %#DiagnosticError#' .. error_count .. ' E%*'
+    local warn_count = count[vim.diagnostic.severity.WARN] or 0
+    local error_count = count[vim.diagnostic.severity.ERROR] or 0
+    if win_is_active() then
+      return string.format('%%#DiagnosticWarn#%u W %%#DiagnosticError#%u E%%*', warn_count, error_count)
+    end
+    return string.format('%u W %u E', warn_count, error_count)
   end,
   function()
     return '%P'
