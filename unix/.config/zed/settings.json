@@ -1,0 +1,14 @@
+{
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  },
+  "project_panel": {
+    "dock": "right"
+  },
+  "theme": {
+    "mode": "dark",
+    "dark": "Catppuccin Frappé - No Italics",
+    "light": "One Light"
+  }
+}

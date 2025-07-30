@@ -141,7 +141,7 @@ class RegisterReader:
             self.entries[ymm] = Entry([index, fp_index[xmm]], values, pc)
 
     @classmethod
-    def new_or_cached(cls, frame: lldb.SBFrame) -> "RegisterReader":
+    def new_or_cached(cls, frame: lldb.SBFrame):
         if cls._instance is None:
             cls._instance = cls(frame)
             cls._frame = frame

@@ -40,4 +40,4 @@ vim.keymap.set('n', '<F36>', function()
   vim.lsp.buf.type_definition()
 end, { desc = 'Go to type definition' })
 
-vim.lsp.enable({ 'luals', 'clangd', 'bashls', 'tsls', 'pylsp' })
+vim.lsp.enable({ 'luals', 'clangd', 'bashls', 'python' })

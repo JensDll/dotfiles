@@ -69,7 +69,7 @@ def register_dashboard(debugger: lldb.SBDebugger):
         debugger,
         container,
         lldbdash.commands.ListSettingsCommand(
-            settings, help=f"List the dashboard settings."
+            settings, help="List the dashboard settings."
         ),
     )
 

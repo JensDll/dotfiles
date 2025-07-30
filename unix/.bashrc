@@ -4,10 +4,6 @@ if [[ -z ${PS1} ]]; then
   return
 fi
 
-__has() {
-  builtin type -fP "$1" &> /dev/null
-}
-
 # https://www.gnu.org/software/bash/manual/bash.html#index-HISTCONTROL
 HISTCONTROL=ignoreboth
 # https://www.gnu.org/software/bash/manual/bash.html#index-HISTSIZE
@@ -81,7 +77,7 @@ fi
 if [[ -d ${HOME}/.pyenv ]]; then
   export PYENV_ROOT="${HOME}"/.pyenv
   PATH="${PYENV_ROOT}"/bin:"${PATH}"
-  eval "$(pyenv init -)"
+  eval "$(pyenv init - bash)"
 fi
 
 if [[ -d ${HOME}/.gvm ]]; then

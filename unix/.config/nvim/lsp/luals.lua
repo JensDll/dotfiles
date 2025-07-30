@@ -26,6 +26,7 @@ local function append_lazy_paths(paths)
   end
 end
 
+---@type vim.lsp.Config
 return {
   cmd = { 'lua-language-server' },
   filetypes = { 'lua' },

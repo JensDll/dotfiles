@@ -33,15 +33,14 @@ return {
   opts = {
     formatters_by_ft = {
       lua = { 'stylua' },
-      cmake = { 'cmake_format' },
+      cmake = { 'gersemi' },
       c = { 'clang-format' },
       cpp = { 'clang-format' },
       javascript = { 'prettier' },
       typescript = { 'prettier' },
-      yaml = { 'prettier' },
-      json = { 'prettier' },
       sh = { 'shfmt' },
       bash = { 'shfmt' },
+      python = { 'isort', 'black' },
     },
     default_format_opts = {
       lsp_format = 'never',

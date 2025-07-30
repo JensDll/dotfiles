@@ -1,3 +1,7 @@
+__has() {
+  builtin type -fP "$1" &> /dev/null
+}
+
 if [[ ${OSTYPE} = linux-gnu ]]; then
   alias ls='ls --color=auto -F --group-directories-first'
   alias ll='ls -A -l'

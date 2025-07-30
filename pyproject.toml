@@ -1,8 +1,6 @@
 [tool.pyright]
-# https://microsoft.github.io/pyright/#/configuration?id=main-configuration-options
-include = ['unix', 'windows', 'misc', 'scripts']
+include = ['unix/.config/lldbdash', 'unix/.config/gdbdash']
 exclude = ['**/__pycache__']
 
 [tool.isort]
-# https://pycqa.github.io/isort/docs/configuration/options.html#profile
 profile = 'black'
