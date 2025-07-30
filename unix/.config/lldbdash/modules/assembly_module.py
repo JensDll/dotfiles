@@ -148,7 +148,7 @@ class Instruction:
 
 class InstructionPrinter:
     _frame: lldb.SBFrame | None = None
-    _instance: typing.Optional["InstructionPrinter"] = None
+    _instance: "InstructionPrinter"
 
     def __init__(self, frame: lldb.SBFrame, target: lldb.SBTarget):
         self.frame = frame
@@ -157,11 +157,9 @@ class InstructionPrinter:
 
     @classmethod
     def new_or_cached(cls, frame: lldb.SBFrame, target: lldb.SBTarget):
-        if cls._instance is None:
+        if cls._frame is None or cls._frame != frame:
+            cls._frame = frame
             cls._instance = cls(frame, target)
-            cls._frame = frame
-        if cls._frame != frame:
-            cls._frame = frame
         return cls._instance
 
     def find_pc_idx(self):
