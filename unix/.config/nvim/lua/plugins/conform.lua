@@ -40,7 +40,7 @@ return {
       typescript = { 'prettier' },
       sh = { 'shfmt' },
       bash = { 'shfmt' },
-      python = { 'isort', 'black' },
+      python = { 'ruff_fix', 'ruff_format' },
     },
     default_format_opts = {
       lsp_format = 'never',

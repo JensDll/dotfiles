@@ -11,6 +11,4 @@ class HandlerContainer:
             handler_name = f"handle_{HandlerContainer.handle_count}"
             setattr(HandlerContainer, handler_name, handler)
             HandlerContainer.handle_count += 1
-            self.handlers.append(
-                f"{HandlerContainer.__module__}.{HandlerContainer.__name__}.{handler_name}"
-            )
+            self.handlers.append(f"{HandlerContainer.__module__}.{HandlerContainer.__name__}.{handler_name}")

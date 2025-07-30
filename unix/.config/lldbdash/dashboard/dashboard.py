@@ -3,6 +3,7 @@ import shutil
 import typing
 
 import lldb
+
 import lldbdash.commands
 from lldbdash.common import RESET_COLOR, Output, Settings, g_file_streams
 
@@ -34,9 +35,7 @@ def on_change_output(prev_output: str, output: str):
 
 def is_running(exe_ctx: lldb.SBExecutionContext):
     state: int = exe_ctx.GetProcess().GetState()
-    return Dashboard.instance and (
-        state == lldb.eStateStopped or state == lldb.eStateCrashed
-    )
+    return Dashboard.instance and state in (lldb.eStateStopped, lldb.eStateCrashed)
 
 
 def terminal_window_size():
@@ -47,9 +46,7 @@ class Dashboard:
     modules: typing.ClassVar[list["Module"]]
     instance: typing.ClassVar["Dashboard"]
     settings: typing.ClassVar["DashboardSettings"] = {
-        "config-file": lldbdash.commands.StrCommand(
-            "lldbdash.json", help="The config file name."
-        ),
+        "config-file": lldbdash.commands.StrCommand("lldbdash.json", help="The config file name."),
         "text-highlight": lldbdash.commands.StrCommand("\033[38;2;229;229;16m"),
         "text-secondary": lldbdash.commands.StrCommand("\033[38;2;114;114;110m"),
         "divider-fill-char": lldbdash.commands.StrCommand("─"),
@@ -65,9 +62,7 @@ class Dashboard:
     }
     enabled: typing.ClassVar[lldbdash.commands.ToggleCommand]
 
-    def __init__(
-        self, target: lldb.SBTarget, extra_args: lldb.SBStructuredData, dict: dict
-    ):
+    def __init__(self, target: lldb.SBTarget, extra_args: lldb.SBStructuredData, dict: dict):
         self.config_modified_time = 0
         Dashboard.instance = self
 

@@ -107,9 +107,7 @@ class MxcsrRegister:
 
 
 class AvxRegister:
-    def __init__(
-        self, name_ymm: str, name_xmm: str, values: list[int], prev_values: list[int]
-    ):
+    def __init__(self, name_ymm: str, name_xmm: str, values: list[int], prev_values: list[int]):
         self.name_ymm = name_ymm
         self.name_xmm = name_xmm
         self.values = values

@@ -1,6 +1,7 @@
 import typing
 
 import lldb
+
 from lldbdash.commands import PureCommand
 from lldbdash.dashboard import is_running, terminal_window_size
 

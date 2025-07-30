@@ -1,4 +1,5 @@
 import lldb
+
 import lldbdash.commands
 import lldbdash.common
 import lldbdash.dashboard
@@ -12,20 +13,14 @@ def __lldb_init_module(debugger: lldb.SBDebugger, internal_dict: dict):
 
 def register_dashboard(debugger: lldb.SBDebugger):
     lldbdash.dashboard.Dashboard.modules = [
-        value
-        for value in vars(lldbdash.modules).values()
-        if lldbdash.modules.is_module(value)
+        value for value in vars(lldbdash.modules).values() if lldbdash.modules.is_module(value)
     ]
 
     container = "dashboard"
 
-    debugger.HandleCommand(
-        f"command container add --help 'The command container for the LLDB dashboard.' {container}"
-    )
+    debugger.HandleCommand(f"command container add --help 'The command container for the LLDB dashboard.' {container}")
 
-    debugger.HandleCommand(
-        "target stop-hook add --script-class lldbdash.dashboard.Dashboard"
-    )
+    debugger.HandleCommand("target stop-hook add --script-class lldbdash.dashboard.Dashboard")
 
     stop_hook_id = get_stop_hook_id(debugger)
 
@@ -44,12 +39,8 @@ def register_dashboard(debugger: lldb.SBDebugger):
         on_change=on_toggle,
     )
 
-    debugger.HandleCommand(
-        f"command script add --class {enabled.handlers[0]} {container} enable"
-    )
-    debugger.HandleCommand(
-        f"command script add --class {enabled.handlers[1]} {container} disable"
-    )
+    debugger.HandleCommand(f"command script add --class {enabled.handlers[0]} {container} enable")
+    debugger.HandleCommand(f"command script add --class {enabled.handlers[1]} {container} disable")
 
     debugger.HandleCommand(
         f"command script add --class lldbdash.dashboard.PrintCommand {container} print",
@@ -68,9 +59,7 @@ def register_dashboard(debugger: lldb.SBDebugger):
         settings,
         debugger,
         container,
-        lldbdash.commands.ListSettingsCommand(
-            settings, help="List the dashboard settings."
-        ),
+        lldbdash.commands.ListSettingsCommand(settings, help="List the dashboard settings."),
     )
 
 
@@ -87,25 +76,15 @@ def register_modules(debugger: lldb.SBDebugger):
                 settings,
                 debugger,
                 container,
-                lldbdash.commands.ListSettingsCommand(
-                    settings, help=f"List the {module.name} settings."
-                ),
+                lldbdash.commands.ListSettingsCommand(settings, help=f"List the {module.name} settings."),
             )
 
-        debugger.HandleCommand(
-            f"command script add --class {module.enabled.handlers[0]} {container} enable"
-        )
-        debugger.HandleCommand(
-            f"command script add --class {module.enabled.handlers[1]} {container} disable"
-        )
+        debugger.HandleCommand(f"command script add --class {module.enabled.handlers[0]} {container} enable")
+        debugger.HandleCommand(f"command script add --class {module.enabled.handlers[1]} {container} disable")
 
-        print_command = lldbdash.modules.PrintCommand(
-            module, help=f"Print the {module.name} module."
-        )
+        print_command = lldbdash.modules.PrintCommand(module, help=f"Print the {module.name} module.")
 
-        debugger.HandleCommand(
-            f"command script add --class {print_command.handlers[0]} {container} print"
-        )
+        debugger.HandleCommand(f"command script add --class {print_command.handlers[0]} {container} print")
 
 
 def register_settings(
@@ -121,16 +100,12 @@ def register_settings(
     debugger.HandleCommand(f"command container add {settings_container} show")
 
     for name, setting in settings.items():
-        debugger.HandleCommand(
-            f"command script add --class {setting.handlers[0]} {settings_container} set {name}"
-        )
+        debugger.HandleCommand(f"command script add --class {setting.handlers[0]} {settings_container} set {name}")
         debugger.HandleCommand(
             f"command script add --class {setting.show_command.handlers[0]} {settings_container} show {name}"
         )
 
-    debugger.HandleCommand(
-        f"command script add --class {list_command.handlers[0]} {settings_container} list"
-    )
+    debugger.HandleCommand(f"command script add --class {list_command.handlers[0]} {settings_container} list")
 
 
 def get_stop_hook_id(debugger: lldb.SBDebugger):

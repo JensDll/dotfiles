@@ -31,17 +31,13 @@ class IntCommand(Command[int]):
                 args = shlex.split(_command)
 
                 if len(args) != 1:
-                    _result.SetError(
-                        f"Command expects exactly one argument but {len(args)} were given."
-                    )
+                    _result.SetError(f"Command expects exactly one argument but {len(args)} were given.")
                     return
 
                 try:
                     self.set_value(int(args[0]))
                 except ValueError:
-                    _result.SetError(
-                        f"Invalid argument {args[0]} must be convertible to int"
-                    )
+                    _result.SetError(f"Invalid argument {args[0]} must be convertible to int")
 
             def get_short_help(self):
                 return help
