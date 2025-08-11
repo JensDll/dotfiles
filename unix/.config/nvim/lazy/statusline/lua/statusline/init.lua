@@ -70,8 +70,12 @@ local config = {
 function M.render()
   local result = ''
 
-  for _, index in ipairs(config.line) do
-    result = result .. segments[index]()
+  for _, value in ipairs(config.line) do
+    if type(value) == 'string' then
+      result = result .. value
+    else
+      result = result .. segments[value]()
+    end
   end
 
   return result

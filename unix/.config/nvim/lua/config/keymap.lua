@@ -22,15 +22,15 @@ vim.keymap.set('n', '<Leader>c', function()
   end)
 end, { desc = 'Execute the typed command and display its output in a new buffer' })
 
-vim.keymap.set({ 'n', 'x' }, '<C-_>', function()
+vim.keymap.set({ 'n', 'x' }, '<C-/>', function()
   return require('vim._comment').operator()
 end, { expr = true })
 
-vim.keymap.set('i', '<C-_>', function()
+vim.keymap.set('i', '<C-/>', function()
   return '<Esc>' .. require('vim._comment').operator() .. '_i'
 end, { expr = true })
 
-vim.keymap.set('o', '<C-_>', function()
+vim.keymap.set('o', '<C-/>', function()
   require('vim._comment').textobject()
 end)
 

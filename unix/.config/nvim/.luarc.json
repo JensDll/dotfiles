@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+  "runtime.version": "LuaJIT",
+  "runtime.path": ["lua/?.lua", "lua/?/init.lua"],
+  "workspace.library": [
+    "/opt/nvim-linux-x86_64/share/nvim/runtime",
+    "~/.local/share/nvim/lazy/blink.cmp",
+    "~/.local/share/nvim/lazy/bufferline.nvim",
+    "~/.local/share/nvim/lazy/catppuccin",
+    "~/.local/share/nvim/lazy/conform.nvim",
+    "~/.local/share/nvim/lazy/friendly-snippets.nvim",
+    "~/.local/share/nvim/lazy/gitsigns.nvim",
+    "~/.local/share/nvim/lazy/mason.nvim",
+    "~/.local/share/nvim/lazy/mini.nvim",
+    "~/.local/share/nvim/lazy/nvim-treesitter"
+  ]
+}

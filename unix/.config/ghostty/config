@@ -13,7 +13,6 @@ keybind = alt+six=goto_tab:6
 keybind = alt+seven=goto_tab:7
 keybind = alt+eight=goto_tab:8
 keybind = alt+nine=goto_tab:9
-keybind = ctrl+`=toggle_split_zoom
 keybind = ctrl+shift+,=reload_config
 
 theme = cyberpunk

@@ -69,9 +69,6 @@ class Instruction:
         branch_taken_marker = AssemblyModule.settings["branch-taken-marker"].value
         branch_not_taken_marker = AssemblyModule.settings["branch-not-taken-marker"].value
 
-        does_branch = BRANCH_MAP.get(self.mnemonic)
-        does_branch_result = does_branch and does_branch(flags, reader)
-
         # Address
         out.write(f"{color}{self.addr:#0x}{RESET_COLOR}  ")
 
@@ -84,8 +81,8 @@ class Instruction:
 
         # Branching
         if predict_branching:
-            if does_branch is not None:
-                out.write(branch_taken_marker if does_branch_result else branch_not_taken_marker)
+            if does_branch := BRANCH_MAP.get(self.mnemonic):
+                out.write(branch_taken_marker if does_branch(flags, reader) else branch_not_taken_marker)
                 out.write(" ")
             else:
                 out.write("  ")

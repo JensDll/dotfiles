@@ -84,6 +84,12 @@ if [[ -d ${HOME}/.gvm ]]; then
   source "${HOME}"/.gvm/scripts/gvm
 fi
 
+if [[ -d ${HOME}/.deno ]]; then
+  source "${HOME}/.deno/env"
+  source <(deno completions bash)
+  export DENO_NO_UPDATE_CHECK=1
+fi
+
 if [[ -f ${HOME}/.bash_aliases ]]; then
   source "${HOME}"/.bash_aliases
 fi

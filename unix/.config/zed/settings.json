@@ -10,5 +10,16 @@
     "mode": "dark",
     "dark": "Catppuccin Frappé - No Italics",
     "light": "One Light"
+  },
+  "buffer_font_family": "JetBrains Mono NL",
+  "languages": {
+    "Lua": {
+      "formatter": {
+        "external": {
+          "command": "stylua",
+          "arguments": ["--stdin-filepath", "{buffer_path}", "-"]
+        }
+      }
+    }
   }
 }

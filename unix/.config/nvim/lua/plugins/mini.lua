@@ -1,4 +1,4 @@
-vim.keymap.set({ 'n', 'i', 'v' }, '<C-b>', function()
+vim.keymap.set({ 'n', 'i', 'v' }, '<C-`>', function()
   if not MiniFiles.close() then
     MiniFiles.open()
   end
