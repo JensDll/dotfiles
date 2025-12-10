@@ -31,7 +31,11 @@ alias today='date +%d.%m.%y'
 alias his='history'
 
 for i in {24..18}; do
-  if __has lldb-"${i}"; then
+  if __has clang-"${i}"; then
+    # shellcheck disable=SC2139
+    alias clang="clang-${i}"
+    # shellcheck disable=SC2139
+    alias clang++="clang++-${i}"
     # shellcheck disable=SC2139
     alias lldb="lldb-${i}"
     break
@@ -83,4 +87,8 @@ if __has flatpak; then
     source /usr/share/bash-completion/completions/flatpak
     complete -o nospace -F __flatpak fp
   fi
+fi
+
+if __has tree-sitter; then
+  alias ts='tree-sitter'
 fi

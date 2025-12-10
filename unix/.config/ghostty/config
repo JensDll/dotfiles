@@ -16,5 +16,6 @@ keybind = alt+nine=goto_tab:9
 keybind = ctrl+shift+,=reload_config
 
 theme = cyberpunk
+cursor-text = #000000
 
 window-padding-balance = true

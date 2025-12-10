@@ -42,19 +42,17 @@ vim.api.nvim_create_autocmd('User', {
 })
 
 return {
-  {
-    'echasnovski/mini.nvim',
-    init = function()
-      require('mini.icons').setup()
+  'nvim-mini/mini.nvim',
+  init = function()
+    require('mini.icons').setup()
 
-      require('mini.files').setup({
-        options = {
-          permanent_delete = false,
-        },
-        mappings = {
-          show_help = '',
-        },
-      })
-    end,
-  },
+    require('mini.files').setup({
+      options = {
+        permanent_delete = false,
+      },
+      mappings = {
+        show_help = '',
+      },
+    })
+  end,
 }
