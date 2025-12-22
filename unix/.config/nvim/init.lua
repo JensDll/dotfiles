@@ -1,40 +1,38 @@
-require("plugins")
+vim.g.mapleader = ' '
+vim.g.maplocalleader = '\\'
 
-local lsp = require("lsp-zero").preset({})
+vim.g.c_syntax_for_h = true
 
-lsp.on_attach(function(client, bufnr)
-  lsp.default_keymaps({ buffer = bufnr })
+vim.o.number = true
+
+vim.o.termguicolors = true
+
+vim.o.list = true
+vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+
+vim.o.ignorecase = true
+vim.o.smartcase = true
+
+vim.o.cursorline = true
+
+vim.o.confirm = true
+
+vim.o.mouse = 'a'
+
+vim.o.undofile = true
+
+vim.o.timeoutlen = 800
+
+vim.schedule(function()
+  vim.o.clipboard = 'unnamedplus'
 end)
 
-lsp.extend_cmp()
+vim.cmd([[
+  aunmenu PopUp.How-to\ disable\ mouse
+  aunmenu PopUp.-2-
+]])
 
-require("mason").setup()
-
-require("formatter").setup({
-  logging = true,
-  log_level = vim.log.levels.WARN,
-  filetype = {
-    -- https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd
-    sh = {
-      function()
-        local shiftwidth = vim.opt.shiftwidth:get()
-        local expandtab = vim.opt.expandtab:get()
-
-        if not expandtab then
-          shiftwidth = 0
-        end
-
-        return {
-          exe = "shfmt",
-          args = { "--indent", shiftwidth, "--binary-next-line", "--space-redirects", "--keep-padding" },
-          stdin = true,
-        }
-      end,
-    },
-  },
-})
-
-vim.o.relativenumber = true
-
-vim.keymap.set("n", "<leader>f", ":Format<CR>", { silent = true, unique = true })
-vim.keymap.set("n", "<leader>F", ":FormatWrite<CR>", { silent = true, unique = true })
+require('config.keymap')
+require('config.autocmd')
+require('config.lazy')
+require('config.lsp')

@@ -1,4 +1,5 @@
 import lldb
+
 from lldbdash.common import g_file_streams
 
 
@@ -11,9 +12,7 @@ def on_change_output(prev_output: str, current_output: str):
 
 
 def add_or_increase(key: str):
-    entry = g_file_streams.setdefault(
-        key, {"stream": lldb.SBStream(), "num_writers": 0}
-    )
+    entry = g_file_streams.setdefault(key, {"stream": lldb.SBStream(), "num_writers": 0})
     if entry["num_writers"] == 0:
         entry["stream"].RedirectToFile(key, True)
     entry["num_writers"] += 1

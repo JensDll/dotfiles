@@ -31,9 +31,7 @@ class StrCommand(Command[str]):
                 args = shlex.split(_command)
 
                 if len(args) != 1:
-                    _result.SetError(
-                        f"Command expects exactly one argument but {len(args)} were given."
-                    )
+                    _result.SetError(f"Command expects exactly one argument but {len(args)} were given.")
                     return
 
                 self.set_value(args[0])

@@ -1,1 +1,2 @@
-external-sources=true
+enable=all
+disable=SC1090,SC1091,SC2312

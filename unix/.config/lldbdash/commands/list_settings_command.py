@@ -1,6 +1,7 @@
 import typing
 
 import lldb
+
 from lldbdash.common import Settings
 
 from .pure_command import PureCommand

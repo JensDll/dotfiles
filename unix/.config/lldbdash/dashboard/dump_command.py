@@ -18,15 +18,11 @@ class DumpCommand:
     ):
         values = {
             "enabled": Dashboard.enabled.value,
-            "settings": {
-                name: option.value for name, option in Dashboard.get_settings().items()
-            },
+            "settings": {name: option.value for name, option in Dashboard.get_settings().items()},
             "modules": {
                 module.name: {
                     "enabled": module.enabled.value,
-                    "settings": {
-                        name: option.value for name, option in module.settings.items()
-                    },
+                    "settings": {name: option.value for name, option in module.settings.items()},
                 }
                 for module in Dashboard.modules
             },

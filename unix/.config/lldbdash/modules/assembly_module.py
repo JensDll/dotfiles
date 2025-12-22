@@ -4,6 +4,7 @@ import typing
 
 import lldb
 import lldb.utils
+
 import lldbdash.commands
 from lldbdash.common import FONT_UNDERLINE, RESET_COLOR, Output
 from lldbdash.dashboard import Dashboard as D
@@ -52,9 +53,7 @@ class Instruction:
 
     @classmethod
     def list(cls, symbol: lldb.SBSymbol, target: lldb.SBTarget) -> list["Instruction"]:
-        instructions = symbol.GetInstructions(
-            target, AssemblyModule.settings["disassembly-flavor"].value
-        )
+        instructions = symbol.GetInstructions(target, AssemblyModule.settings["disassembly-flavor"].value)
         return [cls(target, symbol, inst) for inst in instructions]
 
     def print(
@@ -68,12 +67,7 @@ class Instruction:
     ):
         predict_branching = AssemblyModule.settings["predict-branching"].value
         branch_taken_marker = AssemblyModule.settings["branch-taken-marker"].value
-        branch_not_taken_marker = AssemblyModule.settings[
-            "branch-not-taken-marker"
-        ].value
-
-        does_branch = BRANCH_MAP.get(self.mnemonic)
-        does_branch_result = does_branch and does_branch(flags, reader)
+        branch_not_taken_marker = AssemblyModule.settings["branch-not-taken-marker"].value
 
         # Address
         out.write(f"{color}{self.addr:#0x}{RESET_COLOR}  ")
@@ -87,12 +81,8 @@ class Instruction:
 
         # Branching
         if predict_branching:
-            if does_branch is not None:
-                out.write(
-                    branch_taken_marker
-                    if does_branch_result
-                    else branch_not_taken_marker
-                )
+            if does_branch := BRANCH_MAP.get(self.mnemonic):
+                out.write(branch_taken_marker if does_branch(flags, reader) else branch_not_taken_marker)
                 out.write(" ")
             else:
                 out.write("  ")
@@ -157,9 +147,9 @@ class InstructionPrinter:
 
     @classmethod
     def new_or_cached(cls, frame: lldb.SBFrame, target: lldb.SBTarget):
-        if cls._frame != frame:
-            cls._instance = cls(frame, target)
+        if cls._frame is None or cls._frame != frame:
             cls._frame = frame
+            cls._instance = cls(frame, target)
         return cls._instance
 
     def find_pc_idx(self):
@@ -203,9 +193,7 @@ class InstructionPrinter:
         flags = reader.read_rflags()
 
         self.print_instructions(out, dimensions, flags, reader, start, pc_idx)
-        self.instructions[pc_idx].print_highlight(
-            out=out, dim=dimensions, flags=flags, reader=reader
-        )
+        self.instructions[pc_idx].print_highlight(out=out, dim=dimensions, flags=flags, reader=reader)
         self.print_instructions(out, dimensions, flags, reader, pc_idx + 1, end)
 
     def print_instructions(
@@ -218,9 +206,7 @@ class InstructionPrinter:
         end: int,
     ):
         for i in range(start, end):
-            self.instructions[i].print_normal(
-                out=out, dim=dimensions, flags=flags, reader=reader
-            )
+            self.instructions[i].print_normal(out=out, dim=dimensions, flags=flags, reader=reader)
 
     def fetch_blocks_start(self, pc_idx: int):
         before = AssemblyModule.settings["instructions-before"].value - pc_idx
@@ -249,12 +235,7 @@ class InstructionPrinter:
         return pc_idx
 
     def fetch_blocks_end(self, pc_idx: int):
-        after = (
-            AssemblyModule.settings["instructions-after"].value
-            - len(self.instructions)
-            + pc_idx
-            + 1
-        )
+        after = AssemblyModule.settings["instructions-after"].value - len(self.instructions) + pc_idx + 1
 
         while after > 0:
             addr: lldb.SBAddress = self.instructions[-1].symbol.GetEndAddress()
@@ -306,18 +287,14 @@ class AssemblyModule:
         "disassembly-flavor": lldbdash.commands.StrCommand(
             "intel", help="The disassembly flavor (default, att, intel)."
         ),
-        "show-opcode": lldbdash.commands.BoolCommand(
-            True, help="Whether to display the opcode."
-        ),
+        "show-opcode": lldbdash.commands.BoolCommand(True, help="Whether to display the opcode."),
         "text-comment": lldbdash.commands.StrCommand(
             "\033[38;2;14;188;108m", help="The color of the instruction comment."
         ),
         "text-mnemonic": lldbdash.commands.StrCommand(
             "\033[38;2;17;168;193m", help="The color of the instruction mnemonic."
         ),
-        "predict-branching": lldbdash.commands.BoolCommand(
-            True, help="Whether to show branch information."
-        ),
+        "predict-branching": lldbdash.commands.BoolCommand(True, help="Whether to show branch information."),
         "branch-taken-marker": lldbdash.commands.StrCommand(
             f"\033[38;2;14;188;108my{RESET_COLOR}",
             help='The branch taken marker displayed when "predict-branching" is enabled.',

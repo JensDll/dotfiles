@@ -4,17 +4,26 @@
 
 # https://ccache.dev
 
-declare -r reset="\033[0m"
-declare -r red="\033[0;31m"
-declare -r green="\033[0;32m"
+set -e
+shopt -s shift_verbose
+
+__echo() {
+  echo "[install-ccache] $*"
+}
+
+__dispose() {
+  __echo "Removing temporary directory $1"
+  rm --recursive "$1"
+}
 
 __usage() {
-  # https://manpages.debian.org/coreutils/cat
   cat <<EOF
 Usage: $(basename "${BASH_SOURCE[0]}") <version> [options]
+Arguments:
+  <version>       version of the release
 Options: [default value in bracket after description]
   --help|-h|-?    print this message and exit
-  --prefix        directory in which to install    [$HOME/.local/bin]
+  --prefix        directory in which to install    [${HOME}/.local/bin]
 EOF
 
   if [[ $1 == --success ]]; then
@@ -24,35 +33,15 @@ EOF
   fi
 }
 
-__success() {
-  # https://manpages.debian.org/coreutils/echo
-  echo -e "${green}Success: $*${reset}"
-}
-
-__error() {
-  echo -e "${red}Error: $*${reset}" 1>&2
-}
-
-__error_and_exit() {
-  echo -e "${red}Error: $*${reset}" 1>&2
-  exit 1
-}
-
-__cleanup() {
-  echo "Cleaning up temporary directory: $1"
-  # https://manpages.debian.org/coreutils/rm
-  rm --recursive "$1"
-}
-
 __parse_parameters() {
   local -a arguments
 
-  prefix="$HOME/.local/bin"
+  prefix="${HOME}/.local/bin"
 
   while [[ $# -gt 0 ]]; do
     local -l option="${1/#--/-}"
 
-    case "$option" in
+    case "${option}" in
     -\? | -help | -h)
       __usage --success
       ;;
@@ -64,7 +53,7 @@ __parse_parameters() {
       prefix="${option:8}"
       ;;
     -*)
-      __error "Unknown option: $1"
+      __echo "Unknown option: $1"
       __usage
       ;;
     *)
@@ -75,15 +64,21 @@ __parse_parameters() {
     shift
   done
 
+  # Argument <version>
+  # Remove a single leading v
   version=${arguments[0]#v}
 
-  if [[ -z $version ]]; then
-    __error "Missing value for argument: <version>"
+  # Option --prefix
+  # Replace a single leading ~ with $HOME
+  prefix=${prefix/#\~/${HOME}}
+
+  if [[ -z ${version} ]]; then
+    __echo "Missing value for argument: <version>"
     __usage
   fi
 
-  if [[ -z $prefix ]]; then
-    __error "Missing value for option: --prefix"
+  if [[ -z ${prefix} ]]; then
+    __echo "Missing value for option: --prefix"
     __usage
   fi
 }
@@ -91,45 +86,35 @@ __parse_parameters() {
 __parse_parameters "$@"
 declare -r version prefix
 
-# https://manpages.debian.org/coreutils/mktemp
 temp_dir=$(mktemp --directory)
 declare -r temp_dir
 
-# https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html#index-trap
-trap '__cleanup $temp_dir' EXIT
+trap '__dispose $temp_dir' EXIT
 
-# https://manpages.debian.org/gpg/gpg
-if [[ -n $(gpg --auto-key-locate local --locate-keys 5A939A71A46792CF57866A51996DDA075594ADB8) ]]; then
-  gpg --receive-keys 5A939A71A46792CF57866A51996DDA075594ADB8
-fi
+declare -r binary="ccache-${version}-linux-x86_64.tar.xz"
+declare -r binary_uri="https://github.com/ccache/ccache/releases/download/v${version}/${binary}"
+declare -r binary_output="${temp_dir}/${binary}"
 
-declare -r binary="ccache-$version-linux-x86_64.tar.xz"
-declare -r binary_uri="https://github.com/ccache/ccache/releases/download/v$version/$binary"
-declare -r binary_output="$temp_dir/$binary"
+declare -r signature="ccache-${version}-linux-x86_64.tar.xz.minisig"
+declare -r signature_uri="https://github.com/ccache/ccache/releases/download/v${version}/${signature}"
+declare -r signature_output="${temp_dir}/${signature}"
 
-declare -r signature="ccache-$version-linux-x86_64.tar.xz.asc"
-declare -r signature_uri="https://github.com/ccache/ccache/releases/download/v$version/$signature"
-declare -r signature_output="$temp_dir/$signature"
+__echo "Downloading binary from ${binary_uri}"
+__echo "Downloading signature from ${signature_uri}"
 
-# https://manpages.debian.org/curl/curl
-if ! curl --location --fail --fail-early \
-  --output "$signature_output" "$signature_uri" \
-  --output "$binary_output" "$binary_uri"; then
-  __error_and_exit "Failed to download ccache binary and signature"
-fi
+curl --location --fail --fail-early \
+  --output "${signature_output}" "${signature_uri}" \
+  --output "${binary_output}" "${binary_uri}"
 
-if ! gpg --verify "$signature_output" "$binary_output"; then
-  __error_and_exit "Signature verification failed"
-fi
+__echo "Verifying binary"
 
-# https://manpages.debian.org/tar/tar
-tar --extract --xz --file "$binary_output" --directory "$temp_dir"
+minisign -Vm "${binary_output}" -P RWQX7yXbBedVfI4PNx6FLdFXu9GHUFsr28s4BVGxm4BeybtnX3P06saF
+
+tar --extract --xz --file "${binary_output}" --directory "${temp_dir}"
 
 declare -r executable="${binary_output%.tar.xz}/ccache"
 
-# https://manpages.debian.org/coreutils/mkdir
-mkdir --parents "$prefix"
-# https://manpages.debian.org/coreutils/mv
-mv --target-directory="$prefix" "$executable"
+mkdir --parents "${prefix}"
+mv --target-directory="${prefix}" "${executable}"
 
-__success "Installed $executable to $prefix"
+__echo "Installed ${executable} to ${prefix}"

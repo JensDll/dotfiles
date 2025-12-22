@@ -1,8 +1,17 @@
-[tool.pyright]
-# https://microsoft.github.io/pyright/#/configuration?id=main-configuration-options
-include = ['unix', 'windows', 'misc', 'scripts']
-exclude = ['**/__pycache__']
+[project]
+name = "dotfiles"
+version = "0.1.0"
+requires-python = "==3.13.5"
 
-[tool.isort]
-# https://pycqa.github.io/isort/docs/configuration/options.html#profile
-profile = 'black'
+[dependency-groups]
+dev = ["ruff==0.12.7", "pyright==1.1.403"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E731"]
+
+[tool.pyright]
+exclude = ["**/__pycache__", ".*"]

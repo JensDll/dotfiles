@@ -31,23 +31,22 @@ class BoolCommand(Command[bool]):
                 args = shlex.split(_command)
 
                 if len(args) != 1:
-                    _result.SetError(
-                        f"Command expects exactly one argument but {len(args)} were given."
-                    )
+                    _result.SetError(f"Command expects exactly one argument but {len(args)} were given.")
                     return
 
                 arg = args[0].lower()
 
-                if arg == "true" or arg == "on" or arg == "1" or arg == "enable":
+                if arg in {"true", "on", "1", "enable"}:
                     self.set_value(True)
                     return
 
-                if arg == "false" or arg == "off" or arg == "0" or arg == "disable":
+                if arg in {"false", "off", "0", "disable"}:
                     self.set_value(False)
                     return
 
                 _result.SetError(
-                    f"Invalid argument '{arg}' must be convertible to bool. Valid arguments are (true, on, 1, enable) and (false, off, 0, disable)."
+                    f"Invalid argument '{arg}' must be convertible to bool."
+                    "Valid arguments are (true, on, 1, enable) and (false, off, 0, disable)."
                 )
 
             def get_short_help(self):

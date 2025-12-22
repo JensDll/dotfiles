@@ -2,6 +2,7 @@ import os
 import typing
 
 import lldb
+
 import lldbdash.commands
 from lldbdash.common import FONT_UNDERLINE, RESET_COLOR, Output, batched
 from lldbdash.dashboard import Dashboard as D
@@ -33,21 +34,11 @@ if typing.TYPE_CHECKING:
 class RegisterModule:
     name = "register"
     settings: "ModuleSettings" = {
-        "show-decimal": lldbdash.commands.BoolCommand(
-            True, help="Display the general purpose register decimal value."
-        ),
-        "show-segment": lldbdash.commands.BoolCommand(
-            True, help="Display the segment registers."
-        ),
-        "show-rflags": lldbdash.commands.BoolCommand(
-            True, help="Display the rflags register."
-        ),
-        "show-mxcsr": lldbdash.commands.BoolCommand(
-            True, help="Display the mxcsr register."
-        ),
-        "show-vector": lldbdash.commands.BoolCommand(
-            True, help="Display the vector registers."
-        ),
+        "show-decimal": lldbdash.commands.BoolCommand(True, help="Display the general purpose register decimal value."),
+        "show-segment": lldbdash.commands.BoolCommand(True, help="Display the segment registers."),
+        "show-rflags": lldbdash.commands.BoolCommand(True, help="Display the rflags register."),
+        "show-mxcsr": lldbdash.commands.BoolCommand(True, help="Display the mxcsr register."),
+        "show-vector": lldbdash.commands.BoolCommand(True, help="Display the vector registers."),
         "output": lldbdash.commands.StrCommand(
             "0",
             help="The render location of the register module.",
@@ -131,11 +122,7 @@ def write_gp(out: Output, regs: list[GeneralPurposeRegister], per_row: int):
 
 
 def write_gp_hex(out: Output, reg: GeneralPurposeRegister):
-    out.write(
-        D.settings["text-highlight"].value
-        if reg.changed
-        else D.settings["text-secondary"].value
-    )
+    out.write(D.settings["text-highlight"].value if reg.changed else D.settings["text-secondary"].value)
     out.write(f"{reg.get_name_64():>18}")
     out.write(RESET_COLOR)
     out.write(" ")

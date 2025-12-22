@@ -37,15 +37,9 @@ class RegisterReader:
         self.update_reg_sets(frame)
         pc = frame.GetPC()
 
-        gp_index = dict[str, int](
-            (t[1].GetName(), t[0]) for t in enumerate(self.gp_reg_set)
-        )
-        fp_index = dict[str, int](
-            (t[1].GetName(), t[0]) for t in enumerate(self.fp_reg_set)
-        )
-        avx_index = dict[str, int](
-            (t[1].GetName(), t[0]) for t in enumerate(self.avx_reg_set)
-        )
+        gp_index = dict[str, int]((t[1].GetName(), t[0]) for t in enumerate(self.gp_reg_set))
+        fp_index = dict[str, int]((t[1].GetName(), t[0]) for t in enumerate(self.fp_reg_set))
+        avx_index = dict[str, int]((t[1].GetName(), t[0]) for t in enumerate(self.avx_reg_set))
 
         for regs in (
             ["rax", "eax", "ax", "al"],
@@ -115,10 +109,7 @@ class RegisterReader:
             index = fp_index.get(xmm)
             if index is None:
                 continue
-            values = [
-                child.GetValueAsUnsigned()
-                for child in self.fp_reg_set.GetChildAtIndex(index)
-            ]
+            values = [child.GetValueAsUnsigned() for child in self.fp_reg_set.GetChildAtIndex(index)]
             self.entries[xmm] = Entry([index], values, pc)
 
         for reg in ["mxcsr"]:
@@ -134,14 +125,11 @@ class RegisterReader:
             index = avx_index.get(ymm)
             if index is None:
                 continue
-            values = [
-                child.GetValueAsUnsigned()
-                for child in self.avx_reg_set.GetChildAtIndex(index)
-            ]
+            values = [child.GetValueAsUnsigned() for child in self.avx_reg_set.GetChildAtIndex(index)]
             self.entries[ymm] = Entry([index, fp_index[xmm]], values, pc)
 
     @classmethod
-    def new_or_cached(cls, frame: lldb.SBFrame) -> "RegisterReader":
+    def new_or_cached(cls, frame: lldb.SBFrame):
         if cls._instance is None:
             cls._instance = cls(frame)
             cls._frame = frame
@@ -162,9 +150,7 @@ class RegisterReader:
 
     def read_gp(self, name: str):
         entry, pc_changed = self.get_entry(name)
-        values: list[lldb.SBValue] = [
-            self.gp_reg_set.GetChildAtIndex(i) for i in entry.indices
-        ]
+        values: list[lldb.SBValue] = [self.gp_reg_set.GetChildAtIndex(i) for i in entry.indices]
         if pc_changed:
             entry.values[0] = values[0].GetValueAsUnsigned()
         return GeneralPurposeRegister(values, entry.prev_values[0])
@@ -196,9 +182,7 @@ class RegisterReader:
         xmm: lldb.SBValue = self.fp_reg_set.GetChildAtIndex(entry.indices[1])
         if pc_changed:
             entry.values = [child.GetValueAsUnsigned() for child in ymm]
-        return AvxRegister(
-            ymm.GetName(), xmm.GetName(), entry.values, entry.prev_values
-        )
+        return AvxRegister(ymm.GetName(), xmm.GetName(), entry.values, entry.prev_values)
 
     def get_entry(self, name: str):
         entry = self.entries[name]
