@@ -91,37 +91,24 @@ declare -r temp_dir
 
 trap '__dispose $temp_dir' EXIT
 
-declare -r public_key="release-signing-public-key.txt"
-declare -r public_key_uri="https://ccache.dev/${public_key}"
-declare -r public_key_output="${temp_dir}/${public_key}"
-
 declare -r binary="ccache-${version}-linux-x86_64.tar.xz"
 declare -r binary_uri="https://github.com/ccache/ccache/releases/download/v${version}/${binary}"
 declare -r binary_output="${temp_dir}/${binary}"
 
-declare -r signature="ccache-${version}-linux-x86_64.tar.xz.asc"
+declare -r signature="ccache-${version}-linux-x86_64.tar.xz.minisig"
 declare -r signature_uri="https://github.com/ccache/ccache/releases/download/v${version}/${signature}"
 declare -r signature_output="${temp_dir}/${signature}"
 
-__echo "Downloading public key from ${public_key_uri}"
 __echo "Downloading binary from ${binary_uri}"
 __echo "Downloading signature from ${signature_uri}"
 
 curl --location --fail --fail-early \
-  --output "${public_key_output}" "${public_key_uri}" \
   --output "${signature_output}" "${signature_uri}" \
   --output "${binary_output}" "${binary_uri}"
 
-__echo "Importing public key"
-
-gpg --import-options import-clean,import-minimal --import "${public_key_output}"
-
 __echo "Verifying binary"
 
-if ! gpgv --keyring pubring.kbx "${signature_output}" "${binary_output}"; then
-  __echo "Signature verification failed"
-  exit 1
-fi
+minisign -Vm "${binary_output}" -P RWQX7yXbBedVfI4PNx6FLdFXu9GHUFsr28s4BVGxm4BeybtnX3P06saF
 
 tar --extract --xz --file "${binary_output}" --directory "${temp_dir}"
 
