@@ -37,3 +37,11 @@ end)
 vim.keymap.set('x', '<C-c>', 'y', {
   desc = 'Visual mode yank',
 })
+
+vim.keymap.set('n', '<Tab><Right>', '<Cmd>bnext<CR>', {
+  desc = 'Go to next buffer',
+})
+
+vim.keymap.set('n', '<Tab><Left>', '<Cmd>bprevious<CR>', {
+  desc = 'Go to previous buffer',
+})

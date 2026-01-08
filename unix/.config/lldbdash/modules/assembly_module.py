@@ -7,7 +7,7 @@ import lldb.utils
 
 import lldbdash.commands
 from lldbdash.common import FONT_UNDERLINE, RESET_COLOR, Output
-from lldbdash.dashboard import Dashboard as D
+from lldbdash.dashboard import Dashboard
 
 from .branch_map import BRANCH_MAP
 from .on_change_output import on_change_output
@@ -52,7 +52,7 @@ class Instruction:
         self.offset: int = self.addr - symbol.GetStartAddress().GetLoadAddress(target)
 
     @classmethod
-    def list(cls, symbol: lldb.SBSymbol, target: lldb.SBTarget) -> list["Instruction"]:
+    def instructions(cls, symbol: lldb.SBSymbol, target: lldb.SBTarget) -> list["Instruction"]:
         instructions = symbol.GetInstructions(target, AssemblyModule.settings["disassembly-flavor"].value)
         return [cls(target, symbol, inst) for inst in instructions]
 
@@ -111,7 +111,7 @@ class Instruction:
             out=out,
             dim=dim,
             flags=flags,
-            color=D.settings["text-secondary"].value,
+            color=Dashboard.settings["text-secondary"].value,
             mnemonic=f"{AssemblyModule.settings['text-mnemonic']}{self.mnemonic}{RESET_COLOR}",
             reader=reader,
         )
@@ -127,7 +127,7 @@ class Instruction:
             out=out,
             dim=dim,
             flags=flags,
-            color=D.settings["text-highlight"].value,
+            color=Dashboard.settings["text-highlight"].value,
             mnemonic=f"{AssemblyModule.settings['text-mnemonic']}{FONT_UNDERLINE}{self.mnemonic}{RESET_COLOR}",
             reader=reader,
         )
@@ -143,7 +143,7 @@ class InstructionPrinter:
     def __init__(self, frame: lldb.SBFrame, target: lldb.SBTarget):
         self.frame = frame
         self.target = target
-        self.instructions = Instruction.list(frame.GetSymbol(), target)
+        self.instructions = Instruction.instructions(frame.GetSymbol(), target)
 
     @classmethod
     def new_or_cached(cls, frame: lldb.SBFrame, target: lldb.SBTarget):
@@ -222,7 +222,7 @@ class InstructionPrinter:
             if not context.IsValid():
                 break
 
-            instructions = Instruction.list(context.GetSymbol(), self.target)
+            instructions = Instruction.instructions(context.GetSymbol(), self.target)
 
             if not instructions:
                 break
@@ -247,7 +247,7 @@ class InstructionPrinter:
             if not context.IsValid():
                 break
 
-            instructions = Instruction.list(context.GetSymbol(), self.target)
+            instructions = Instruction.instructions(context.GetSymbol(), self.target)
 
             if not instructions:
                 break

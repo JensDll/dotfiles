@@ -40,4 +40,8 @@ vim.keymap.set('n', '<F36>', function()
   vim.lsp.buf.type_definition()
 end, { desc = 'Go to type definition' })
 
+vim.keymap.set('n', '<F4>', function()
+  vim.lsp.buf.document_symbol()
+end, { desc = 'Show document symbols' })
+
 vim.lsp.enable({ 'luals', 'clangd', 'bashls', 'python', 'deno' })

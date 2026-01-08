@@ -80,13 +80,14 @@ class Dashboard:
         show_divider = Dashboard.settings["show-divider"].value
         size = terminal_window_size()
         for module in Dashboard.modules:
-            output = out
+            if not module.enabled:
+                continue
             module_output = module.settings["output"].value
-            if module_output != "0":
-                output = g_file_streams[module_output]["stream"]
+            if module.settings["output"].value != "0":
+                out = g_file_streams[module_output]["stream"]
             if show_divider:
-                self.print_divider(size, module, output)
-            module.render(size, exe_ctx, output)
+                self.print_divider(size, module, out)
+            module.render(size, exe_ctx, out)
 
     def print_divider(self, size: "terminal_size", module: "Module", out: Output):
         fill_char = Dashboard.settings["divider-fill-char"].value

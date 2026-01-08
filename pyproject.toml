@@ -1,10 +1,10 @@
 [project]
 name = "dotfiles"
 version = "0.1.0"
-requires-python = "==3.13.5"
+requires-python = "~=3.14.0"
 
 [dependency-groups]
-dev = ["ruff==0.12.7", "pyright==1.1.403"]
+dev = ["ruff==0.14.10", "ty==0.0.10"]
 
 [tool.ruff]
 line-length = 120
@@ -13,5 +13,5 @@ line-length = 120
 select = ["E", "F", "I"]
 ignore = ["E731"]
 
-[tool.pyright]
-exclude = ["**/__pycache__", ".*"]
+[tool.ty.environment]
+root = ["./unix/.config", "./unix/.config/lldbdash"]

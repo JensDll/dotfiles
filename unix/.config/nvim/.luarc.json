@@ -12,7 +12,6 @@
     "~/.local/share/nvim/lazy/lazy.nvim",
     "~/.local/share/nvim/lazy/mason.nvim",
     "~/.local/share/nvim/lazy/mini.nvim",
-    "~/.local/share/nvim/lazy/nvim-dap",
     "~/.local/share/nvim/lazy/nvim-treesitter"
   ]
 }

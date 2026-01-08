@@ -1,6 +1,6 @@
 ---@type vim.lsp.Config
 return {
-  cmd = { 'pylsp' },
+  cmd = { 'ty', 'server' },
   filetypes = { 'python' },
   root_markers = {
     'pyproject.toml',
@@ -9,20 +9,5 @@ return {
     'requirements.txt',
     'Pipfile',
     '.git',
-  },
-  settings = {
-    pylsp = {
-      plugins = {
-        autopep8 = {
-          enabled = false,
-        },
-        pycodestyle = {
-          enabled = false,
-        },
-        yapf = {
-          enabled = false,
-        },
-      },
-    },
   },
 }
