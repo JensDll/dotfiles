@@ -83,25 +83,11 @@ class Dashboard:
             if not module.enabled:
                 continue
             module_output = module.settings["output"].value
-            if module.settings["output"].value != "0":
+            if module_output != "0":
                 out = g_file_streams[module_output]["stream"]
             if show_divider:
-                self.print_divider(size, module, out)
+                print_divider(size, module, out)
             module.render(size, exe_ctx, out)
-
-    def print_divider(self, size: "terminal_size", module: "Module", out: Output):
-        fill_char = Dashboard.settings["divider-fill-char"].value
-
-        before = fill_char * (size.columns >> 4)
-        name = f" {module.name} "
-        after = fill_char * (size.columns - len(before) - len(name))
-
-        out.write(Dashboard.settings["text-secondary"].value)
-        out.write(before)
-        out.write(name)
-        out.write(after)
-        out.write(RESET_COLOR)
-        out.write("\n")
 
     def apply_config(self):
         path = pathlib.Path.cwd() / Dashboard.settings["config-file"].value
@@ -114,3 +100,18 @@ class Dashboard:
     @classmethod
     def get_settings(cls):
         return typing.cast(Settings, cls.settings)
+
+
+def print_divider(size: "terminal_size", module: "Module", out: Output):
+    fill_char = Dashboard.settings["divider-fill-char"].value
+
+    before = fill_char * (size.columns >> 4)
+    name = f" {module.name} "
+    after = fill_char * (size.columns - len(before) - len(name))
+
+    out.write(Dashboard.settings["text-secondary"].value)
+    out.write(before)
+    out.write(name)
+    out.write(after)
+    out.write(RESET_COLOR)
+    out.write("\n")
