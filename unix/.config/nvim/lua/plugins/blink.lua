@@ -17,6 +17,9 @@ return {
       trigger = {
         show_in_snippet = false,
       },
+      menu = {
+        auto_show = false,
+      },
     },
     sources = {
       default = { 'lsp', 'path', 'snippets', 'buffer' },

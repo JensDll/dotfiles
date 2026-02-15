@@ -1,0 +1,4 @@
+default partial alphanumeric_keys
+xkb_symbols "rctl_escape" {
+  key <RCTL> { [Escape, Escape, Escape, Escape] };
+};
