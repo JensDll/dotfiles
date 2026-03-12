@@ -31,4 +31,9 @@ require('lazy').setup({
   dev = {
     path = vim.fn.stdpath('config') .. '/lazy',
   },
+  performance = {
+    rtp = {
+      reset = false,
+    },
+  },
 })

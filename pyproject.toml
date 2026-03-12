@@ -4,7 +4,7 @@ version = "0.1.0"
 requires-python = "~=3.14.0"
 
 [dependency-groups]
-dev = ["ruff==0.14.10", "ty==0.0.10"]
+dev = ["ruff==0.14.10", "ty==0.0.10", "stylua"]
 
 [tool.ruff]
 line-length = 120
@@ -15,3 +15,9 @@ ignore = ["E731"]
 
 [tool.ty.environment]
 root = ["./unix/.config", "./unix/.config/lldbdash"]
+
+[tool.uv.sources]
+stylua = {
+  git = "https://github.com/johnnymorganz/stylua",
+  tag = "v2.4.0"
+}

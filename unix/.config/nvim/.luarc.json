@@ -3,7 +3,7 @@
   "runtime.version": "LuaJIT",
   "runtime.path": ["lua/?.lua", "lua/?/init.lua"],
   "workspace.library": [
-    "/opt/nvim-linux-x86_64/share/nvim/runtime",
+    "/usr/share/nvim/runtime",
     "~/.local/share/nvim/lazy/blink.cmp",
     "~/.local/share/nvim/lazy/bufferline.nvim",
     "~/.local/share/nvim/lazy/catppuccin",
