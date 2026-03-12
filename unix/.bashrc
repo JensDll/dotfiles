@@ -3,18 +3,12 @@ if [[ -z ${PS1} ]]; then
   return
 fi
 
-if [[ -r /etc/bashrc ]]; then
-  . /etc/bashrc
-fi
-
 HISTCONTROL=ignoreboth
 HISTSIZE=1000
 HISTFILESIZE=2000
 
 shopt -s histappend
 shopt -s checkwinsize
-
-PROMPT_COMMAND=('history -a' "${PROMPT_COMMAND[@]}")
 
 if [[ -z ${debian_chroot:-} && -r /etc/debian_chroot ]]; then
   debian_chroot=$(cat /etc/debian_chroot)
