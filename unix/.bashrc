@@ -29,13 +29,17 @@ fi
 
 if [[ ${is_color} = true ]]; then
   if [[ ${is_git} = true ]]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[38;2;0;255;0m\]\u@\h\[\033[38:5:15m\]:\[\033[38;2;83;234;253m\]\w\[\033[38;2;162;244;253m\]$(__git_ps1 "(%s)")\[\033[38;2;255;255;255m\]$ '
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[38;2;0;255;0m\]\u\[\033[38:5:15m\]:\[\033[38;2;83;234;253m\]\w\[\033[38;2;162;244;253m\]$(__git_ps1 "(%s)")\[\033[38;2;255;255;255m\]$ '
   else
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[38;2;0;255;0m\]\u@\h\[\033[38:5:15m\]:\[\033[38;2;83;234;253m\]\w\[\033[38;2;255;255;255m\]$ '
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[38;2;0;255;0m\]\u\[\033[38:5:15m\]:\[\033[38;2;83;234;253m\]\w\[\033[38;2;255;255;255m\]$ '
   fi
   export COLORTERM=truecolor
 else
-  PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+  if [[ ${is_git} = true ]]; then
+    PS1='${debian_chroot:+($debian_chroot)}\u:\w$(__git_ps1 "(%s)")$ '
+  else
+    PS1='${debian_chroot:+($debian_chroot)}\u:\w$ '
+  fi
 fi
 
 unset is_color
