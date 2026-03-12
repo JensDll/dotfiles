@@ -73,8 +73,24 @@ declare -r yes
 
 __bs_bootstrap() {
   chmod 700 "${unix}"/.gnupg
-  rsync --no-perms --archive --verbose --human-readable --safe-links --copy-links --exclude-from="${root}"/.rsyncignore "${unix}"/ "${HOME}"
+
+  rsync \
+    --no-perms \
+    --archive \
+    --verbose \
+    --human-readable \
+    --safe-links \
+    --copy-links \
+    --filter 'exclude /.config' \
+    --filter 'exclude __pycache__/' \
+    "${unix}"/ \
+    "${HOME}"
+
   ln -s -f "${unix}"/.config/* ~/.config/
+
+  if [[ ${OSTYPE} = darwin* ]]; then
+    ln -s -f "${misc}"/ghostty.macos ~/.config/ghostty/config.macos
+  fi
 }
 
 case "${action}" in

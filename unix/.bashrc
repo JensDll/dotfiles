@@ -99,6 +99,7 @@ if [[ ${OSTYPE} = darwin* ]]; then
   eval "$(locale)"
   if [[ -d /opt/homebrew ]]; then
     PATH=/opt/homebrew/bin:"${PATH}"
+    source <(brew shellenv bash)
     if [[ -r /opt/homebrew/etc/profile.d/bash_completion.sh ]]; then
       source /opt/homebrew/etc/profile.d/bash_completion.sh
     fi

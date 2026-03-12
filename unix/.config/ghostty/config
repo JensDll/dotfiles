@@ -24,3 +24,5 @@ window-padding-balance = true
 maximize = true
 
 theme = dotfiles
+
+config-file = ?config.macos
