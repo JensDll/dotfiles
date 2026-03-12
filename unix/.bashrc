@@ -29,9 +29,9 @@ fi
 
 if [[ ${is_color} = true ]]; then
   if [[ ${is_git} = true ]]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[38:5:10m\]\u@\h\[\033[38:5:15m\]:\[\033[38:5:12m\]\w\[\033[38:5:14m\]$(__git_ps1 "(%s)")\[\033[38:5:15m\]\$ '
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[38;2;0;255;0m\]\u@\h\[\033[38:5:15m\]:\[\033[38;2;83;234;253m\]\w\[\033[38;2;162;244;253m\]$(__git_ps1 "(%s)")\[\033[38;2;255;255;255m\]$ '
   else
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[38:5:10m\]\u@\h\[\033[38:5:15m\]:\[\033[38:5:12m\]\w\[\033[38:5:14m\]\[\033[38:5:15m\]\$ '
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[38;2;0;255;0m\]\u@\h\[\033[38:5:15m\]:\[\033[38;2;83;234;253m\]\w\[\033[38;2;255;255;255m\]$ '
   fi
   export COLORTERM=truecolor
 else
@@ -92,7 +92,7 @@ if [[ -r ${HOME}/.bash_aliases ]]; then
 fi
 
 if [[ ${OSTYPE} = darwin* ]]; then
-  eval $(locale)
+  eval "$(locale)"
   if [[ -d /opt/homebrew ]]; then
     PATH=/opt/homebrew/bin:"${PATH}"
     if [[ -r /opt/homebrew/etc/profile.d/bash_completion.sh ]]; then
