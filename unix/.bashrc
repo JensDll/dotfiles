@@ -91,6 +91,16 @@ if [[ -r ${HOME}/.bash_aliases ]]; then
   source "${HOME}"/.bash_aliases
 fi
 
+if [[ ${OSTYPE} = darwin* ]]; then
+  eval $(locale)
+  if [[ -d /opt/homebrew ]]; then
+    PATH=/opt/homebrew/bin:"${PATH}"
+    if [[ -r /opt/homebrew/etc/profile.d/bash_completion.sh ]]; then
+      source /opt/homebrew/etc/profile.d/bash_completion.sh
+    fi
+  fi
+fi
+
 export CPM_SOURCE_CACHE="${HOME}"/.cache/CPM
 export PATH
 export PROMPT_COMMAND

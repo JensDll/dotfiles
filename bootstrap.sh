@@ -74,7 +74,7 @@ declare -r yes
 __bs_bootstrap() {
   chmod 700 "${unix}"/.gnupg
   rsync --no-perms --archive --verbose --human-readable --safe-links --copy-links --exclude-from="${root}"/.rsyncignore "${unix}"/ "${HOME}"
-  ln --symbolic --force "${unix}"/.config/* ~/.config/
+  ln -s -f "${unix}"/.config/* ~/.config/
 }
 
 case "${action}" in
