@@ -89,7 +89,8 @@ __bs_bootstrap() {
   ln -s -f "${unix}"/.config/* ~/.config/
 
   if [[ ${OSTYPE} = darwin* ]]; then
-    ln -s -f "${misc}"/ghostty.macos ~/.config/ghostty/config.macos
+    ln -s -f "${unix}"/.config/ghostty/config.ghostty.macos \
+      "${unix}"/.config/ghostty/config.ghostty.macos.active
   fi
 }
 

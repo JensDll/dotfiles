@@ -25,4 +25,4 @@ maximize = true
 
 theme = dotfiles
 
-config-file = ?config.macos
+config-file = ?config.ghostty.macos.active
