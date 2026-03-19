@@ -1,5 +1,5 @@
 if [[ -z ${PS1} ]]; then
-  # Skip when running non-interactive
+  # skip when running non-interactive
   return
 fi
 
@@ -10,9 +10,36 @@ HISTFILESIZE=2000
 shopt -s histappend
 shopt -s checkwinsize
 
-if [[ -z ${debian_chroot:-} && -r /etc/debian_chroot ]]; then
-  debian_chroot=$(cat /etc/debian_chroot)
-fi
+# shellcheck disable=SC2128,SC2178,SC2179
+__dotfiles_push_back_prompt_command() {
+  if [[ ";${PROMPT_COMMAND[*]};" == *";$1;"* ]]; then
+    # already added
+    return
+  fi
+
+  if [[ -z "${PROMPT_COMMAND[*]}" ]]; then
+    # no prompt command
+    if ((BASH_VERSINFO[0] > 5 || (BASH_VERSINFO[0] == 5 && BASH_VERSINFO[1] >= 1))); then
+      # >= 5.1 can be an array
+      PROMPT_COMMAND=("$1")
+    else
+      PROMPT_COMMAND="$1"
+    fi
+  elif [[ $(builtin declare -p PROMPT_COMMAND 2> /dev/null) == 'declare -a'* ]]; then
+    # is an array, append to it
+    PROMPT_COMMAND+=("$1")
+  else
+    if ! [[ "${PROMPT_COMMAND}" =~ \;[[:space:]]*$ ]]; then
+      # does not end with ';', need to append it
+      PROMPT_COMMAND+=';'
+    fi
+    PROMPT_COMMAND+="$1"
+  fi
+}
+
+__dotfiles_push_back_prompt_command 'history -a'
+
+unset __dotfiles_push_back_prompt_command
 
 if [[ ${TERM} = xterm-color || ${TERM} = *-256color ]]; then
   is_color=true
@@ -29,16 +56,16 @@ fi
 
 if [[ ${is_color} = true ]]; then
   if [[ ${is_git} = true ]]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[38;2;0;255;0m\]\u\[\033[38:5:15m\]:\[\033[38;2;83;234;253m\]\w\[\033[38;2;162;244;253m\]$(__git_ps1 "(%s)")\[\033[38;2;255;255;255m\]$ '
+    PS1='\[\033[38;2;0;255;0m\]\u\[\033[38:5:15m\]:\[\033[38;2;83;234;253m\]\w\[\033[38;2;162;244;253m\]$(__git_ps1 "(%s)")\[\033[38;2;255;255;255m\]$ '
   else
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[38;2;0;255;0m\]\u\[\033[38:5:15m\]:\[\033[38;2;83;234;253m\]\w\[\033[38;2;255;255;255m\]$ '
+    PS1='\[\033[38;2;0;255;0m\]\u\[\033[38:5:15m\]:\[\033[38;2;83;234;253m\]\w\[\033[38;2;255;255;255m\]$ '
   fi
   export COLORTERM=truecolor
 else
   if [[ ${is_git} = true ]]; then
-    PS1='${debian_chroot:+($debian_chroot)}\u:\w$(__git_ps1 "(%s)")$ '
+    PS1='\u:\w$(__git_ps1 "(%s)")$ '
   else
-    PS1='${debian_chroot:+($debian_chroot)}\u:\w$ '
+    PS1='\u:\w$ '
   fi
 fi
 
@@ -91,10 +118,6 @@ if [[ -d ${HOME}/.deno ]]; then
   export DENO_NO_UPDATE_CHECK=1
 fi
 
-if [[ -r ${HOME}/.bash_aliases ]]; then
-  source "${HOME}"/.bash_aliases
-fi
-
 if [[ ${OSTYPE} = darwin* ]]; then
   eval "$(locale)"
   if [[ -d /opt/homebrew ]]; then
@@ -104,6 +127,10 @@ if [[ ${OSTYPE} = darwin* ]]; then
       source /opt/homebrew/etc/profile.d/bash_completion.sh
     fi
   fi
+fi
+
+if [[ -r ${HOME}/.bash_aliases ]]; then
+  source "${HOME}"/.bash_aliases
 fi
 
 export CPM_SOURCE_CACHE="${HOME}"/.cache/CPM

@@ -12,11 +12,11 @@ declare -r unix="${root}"/unix
 declare -r misc="${root}"/misc
 declare -r program=${BASH_SOURCE[0]}
 
-__bs_echo() {
+__dotfiles_echo() {
   echo "$*"
 }
 
-__bs_usage() {
+__dotfiles_usage() {
   cat << EOF
 Usage: ${program} <action> [options]
 
@@ -39,7 +39,7 @@ EOF
   exit "${1:-2}"
 }
 
-__bs_parse_parameters() {
+__dotfiles_parse_parameters() {
   local -a arguments
 
   while [[ $# -gt 0 ]]; do
@@ -47,14 +47,14 @@ __bs_parse_parameters() {
 
     case "${option}" in
     -\? | -h | -he | -hel | -help)
-      __bs_usage 0
+      __dotfiles_usage 0
       ;;
     -y | -ye | -yes)
       yes=true
       ;;
     -*)
-      __bs_echo "Unknown option: $1"
-      __bs_usage
+      __dotfiles_echo "Unknown option: $1"
+      __dotfiles_usage
       ;;
     *)
       arguments+=("$1")
@@ -67,11 +67,11 @@ __bs_parse_parameters() {
   action=${arguments[0]:-home}
 }
 
-__bs_parse_parameters "$@"
+__dotfiles_parse_parameters "$@"
 declare -r action
 declare -r yes
 
-__bs_bootstrap() {
+__dotfiles_bootstrap() {
   chmod 700 "${unix}"/.gnupg
 
   rsync \
@@ -98,12 +98,12 @@ __bs_bootstrap() {
 case "${action}" in
 h | ho | hom | home)
   if [[ ${yes} == true ]]; then
-    __bs_bootstrap
+    __dotfiles_bootstrap
   else
     read -r -p 'This may overwrite existing files in your home directory. Are you sure? (Y/n) '
     declare -rl yes_no="${REPLY:-y}"
     if [[ ${yes_no} = y ]]; then
-      __bs_bootstrap
+      __dotfiles_bootstrap
     fi
   fi
   ;;
@@ -114,7 +114,7 @@ u | ud | ude | udev)
   sudo udevadm trigger
   ;;
 *)
-  __bs_echo "Unknown action: ${action}"
-  __bs_usage
+  __dotfiles_echo "Unknown action: ${action}"
+  __dotfiles_usage
   ;;
 esac

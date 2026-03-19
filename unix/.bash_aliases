@@ -1,4 +1,4 @@
-__has() {
+__dotfiles_has() {
   builtin type -fP "$1" &> /dev/null
 }
 
@@ -10,11 +10,11 @@ elif [[ ${OSTYPE} = darwin* ]]; then
   alias ll='ls -A -l'
 fi
 
-if ! __has poweroff; then
+if ! __dotfiles_has poweroff; then
   alias poweroff='sudo shutdown -h now'
 fi
 
-if ! __has reboot; then
+if ! __dotfiles_has reboot; then
   alias reboot='sudo shutdown -r now'
 fi
 
@@ -30,7 +30,7 @@ alias today='date +%d.%m.%y'
 
 alias his='history'
 
-if __has pacman; then
+if __dotfiles_has pacman; then
   alias pc='sudo pacman'
   if [[ -r /usr/share/bash-completion/completions/pacman ]]; then
     source /usr/share/bash-completion/completions/pacman
@@ -38,38 +38,38 @@ if __has pacman; then
   fi
 fi
 
-if __has kubectl; then
+if __dotfiles_has kubectl; then
   alias k=kubectl
   source <(kubectl completion bash)
   complete -F __start_kubectl k
 fi
 
-if __has helm; then
+if __dotfiles_has helm; then
   alias h=helm
   source <(helm completion bash)
   complete -F __start_helm h
 fi
 
-if __has linode_cli; then
+if __dotfiles_has linode_cli; then
   source <(linode-cli completion bash)
 fi
 
-if __has pip; then
+if __dotfiles_has pip; then
   source <(pip completion --bash)
 fi
 
-if __has pnpm; then
+if __dotfiles_has pnpm; then
   source <(pnpm completion bash)
   complete -F _pnpm_completion pnpm
 fi
 
-if __has nvim; then
+if __dotfiles_has nvim; then
   export GIT_EDITOR='nvim'
   alias vi='nvim'
   alias vim='nvim'
 fi
 
-if __has flatpak; then
+if __dotfiles_has flatpak; then
   alias fp='flatpak'
 
   if flatpak list --app --columns=application 2> /dev/null | grep io.neovim.nvim > /dev/null; then
@@ -85,6 +85,8 @@ if __has flatpak; then
   fi
 fi
 
-if __has tree-sitter; then
+if __dotfiles_has tree-sitter; then
   alias ts='tree-sitter'
 fi
+
+unset __dotfiles_has
