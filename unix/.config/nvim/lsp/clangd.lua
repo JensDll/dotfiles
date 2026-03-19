@@ -1,6 +1,6 @@
 ---@type vim.lsp.Config
 return {
-  cmd = { 'clangd-21' },
+  cmd = { 'clangd' },
   filetypes = { 'c', 'cpp' },
   root_markers = {
     '.clangd',

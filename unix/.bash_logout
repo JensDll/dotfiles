@@ -1,4 +1,5 @@
-# https://www.gnu.org/software/bash/manual/bash.html#index-SHLVL
 if [[ "${SHLVL}" = 1 ]]; then
-  [[ -x /usr/bin/clear_console ]] && /usr/bin/clear_console -q
+  if [[ -x /usr/bin/clear_console ]]; then
+    /usr/bin/clear_console -q
+  fi
 fi

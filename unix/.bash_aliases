@@ -30,17 +30,13 @@ alias today='date +%d.%m.%y'
 
 alias his='history'
 
-for i in {24..18}; do
-  if __has clang-"${i}"; then
-    # shellcheck disable=SC2139
-    alias clang="clang-${i}"
-    # shellcheck disable=SC2139
-    alias clang++="clang++-${i}"
-    # shellcheck disable=SC2139
-    alias lldb="lldb-${i}"
-    break
+if __has pacman; then
+  alias pc='sudo pacman'
+  if [[ -r /usr/share/bash-completion/completions/pacman ]]; then
+    source /usr/share/bash-completion/completions/pacman
+    complete -F _pacman pc
   fi
-done
+fi
 
 if __has kubectl; then
   alias k=kubectl
@@ -83,7 +79,7 @@ if __has flatpak; then
     alias nvim='flatpak run io.neovim.nvim'
   fi
 
-  if [[ -f /usr/share/bash-completion/completions/flatpak ]]; then
+  if [[ -r /usr/share/bash-completion/completions/flatpak ]]; then
     source /usr/share/bash-completion/completions/flatpak
     complete -o nospace -F __flatpak fp
   fi
