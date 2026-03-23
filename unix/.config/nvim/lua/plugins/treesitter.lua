@@ -3,7 +3,4 @@ return {
   branch = 'main',
   lazy = false,
   build = ':TSUpdate',
-  config = function()
-    require('nvim-treesitter').install({ 'javascript', 'typescript', 'bash', 'python' })
-  end,
 }
