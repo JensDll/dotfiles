@@ -12,49 +12,44 @@ declare -r unix="${root}"/unix
 declare -r misc="${root}"/misc
 declare -r program=${BASH_SOURCE[0]}
 
-__dotfiles_echo() {
-  echo "$*"
-}
-
-__dotfiles_usage() {
+usage() {
   cat << EOF
 Usage: ${program} <action> [options]
 
-Arguments:
-
   <action> = home
-  The type of action to perform. Action names can be abbreviated.
-  - home
-    Bootstrap the local unix directory into the user's home directory.
-  - udev
+  The type of action to perform:
+    - home
+      Bootstrap the local unix directory into the user's home directory.
+    - udev
+      Bootstrap keyboard rules.
 
-Options:
-
-  --help | -h | -?
+  --? | --help
   Print this message and exit.
 
-  --yes | -y
+  --yes
   Don't ask for permission.
 EOF
   exit "${1:-2}"
 }
 
-__dotfiles_parse_parameters() {
+parse_parameters() {
   local -a arguments
+
+  yes=0
 
   while [[ $# -gt 0 ]]; do
     local -l option="${1/#--/-}"
 
     case "${option}" in
     -\? | -h | -he | -hel | -help)
-      __dotfiles_usage 0
+      usage 0
       ;;
     -y | -ye | -yes)
-      yes=true
+      yes=1
       ;;
     -*)
-      __dotfiles_echo "Unknown option: $1"
-      __dotfiles_usage
+      echo "Unknown option: $1"
+      usage
       ;;
     *)
       arguments+=("$1")
@@ -67,11 +62,11 @@ __dotfiles_parse_parameters() {
   action=${arguments[0]:-home}
 }
 
-__dotfiles_parse_parameters "$@"
+parse_parameters "$@"
 declare -r action
 declare -r yes
 
-__dotfiles_bootstrap() {
+bootstrap() {
   chmod 700 "${unix}"/.gnupg
 
   rsync \
@@ -97,13 +92,13 @@ __dotfiles_bootstrap() {
 
 case "${action}" in
 h | ho | hom | home)
-  if [[ ${yes} == true ]]; then
-    __dotfiles_bootstrap
+  if [[ yes -eq 1 ]]; then
+    bootstrap
   else
     read -r -p 'This may overwrite existing files in your home directory. Are you sure? (Y/n) '
     declare -rl yes_no="${REPLY:-y}"
     if [[ ${yes_no} = y ]]; then
-      __dotfiles_bootstrap
+      bootstrap
     fi
   fi
   ;;
@@ -114,7 +109,7 @@ u | ud | ude | udev)
   sudo udevadm trigger
   ;;
 *)
-  __dotfiles_echo "Unknown action: ${action}"
-  __dotfiles_usage
+  echo "Unknown action: ${action}"
+  usage
   ;;
 esac

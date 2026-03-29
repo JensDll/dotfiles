@@ -10,22 +10,22 @@ HISTFILESIZE=2000
 shopt -s histappend
 shopt -s checkwinsize
 
-# shellcheck disable=SC2128,SC2178,SC2179
-__dotfiles_push_back_prompt_command() {
-  if [[ ";${PROMPT_COMMAND[*]};" == *";$1;"* ]]; then
+# shellcheck disable=SC2128,SC2178,SC2179,SC2309
+push_back_prompt_command() {
+  if [[ \;${PROMPT_COMMAND[*]}\; == *\;$1\;* ]]; then
     # already added
     return
   fi
 
-  if [[ -z "${PROMPT_COMMAND[*]}" ]]; then
+  if [[ -z ${PROMPT_COMMAND[*]} ]]; then
     # no prompt command
-    if ((BASH_VERSINFO[0] > 5 || (BASH_VERSINFO[0] == 5 && BASH_VERSINFO[1] >= 1))); then
-      # >= 5.1 can be an array
+    if [[ BASH_VERSINFO[0] -gt 5 || (BASH_VERSINFO[0] -eq 5 && BASH_VERSINFO[1] -ge 1) ]]; then
+      # >= 5.1 array supported
       PROMPT_COMMAND=("$1")
     else
       PROMPT_COMMAND="$1"
     fi
-  elif [[ $(builtin declare -p PROMPT_COMMAND 2> /dev/null) == 'declare -a'* ]]; then
+  elif [[ $(builtin declare -p PROMPT_COMMAND 2> /dev/null) == declare\ -a* ]]; then
     # is an array, append to it
     PROMPT_COMMAND+=("$1")
   else
@@ -37,32 +37,32 @@ __dotfiles_push_back_prompt_command() {
   fi
 }
 
-__dotfiles_push_back_prompt_command 'history -a'
+push_back_prompt_command 'history -a'
 
-unset __dotfiles_push_back_prompt_command
+unset -f push_back_prompt_command
 
 if [[ ${TERM} = xterm-color || ${TERM} = *-256color ]]; then
-  is_color=true
+  is_color=1
 fi
 
 if [[ -x /usr/bin/tput ]] && tput setaf 1> /dev/null 2>&1; then
-  is_color=true
+  is_color=1
 fi
 
 if [[ -r ${HOME}/.git-prompt.sh ]]; then
-  is_git=true
+  is_git=1
   source "${HOME}"/.git-prompt.sh
 fi
 
-if [[ ${is_color} = true ]]; then
-  if [[ ${is_git} = true ]]; then
+if [[ is_color -eq 1 ]]; then
+  if [[ is_git -eq 1 ]]; then
     PS1='\[\033[38;2;0;255;0m\]\u\[\033[38:5:15m\]:\[\033[38;2;83;234;253m\]\w\[\033[38;2;162;244;253m\]$(__git_ps1 "(%s)")\[\033[38;2;255;255;255m\]$ '
   else
     PS1='\[\033[38;2;0;255;0m\]\u\[\033[38:5:15m\]:\[\033[38;2;83;234;253m\]\w\[\033[38;2;255;255;255m\]$ '
   fi
   export COLORTERM=truecolor
 else
-  if [[ ${is_git} = true ]]; then
+  if [[ is_git -eq 1 ]]; then
     PS1='\u:\w$(__git_ps1 "(%s)")$ '
   else
     PS1='\u:\w$ '
@@ -88,7 +88,7 @@ if ! shopt -oq posix; then
   fi
 fi
 
-if ! [[ ${PATH} =~ ${HOME}/.local/bin:${HOME}/bin ]]; then
+if [[ ! ${PATH} =~ ${HOME}/.local/bin:${HOME}/bin ]]; then
   PATH="${HOME}"/.local/bin:"${HOME}"/bin:"${PATH}"
 fi
 
