@@ -37,7 +37,7 @@ vim.keymap.set('n', '<Esc>', '<Cmd>nohlsearch<CR>')
 vim.keymap.set({ 'n', 'x', 'i' }, '<C-s>', '<Cmd>write<CR>', { desc = 'Save changes' })
 
 vim.keymap.set('c', '<C-s>', [[execute "silent write !pkexec tee '%:p'" | :edit!]], {
-  desc = "Save changes to the file it's not owned by the current user",
+  desc = 'Save changes not owned by the current user',
 })
 
 vim.keymap.set('n', '<Leader>q', '<Cmd>quit<CR>', { desc = ':quit' })
