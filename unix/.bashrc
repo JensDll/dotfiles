@@ -12,7 +12,7 @@ shopt -s checkwinsize
 
 # shellcheck disable=SC2128,SC2178,SC2179,SC2309
 push_back_prompt_command() {
-  if [[ \;${PROMPT_COMMAND[*]}\; == *\;$1\;* ]]; then
+  if [[ ";${PROMPT_COMMAND[*]};" == *";$1;"* ]]; then
     # already added
     return
   fi
@@ -25,7 +25,7 @@ push_back_prompt_command() {
     else
       PROMPT_COMMAND="$1"
     fi
-  elif [[ $(builtin declare -p PROMPT_COMMAND 2> /dev/null) == declare\ -a* ]]; then
+  elif [[ $(builtin declare -p PROMPT_COMMAND 2> /dev/null) == 'declare -a'* ]]; then
     # is an array, append to it
     PROMPT_COMMAND+=("$1")
   else
