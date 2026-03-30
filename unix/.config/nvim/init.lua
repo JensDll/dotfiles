@@ -72,12 +72,20 @@ vim.keymap.set('x', '<C-c>', '"+y', {
   desc = 'Yank to clipboard register',
 })
 
-vim.keymap.set('n', '<Tab><Right>', '<Cmd>bnext<CR>', {
-  desc = 'Go to next buffer',
+vim.keymap.set('x', '<C-x>', '"+d', {
+  desc = 'Delete to clipboard register',
 })
 
 vim.keymap.set('n', '<Tab><Left>', '<Cmd>bprevious<CR>', {
   desc = 'Go to previous buffer',
+})
+
+vim.keymap.set('n', '<Tab><Right>', '<Cmd>bnext<CR>', {
+  desc = 'Go to next buffer',
+})
+
+vim.keymap.set('n', '<Tab><Down>', '<Cmd>bdelete<CR>', {
+  desc = 'Delete the current buffer',
 })
 
 local DOTFILES_AUGROUP = vim.api.nvim_create_augroup('dotfiles', {})
