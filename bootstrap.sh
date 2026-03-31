@@ -21,7 +21,9 @@ Usage: ${program} <action> [options]
     - home
       Bootstrap the local unix directory into the user's home directory.
     - udev
-      Bootstrap keyboard rules.
+      Keyboard rules.
+    - arch
+      Arch Linux related config.
 
   --? | --help
   Print this message and exit.
@@ -66,7 +68,7 @@ parse_parameters "$@"
 declare -r action
 declare -r yes
 
-bootstrap() {
+bootstrap_home() {
   chmod 700 "${unix}"/.gnupg
 
   rsync \
@@ -93,12 +95,12 @@ bootstrap() {
 case "${action}" in
 h | ho | hom | home)
   if [[ yes -eq 1 ]]; then
-    bootstrap
+    bootstrap_home
   else
     read -r -p 'This may overwrite existing files in your home directory. Are you sure? (Y/n) '
     declare -rl yes_no="${REPLY:-y}"
     if [[ ${yes_no} = y ]]; then
-      bootstrap
+      bootstrap_home
     fi
   fi
   ;;
@@ -107,6 +109,17 @@ u | ud | ude | udev)
   sudo cp "${misc}"/*.hwdb /usr/lib/udev/hwdb.d
   sudo systemd-hwdb update
   sudo udevadm trigger
+  ;;
+a | ar | arc | arch)
+  set -x
+  sudo install -m 644 -t /etc "${misc}"/mkinitcpio.conf "${misc}"/pacman.conf
+  sudo install -m 755 "${misc}"/arch-kernel-install /usr/local/bin/arch-kernel-install
+  sudo install -D -m 644 -t /etc/pacman.d/hooks/ \
+    "${misc}"/90-kernel-install.hook \
+    "${misc}"/90-kernel-remove.hook
+  for hook in /usr/share/libalpm/hooks/*mkinitcpio*; do
+    sudo ln -s -f /dev/null /etc/pacman.d/hooks/"${hook##*/}"
+  done
   ;;
 *)
   echo "Unknown action: ${action}"

@@ -1,0 +1,15 @@
+[Trigger]
+Type = Path
+Operation = Remove
+Target = usr/lib/modules/*/vmlinuz
+
+[Trigger]
+Type = Package
+Operation = Remove
+Target = mkinitcpio
+Target = mkinitcpio-git
+
+[Action]
+Description = Removing kernel from boot...
+When = PreTransaction
+Exec = /usr/local/bin/arch-kernel-install --remove
