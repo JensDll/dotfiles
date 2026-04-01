@@ -80,15 +80,17 @@ parse_parameters "$@"
 
 declare -r remove
 declare -r kernel_build_dir
+declare -r makefile="${kernel_build_dir}"/Makefile
 declare -r no_module
 declare -r no_boot
+declare -r no_loader_conf
 declare -r machine_id=c926b349fcb441b28056b1018c44552d
 root_uuid=$(findmnt --mountpoint / --output UUID --noheadings)
 declare -r root_uuid
 
 # shellcheck disable=SC2207
 if info=($(pacman -Q linux 2>/dev/null)); then
-  declare -r package_version="${info[1]%'.'*}-${info[1]##*'.'}"
+  declare -r package_version="${info[1]%.*}-${info[1]##*.}"
   declare -r package_image_name=/usr/lib/modules/"${package_version}"/vmlinuz
   unset info
 fi
@@ -121,14 +123,13 @@ EOF
 }
 
 if [[ -n ${kernel_build_dir} ]]; then
-  version=$(make -f "${kernel_build_dir}"/Makefile -s kernelrelease)
-  image_name="${kernel_build_dir}/$(make -f "${kernel_build_dir}"/Makefile -s image_name)"
+  version=$(make -f "${makefile}" -s kernelrelease)
+  image_name="${kernel_build_dir}/$(make -f "${makefile}" -s image_name)"
   declare -r modules_dir=/usr/lib/modules/"${version}"
 
   if [[ no_module -eq 0 ]]; then
     install -Dm644 "${image_name}" "${modules_dir}"/vmlinuz
-    ZSTD_CLEVEL=19 make -j -f "${kernel_build_dir}"/Makefile modules_install \
-      INSTALL_MOD_PATH=/usr INSTALL_MOD_STRIP=1
+    ZSTD_CLEVEL=19 make -j -f "${makefile}" modules_install INSTALL_MOD_PATH=/usr INSTALL_MOD_STRIP=1
     rm "${modules_dir}"/build
   fi
 
