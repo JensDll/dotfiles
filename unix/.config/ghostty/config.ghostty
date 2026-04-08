@@ -7,7 +7,7 @@ keybind = ctrl+alt+v=paste_from_clipboard
 keybind = alt+enter=new_tab
 keybind = alt+right=next_tab
 keybind = alt+left=previous_tab
-keybind = alt+escape=close_tab
+keybind = alt+end=close_tab
 keybind = alt+one=goto_tab:1
 keybind = alt+two=goto_tab:2
 keybind = alt+three=goto_tab:3

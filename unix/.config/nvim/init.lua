@@ -1,3 +1,5 @@
+local common = require('common')
+
 vim.g.mapleader = ' '
 vim.g.maplocalleader = '\\'
 
@@ -165,11 +167,25 @@ vim.keymap.set('n', '<F12>', function()
   vim.lsp.buf.definition()
 end, { desc = 'Go to definition' })
 
-vim.keymap.set('n', '<S-F12>', function()
+local shift_f12 = function()
+  if common.OS == common.OS_LINUX then
+    return '<F24>'
+  end
+  return '<S-F12>'
+end
+
+vim.keymap.set('n', shift_f12(), function()
   vim.lsp.buf.references()
 end, { desc = 'Show references' })
 
-vim.keymap.set('n', '<C-S-F12>', function()
+local ctrl_shift_f12 = function()
+  if common.OS == common.OS_LINUX then
+    return '<F48>'
+  end
+  return '<C-S-F12>'
+end
+
+vim.keymap.set('n', ctrl_shift_f12(), function()
   vim.lsp.buf.type_definition()
 end, { desc = 'Go to type definition' })
 
