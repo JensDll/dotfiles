@@ -24,9 +24,10 @@ if (-not $IsWindows) {
 }
 
 function Install-Dotfiles() {
-  Copy-Item -Path "$PSScriptRoot\windows\profile.ps1" -Destination $PROFILE -Verbose
-  Copy-Item -Path "$PSScriptRoot\windows\.config" -Destination $HOME -Verbose -Recurse -Force
-  Get-ChildItem -Path "$PSScriptRoot\unix" -File | Select-Object -ExpandProperty FullName | Copy-Item -Destination $HOME -Verbose
+  New-Item -ItemType File -Path $PROFILE -Force
+  Copy-Item -Path "$PSScriptRoot\windows\profile.ps1" -Destination $PROFILE
+  Copy-Item -Path "$PSScriptRoot\windows\terminal.json" `
+    -Destination "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\LocalState\settings.json"
 }
 
 function Install-Registry() {
@@ -41,14 +42,27 @@ function Install-Environment() {
     [System.Environment]::SetEnvironmentVariable('VSINSTALLDIR', "$vsInstallDir\", [System.EnvironmentVariableTarget]::User)
   }
 
-  # https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
-  [System.Environment]::SetEnvironmentVariable('XDG_DATA_HOME', "$HOME\.local\share", [System.EnvironmentVariableTarget]::User)
-  [System.Environment]::SetEnvironmentVariable('XDG_CONFIG_HOME', "$HOME\.config", [System.EnvironmentVariableTarget]::User)
-  [System.Environment]::SetEnvironmentVariable('XDG_STATE_HOME', "$HOME\.local\state", [System.EnvironmentVariableTarget]::User)
-  [System.Environment]::SetEnvironmentVariable('XDG_CACHE_HOME', "$HOME\.cache", [System.EnvironmentVariableTarget]::User)
+  $devDrive = 'D'
 
-  # https://github.com/cpm-cmake/CPM.cmake
-  [System.Environment]::SetEnvironmentVariable('CPM_SOURCE_CACHE', "$HOME\.cache\CPM", [System.EnvironmentVariableTarget]::User)
+  $path = [System.Environment]::GetEnvironmentVariable('Path', [System.EnvironmentVariableTarget]::User)
+
+  if (-not (";$path;" -like "*;${devDrive}:\.local\bin;*")) {
+    [System.Environment]::SetEnvironmentVariable('Path', "${path};D:\.local\bin", [System.EnvironmentVariableTarget]::User)
+  }
+
+  [System.Environment]::SetEnvironmentVariable('TMP', "${devDrive}:\tmp", [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('TEMP', "${devDrive}:\tmp", [System.EnvironmentVariableTarget]::User)
+
+  [System.Environment]::SetEnvironmentVariable('XDG_CONFIG_HOME', "${devDrive}:\.config", [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('XDG_DATA_HOME', "${devDrive}:\.local\share", [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('XDG_STATE_HOME', "${devDrive}:\.local\state", [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('XDG_CACHE_HOME', "${devDrive}:\.cache", [System.EnvironmentVariableTarget]::User)
+
+  [System.Environment]::SetEnvironmentVariable('CPM_SOURCE_CACHE', "${devDrive}:\.cache\cpm", [System.EnvironmentVariableTarget]::User)
+
+  [System.Environment]::SetEnvironmentVariable('DENO_DIR', "${devDrive}:\.cache\deno", [System.EnvironmentVariableTarget]::User)
+
+  [System.Environment]::SetEnvironmentVariable('UV_CACHE_DIR', "${devDrive}:\.cache\uv", [System.EnvironmentVariableTarget]::User)
 }
 
 $installedAny = $false

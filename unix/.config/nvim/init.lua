@@ -161,23 +161,21 @@ vim.keymap.set('n', '<F2>', function()
   vim.lsp.buf.rename()
 end, { desc = 'Rename symbol under the cursor' })
 
-vim.keymap.set('n', '<F24>', function()
-  vim.lsp.buf.references()
-end, { desc = 'Show references' })
-
 vim.keymap.set('n', '<F12>', function()
   vim.lsp.buf.definition()
 end, { desc = 'Go to definition' })
 
-vim.keymap.set('n', '<F36>', function()
+vim.keymap.set('n', '<S-F12>', function()
+  vim.lsp.buf.references()
+end, { desc = 'Show references' })
+
+vim.keymap.set('n', '<C-S-F12>', function()
   vim.lsp.buf.type_definition()
 end, { desc = 'Go to type definition' })
 
 vim.keymap.set('n', '<F4>', function()
   vim.lsp.buf.document_symbol()
 end, { desc = 'Show document symbols' })
-
-vim.lsp.enable({ 'luals', 'clangd', 'python', 'deno' })
 
 local github_src = function(name)
   return 'https://github.com/' .. name
@@ -247,6 +245,7 @@ require('conform').setup({
   default_format_opts = {
     lsp_format = 'never',
   },
+  formatters = {},
   format_on_save = function(id)
     if not vim.g.disable_autoformat and not vim.b[id].disable_autoformat then
       return { timeout_ms = 500 }
@@ -347,3 +346,5 @@ require('bufferline').setup({
     show_buffer_close_icons = false,
   },
 })
+
+vim.lsp.enable({ 'luals', 'clangd', 'python', 'deno' })

@@ -1,4 +1,16 @@
-﻿Import-Module posh-git
-$GitPromptSettings.BranchIdenticalStatusSymbol = ''
+﻿$env:Path += ";$env:XDG_DATA_HOME\lua-language-server-3.18.1-win32-x64\bin"
 
-oh-my-posh init pwsh --config "$env:XDG_CONFIG_HOME\oh-my-posh\config.json" | Invoke-Expression
+function prompt {
+  $location = $ExecutionContext.SessionState.Path.CurrentLocation;
+
+  $out = ''
+
+  if ($location.Provider.Name -eq 'FileSystem') {
+    # https://conemu.github.io/en/AnsiEscapeCodes.html#OSC_Operating_system_commands
+    $out += "`e]9;9;`"{0}`"`e\" -f $location.ProviderPath
+  }
+
+  $out += 'PS {0}{1} ' -f $location, '>' * ($NestedPromptLevel + 1)
+
+  return $out
+}

@@ -1,0 +1,130 @@
+{
+  "launchMode": "maximized",
+  "alwaysShowTabs": true,
+  "disableAnimations": true,
+  "confirmCloseAllTabs": false,
+  "tabSwitcherMode": false,
+  "actions": [
+    {
+      "command": "closeTab",
+      "id": "Terminal.CloseTab"
+    }
+  ],
+  "keybindings": [
+    {
+      "id": "Terminal.CopyToClipboard",
+      "keys": "ctrl+c"
+    },
+    {
+      "id": "Terminal.PasteFromClipboard",
+      "keys": "ctrl+alt+v"
+    },
+    {
+      "id": "Terminal.DuplicateTab",
+      "keys": "alt+enter"
+    },
+    {
+      "id": "Terminal.NextTab",
+      "keys": "alt+right"
+    },
+    {
+      "id": "Terminal.PrevTab",
+      "keys": "alt+left"
+    },
+    {
+      "id": "Terminal.CloseTab",
+      "keys": "alt+end"
+    },
+    {
+      "id": "Terminal.SwitchToTab0",
+      "keys": "alt+1"
+    },
+    {
+      "id": "Terminal.SwitchToTab1",
+      "keys": "alt+2"
+    },
+    {
+      "id": "Terminal.SwitchToTab2",
+      "keys": "alt+3"
+    },
+    {
+      "id": "Terminal.SwitchToTab3",
+      "keys": "alt+4"
+    },
+    {
+      "id": "Terminal.SwitchToTab4",
+      "keys": "alt+5"
+    },
+    {
+      "id": "Terminal.SwitchToTab5",
+      "keys": "alt+6"
+    },
+    {
+      "id": "Terminal.SwitchToTab6",
+      "keys": "alt+7"
+    },
+    {
+      "id": "Terminal.SwitchToTab7",
+      "keys": "alt+8"
+    }
+  ],
+  "defaultProfile": "{6f51113b-755d-4f06-a320-701505b88513}",
+  "profiles": {
+    "defaults": {
+      "fontSize": 14,
+      "fontFace": "JetBrains Mono NL",
+      "altGrAliasing": true,
+      "startingDirectory": "D:\\",
+      "colorScheme": "Cyberpunk"
+    },
+    "list": [
+      {
+        "guid": "{6f51113b-755d-4f06-a320-701505b88513}",
+        "name": "Powershell",
+        "commandline": "%PROGRAMFILES%\\PowerShell\\7\\pwsh.exe",
+        "icon": "ms-appx:///ProfileIcons/pwsh.png"
+      },
+      {
+        "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+        "name": "Command Prompt",
+        "commandline": "%SystemRoot%\\System32\\cmd.exe",
+        "icon": "ms-appx:///ProfileIcons/{0caa0dad-35be-5f56-a8ff-afceeeaa6101}.png"
+      },
+      {
+        "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+        "name": "Windows PowerShell",
+        "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "icon": "ms-appx:///ProfileIcons/{61c54bbd-c2c6-5271-96e7-009a87ff44bf}.png"
+      }
+    ]
+  },
+  "schemes": [
+    {
+      "name": "Cyberpunk",
+
+      "background": "#332a57",
+      "foreground": "#e5e5e5",
+
+      "cursorColor": "#21f6bc",
+
+      "selectionBackground": "#c1deff",
+
+      "black": "#000000",
+      "red": "#ff7092",
+      "green": "#00fbac",
+      "yellow": "#fffa6a",
+      "blue": "#2b7fff",
+      "purple": "#df95ff",
+      "cyan": "#86cbfe",
+      "white": "#ffffff",
+      "brightBlack": "#919191",
+      "brightRed": "#ff8aa4",
+      "brightGreen": "#21f6bc",
+      "brightYellow": "#fff787",
+      "brightBlue": "#1bccfd",
+      "brightPurple": "#e6aefe",
+      "brightCyan": "#99d6fc",
+      "brightWhite": "#ffffff"
+    }
+  ]
+}

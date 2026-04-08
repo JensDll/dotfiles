@@ -1,3 +1,5 @@
+local packages = vim.pack.get()
+
 ---@type vim.lsp.Config
 return {
   cmd = { 'lua-language-server' },
@@ -12,4 +14,26 @@ return {
     'selene.yml',
     '.git',
   },
+  settings = {
+    Lua = {},
+  },
+  on_init = function(client)
+    local library = {
+      'C:/Program Files/Neovim/share/nvim/runtime',
+    }
+
+    for _, value in ipairs(packages) do
+      table.insert(library, value.path)
+    end
+
+    client.config.settings.Lua = {
+      runtime = {
+        version = 'LuaJIT',
+        path = { 'lua/?.lua', 'lua/?/init.lua' },
+      },
+      workspace = {
+        library = library,
+      },
+    }
+  end,
 }
