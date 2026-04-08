@@ -19,7 +19,7 @@ return {
   },
   on_init = function(client)
     local library = {
-      'C:/Program Files/Neovim/share/nvim/runtime',
+      vim.env.VIMRUNTIME,
     }
 
     for _, value in ipairs(packages) do
