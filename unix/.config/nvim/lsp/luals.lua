@@ -34,6 +34,11 @@ return {
       workspace = {
         library = library,
       },
+      -- diagnostics = {
+      --   groupSeverity = {
+      --     ['type-check'] = 'Hint',
+      --   },
+      -- },
     }
   end,
 }

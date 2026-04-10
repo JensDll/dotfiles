@@ -4,6 +4,7 @@
   "disableAnimations": true,
   "confirmCloseAllTabs": false,
   "tabSwitcherMode": false,
+  "newTabPosition": "afterCurrentTab",
   "actions": [
     {
       "command": "closeTab",

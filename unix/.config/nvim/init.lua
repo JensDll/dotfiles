@@ -90,11 +90,9 @@ vim.keymap.set('n', '<Tab><Down>', '<Cmd>bdelete<CR>', {
   desc = 'Delete the current buffer',
 })
 
-local DOTFILES_AUGROUP = vim.api.nvim_create_augroup('dotfiles', {})
-
 vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking text',
-  group = DOTFILES_AUGROUP,
+  group = common.DOTFILES_AUGROUP,
   callback = function()
     vim.hl.on_yank({ timeout = 300 })
   end,
@@ -102,7 +100,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 
 vim.api.nvim_create_autocmd('LspAttach', {
   desc = 'Enable LSP folding when available',
-  group = DOTFILES_AUGROUP,
+  group = common.DOTFILES_AUGROUP,
   callback = function(args)
     local client = vim.lsp.get_client_by_id(args.data.client_id)
     if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_foldingRange) then
@@ -124,7 +122,7 @@ setmetatable(PARSER_MAP, {
 
 vim.api.nvim_create_autocmd('FileType', {
   desc = 'Enable treesitter highlighting when parser is available',
-  group = DOTFILES_AUGROUP,
+  group = common.DOTFILES_AUGROUP,
   callback = function(args)
     local name = PARSER_MAP[args.match]
     if vim.treesitter.language.add(name) then
@@ -199,7 +197,7 @@ end
 
 vim.api.nvim_create_autocmd('PackChanged', {
   desc = 'Act on various vim.pack events',
-  group = DOTFILES_AUGROUP,
+  group = common.DOTFILES_AUGROUP,
   callback = function(args)
     if args.data.spec.name == 'nvim-treesitter' and args.data.kind == 'update' then
       vim.api.nvim_cmd({ cmd = 'TSUpdate' }, {})
@@ -307,7 +305,7 @@ end, { desc = 'Toggle file explorer' })
 
 vim.api.nvim_create_autocmd('User', {
   pattern = 'MiniFilesBufferCreate',
-  group = DOTFILES_AUGROUP,
+  group = common.DOTFILES_AUGROUP,
   desc = 'Cursor keymaps for mini.files',
   callback = function(args)
     local buf_id = args.data.buf_id
@@ -363,4 +361,10 @@ require('bufferline').setup({
   },
 })
 
-vim.lsp.enable({ 'luals', 'clangd', 'python', 'deno' })
+require('pses').setup({
+  pses = {
+    log_path = 'pses_logs',
+  },
+})
+
+vim.lsp.enable({ 'luals', 'clangd', 'python', 'deno', 'csharp' })
