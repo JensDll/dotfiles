@@ -255,11 +255,17 @@ require('conform').setup({
     sh = { 'shfmt' },
     bash = { 'shfmt' },
     python = { 'ruff_fix', 'ruff_format' },
+    xml = { 'yq_xml' },
   },
   default_format_opts = {
     lsp_format = 'never',
   },
-  formatters = {},
+  formatters = {
+    ['yq_xml'] = {
+      command = 'yq',
+      args = { '--input-format', 'xml', '--output-format', 'xml', '-P' },
+    },
+  },
   format_on_save = function(id)
     if not vim.g.disable_autoformat and not vim.b[id].disable_autoformat then
       return { timeout_ms = 500 }

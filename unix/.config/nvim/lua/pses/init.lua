@@ -12,10 +12,10 @@ local M = {}
 
 ---@param callback fun(session?: pses.session, err?: string): nil
 local function wait_for_session(callback)
-  local event = assert(vim.uv.new_fs_poll())
-  event:start(conf.config.pses.session_path, 100, function(err)
-    event:stop()
-    event:close()
+  local poll = assert(vim.uv.new_fs_poll())
+  poll:start(conf.config.pses.session_path, 100, function(err)
+    poll:stop()
+    poll:close()
     if err then
       callback(nil, err)
       return
@@ -34,9 +34,9 @@ local function wait_for_session(callback)
   timer:start(5000, 0, function()
     timer:stop()
     timer:close()
-    if event:is_active() then
-      event:stop()
-      event:close()
+    if poll:is_active() then
+      poll:stop()
+      poll:close()
       vim.schedule(function()
         vim.notify(
           string.format(
@@ -80,6 +80,10 @@ end
 
 ---@param user_config pses.user_config?
 function M.setup(user_config)
+  if vim.fn.executable('pwsh') == 0 then
+    return
+  end
+
   conf.config = vim.tbl_deep_extend('keep', user_config or {}, conf.default_config)
 
   vim.validate('pses.path', conf.config.pses.path, 'string')
