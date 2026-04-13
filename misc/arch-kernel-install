@@ -69,11 +69,6 @@ parse_parameters() {
   done
 
   kernel_build_dir=${arguments[0]}
-
-  if [[ -z ${kernel_build_dir} && no_module -eq 0 && remove -eq 0 ]]; then
-    echo "Missing value for argument: <kernel_build_dir>"
-    usage
-  fi
 }
 
 parse_parameters "$@"
@@ -136,21 +131,17 @@ if [[ -n ${kernel_build_dir} ]]; then
   if [[ no_boot -eq 0 ]]; then
     install_boot
   fi
+elif [[ no_boot -eq 0 && -n ${package_version} ]]; then
+  version="${package_version}"
+  image_name="${package_image_name}"
+  install_boot
 fi
 
-if [[ no_boot -eq 0 ]]; then
-  if [[ -n ${package_version} ]]; then
-    version="${package_version}"
-    image_name="${package_image_name}"
-    install_boot
-  fi
-
-  if [[ no_loader_conf -eq 0 ]]; then
-    install -D <(
-      cat <<EOF
+if [[ no_loader_conf -eq 0 ]]; then
+  install -D <(
+    cat <<EOF
 timeout 20
 default ${machine_id}-*
 EOF
-    ) /boot/loader/loader.conf
-  fi
+  ) /boot/loader/loader.conf
 fi
