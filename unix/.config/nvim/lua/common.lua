@@ -30,4 +30,25 @@ M.ivalues = function(t)
   end
 end
 
+M.shift_f12 = function()
+  if M.OS == M.OS_LINUX then
+    return '<F24>'
+  end
+  return '<S-F12>'
+end
+
+M.ctrl_shift_f12 = function()
+  if M.OS == M.OS_LINUX then
+    return '<F48>'
+  end
+  return '<C-S-F12>'
+end
+
+M.ctrl_f5 = function()
+  if M.OS == M.OS_LINUX then
+    return '<F17>'
+  end
+  return '<C-F5>'
+end
+
 return M
