@@ -282,18 +282,20 @@ local setup_dap = function()
     end)
   end
 
+  dap.listeners.after['event_initialized']['pses'] = function(session)
+    session.on_close['pses'] = function()
+      if console_buf then
+        vim.api.nvim_buf_delete(console_buf, { force = true })
+      end
+      console = nil
+      console_buf = nil
+    end
+  end
+
   dap.listeners.after['event_powerShell/sendKeyPress']['pses'] = function()
     if console then
       vim.api.nvim_chan_send(console, 'p')
     end
-  end
-
-  dap.listeners.after['event_terminated']['pses'] = function()
-    if console_buf then
-      vim.api.nvim_buf_delete(console_buf, { force = true })
-    end
-    console = nil
-    console_buf = nil
   end
 end
 

@@ -92,7 +92,7 @@ vim.keymap.set('n', '<Tab><Down>', '<Cmd>bdelete<CR>', {
 
 vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking text',
-  group = common.DOTFILES_AUGROUP,
+  group = common.augroup,
   callback = function()
     vim.hl.on_yank({ timeout = 300 })
   end,
@@ -100,7 +100,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 
 vim.api.nvim_create_autocmd('LspAttach', {
   desc = 'Enable LSP folding when available',
-  group = common.DOTFILES_AUGROUP,
+  group = common.augroup,
   callback = function(args)
     local client = vim.lsp.get_client_by_id(args.data.client_id)
     if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_foldingRange) then
@@ -110,11 +110,9 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
-local PARSER_MAP = {
+local parser_map = setmetatable({
   ['sh'] = 'bash',
-}
-
-setmetatable(PARSER_MAP, {
+}, {
   __index = function(_, key)
     return key
   end,
@@ -122,9 +120,9 @@ setmetatable(PARSER_MAP, {
 
 vim.api.nvim_create_autocmd('FileType', {
   desc = 'Enable treesitter highlighting when parser is available',
-  group = common.DOTFILES_AUGROUP,
+  group = common.augroup,
   callback = function(args)
-    local name = PARSER_MAP[args.match]
+    local name = parser_map[args.match]
     if vim.treesitter.language.add(name) then
       vim.treesitter.start(args.buf, name)
     end
@@ -187,7 +185,7 @@ end
 
 vim.api.nvim_create_autocmd('PackChanged', {
   desc = 'Act on various vim.pack events',
-  group = common.DOTFILES_AUGROUP,
+  group = common.augroup,
   callback = function(args)
     if args.data.spec.name == 'nvim-treesitter' and args.data.kind == 'update' then
       vim.api.nvim_cmd({ cmd = 'TSUpdate' }, {})
@@ -303,7 +301,7 @@ end, { desc = 'Toggle file explorer' })
 
 vim.api.nvim_create_autocmd('User', {
   pattern = 'MiniFilesBufferCreate',
-  group = common.DOTFILES_AUGROUP,
+  group = common.augroup,
   desc = 'Cursor keymaps for mini.files',
   callback = function(args)
     local buf_id = args.data.buf_id

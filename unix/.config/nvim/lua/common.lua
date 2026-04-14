@@ -1,51 +1,55 @@
-local M = {
-  OS_LINUX = 0,
-  OS_WINDOWS = 1,
-  OS_MAC = 2,
-  DOTFILES_AUGROUP = vim.api.nvim_create_augroup('dotfiles', {}),
-}
+local M = {}
+
+local os_linux = 0
+local os_windows = 1
+local os_mac = 2
 
 local os_type = function()
   local sysname = vim.uv.os_uname().sysname
 
   if sysname == 'Linux' then
-    return M.OS_LINUX
+    return os_linux
   end
 
   if sysname == 'Windows_NT' then
-    return M.OS_WINDOWS
+    return os_windows
   end
 
-  return M.OS_MAC
+  return os_mac
 end
 
-M.OS = os_type()
+local current_os = os_type()
 
----@param t table
-M.ivalues = function(t)
-  local i = 0
-  return function()
-    i = i + 1
-    return t[i]
-  end
+M.is_linux = function()
+  return current_os == os_linux
 end
+
+M.is_windows = function()
+  return current_os == os_windows
+end
+
+M.is_mac = function()
+  return current_os == os_mac
+end
+
+M.augroup = vim.api.nvim_create_augroup('dotfiles', {})
 
 M.shift_f12 = function()
-  if M.OS == M.OS_LINUX then
+  if M.is_linux() then
     return '<F24>'
   end
   return '<S-F12>'
 end
 
 M.ctrl_shift_f12 = function()
-  if M.OS == M.OS_LINUX then
+  if M.is_linux() then
     return '<F48>'
   end
   return '<C-S-F12>'
 end
 
 M.ctrl_f5 = function()
-  if M.OS == M.OS_LINUX then
+  if M.is_linux() then
     return '<F17>'
   end
   return '<C-F5>'

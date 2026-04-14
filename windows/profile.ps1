@@ -7,9 +7,9 @@
 
   if ($branch -eq 'HEAD') {
     $branch = git rev-parse --short HEAD
-    return "{0}({1}){2}" -f $PSStyle.Foreground.Red, ${branch}, $PSStyle.Foreground.White
+    return "{0}({1}){2}" -f $PSStyle.Foreground.Red, $branch, $PSStyle.Foreground.White
   } else {
-    return "{0}({1}){2}" -f $PSStyle.Foreground.Cyan, ${branch}, $PSStyle.Foreground.White
+    return "{0}({1}){2}" -f $PSStyle.Foreground.Cyan, $branch, $PSStyle.Foreground.White
   }
 }
 
@@ -29,28 +29,28 @@ function prompt {
     $cwd = ''
   }
 
-  return '{0}{1}{2}{3}{4}$ ' -f ${cwd}, $PSStyle.Foreground.Green, ${location}, $PSStyle.Foreground.White, ${branch}
+  return '{0}{1}{2}{3}{4}$ ' -f $cwd, $PSStyle.Foreground.Green, $location, $PSStyle.Foreground.White, $branch
 }
 
 if (Get-Command -Name dotnet -CommandType Application -ErrorAction SilentlyContinue) {
   $version = dotnet --version
-  $version = ${version} -split '\.'
+  $version = $version -split '\.'
   if ([int]$version[0] -ge 10) {
     dotnet completions script pwsh | Out-String | Invoke-Expression
   } else {
     Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock {
       param($wordToComplete, $commandAst, $cursorPosition)
       dotnet complete --position ${cursorPosition} ${commandAst} | ForEach-Object {
-        [System.Management.Automation.CompletionResult]::new(${_}, ${_}, 'ParameterValue', ${_})
+        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
       }
     }
   }
 }
 
-$path = (${env:path} -split ';').Where{ ${_} }
+$path = ($env:path -split ';').Where{ $_ }
 
 if ($resolvedPath = Resolve-Path -Path "${env:XDG_DATA_HOME}\lua-language-server*\bin\") {
-  $path += ${resolvedPath}
+  $path += $resolvedPath
 }
 
 if (Test-Path -Path "${env:ProgramFiles}\LLVM\bin\") {
@@ -62,7 +62,7 @@ if (Test-Path -Path "${env:XDG_DATA_HOME}\omnisharp-win-x64-net6.0\") {
 }
 
 if ($resolvedPath = Resolve-Path -Path '\opt\neovim\bin\') {
-  $path += ${resolvedPath}
+  $path += $resolvedPath
 }
 
-$env:path = ${path} -join ';'
+$env:path = $path -join ';'
