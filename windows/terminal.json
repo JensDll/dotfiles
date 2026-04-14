@@ -72,8 +72,8 @@
   "defaultProfile": "{6f51113b-755d-4f06-a320-701505b88513}",
   "profiles": {
     "defaults": {
-      "fontSize": 14,
-      "fontFace": "JetBrains Mono NL",
+      "fontSize": 16,
+      "fontFace": "UbuntuMono Nerd Font",
       "altGrAliasing": true,
       "startingDirectory": "D:\\",
       "colorScheme": "Cyberpunk"

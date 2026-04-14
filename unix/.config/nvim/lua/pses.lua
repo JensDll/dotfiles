@@ -251,21 +251,21 @@ local setup_dap = function()
   }
 
   ---@type integer?
-  local repl
+  local console
   ---@type integer?
-  local repl_buf
+  local console_buf
 
   dap.adapters.pses = function(callback)
-    if repl_buf then
+    if console_buf then
       return
     end
 
-    repl_buf = vim.api.nvim_create_buf(true, false)
+    console_buf = vim.api.nvim_create_buf(true, false)
 
     vim.uv.fs_open(session_path, vim.uv.constants.O_CREAT, tonumber('600', 8))
 
-    vim.api.nvim_buf_call(repl_buf, function()
-      repl = vim.fn.jobstart(command, { term = true })
+    vim.api.nvim_buf_call(console_buf, function()
+      console = vim.fn.jobstart(command, { term = true })
     end)
 
     wait_for_session(session_path, function(err, session)
@@ -283,17 +283,17 @@ local setup_dap = function()
   end
 
   dap.listeners.after['event_powerShell/sendKeyPress']['pses'] = function()
-    if repl then
-      vim.api.nvim_chan_send(repl, 'p')
+    if console then
+      vim.api.nvim_chan_send(console, 'p')
     end
   end
 
   dap.listeners.after['event_terminated']['pses'] = function()
-    if repl_buf then
-      vim.api.nvim_buf_delete(repl_buf, { force = true })
+    if console_buf then
+      vim.api.nvim_buf_delete(console_buf, { force = true })
     end
-    repl = nil
-    repl_buf = nil
+    console = nil
+    console_buf = nil
   end
 end
 
