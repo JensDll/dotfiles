@@ -38,9 +38,11 @@ vim.keymap.set('n', '<Esc>', '<Cmd>nohlsearch<CR>')
 
 vim.keymap.set({ 'n', 'x', 'i' }, '<C-s>', '<Cmd>write<CR>', { desc = 'Save changes' })
 
-vim.keymap.set('c', '<C-s>', [[execute "silent write !pkexec tee '%:p'" | :edit!]], {
-  desc = 'Save changes not owned by the current user',
-})
+if common.is_linux() then
+  vim.keymap.set('c', '<C-s>', [[execute "silent write !pkexec tee '%:p'" | :edit!]], {
+    desc = 'Save changes not owned by the current user',
+  })
+end
 
 vim.keymap.set('n', '<Leader>q', '<Cmd>quit<CR>', { desc = ':quit' })
 
@@ -283,7 +285,7 @@ require('blink.cmp').setup({
     },
   },
   sources = {
-    default = { 'lsp', 'path', 'snippets', 'buffer' },
+    default = { 'lsp', 'path', 'buffer' },
   },
   fuzzy = {
     implementation = 'prefer_rust_with_warning',

@@ -14,7 +14,7 @@
 }
 
 function prompt {
-  $location = $ExecutionContext.SessionState.Path.CurrentLocation;
+  $location = $ExecutionContext.SessionState.Path.CurrentLocation
 
   if (Get-Command -Name git -CommandType Application -ErrorAction SilentlyContinue) {
     $branch = Get-Git-Branch
@@ -29,7 +29,14 @@ function prompt {
     $cwd = ''
   }
 
-  return '{0}{1}{2}{3}{4}$ ' -f $cwd, $PSStyle.Foreground.Green, $location, $PSStyle.Foreground.White, $branch
+
+  if (Test-Path -Path env:VSCMD_ARG_TGT_ARCH) {
+    $arch = "{0}({1}){2}" -f $PSStyle.Foreground.Yellow, $env:VSCMD_ARG_TGT_ARCH, $PSStyle.Foreground.White
+  } else {
+    $arch = ''
+  }
+
+  return '{0}{1}{2}{3}{4}{5}$ ' -f $cwd, $PSStyle.Foreground.Green, $location, $PSStyle.Foreground.White, $branch, $arch
 }
 
 if (Get-Command -Name dotnet -CommandType Application -ErrorAction SilentlyContinue) {
@@ -40,7 +47,7 @@ if (Get-Command -Name dotnet -CommandType Application -ErrorAction SilentlyConti
   } else {
     Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock {
       param($wordToComplete, $commandAst, $cursorPosition)
-      dotnet complete --position ${cursorPosition} ${commandAst} | ForEach-Object {
+      dotnet complete --position $cursorPosition $commandAst | ForEach-Object {
         [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
       }
     }
@@ -49,7 +56,7 @@ if (Get-Command -Name dotnet -CommandType Application -ErrorAction SilentlyConti
 
 $path = ($env:path -split ';').Where{ $_ }
 
-if ($resolvedPath = Resolve-Path -Path "${env:XDG_DATA_HOME}\lua-language-server*\bin\") {
+if ($resolvedPath = Resolve-Path -Path "${env:XDG_DATA_HOME}\lua-language-server*\bin\" -ErrorAction SilentlyContinue) {
   $path += $resolvedPath
 }
 
@@ -61,7 +68,7 @@ if (Test-Path -Path "${env:XDG_DATA_HOME}\omnisharp-win-x64-net6.0\") {
   $path += "${env:XDG_DATA_HOME}\omnisharp-win-x64-net6.0\"
 }
 
-if ($resolvedPath = Resolve-Path -Path '\opt\neovim\bin\') {
+if ($resolvedPath = Resolve-Path -Path '\opt\neovim\bin\' -ErrorAction SilentlyContinue) {
   $path += $resolvedPath
 }
 
