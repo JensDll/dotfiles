@@ -90,11 +90,9 @@ vim.keymap.set('n', '<Tab><Down>', '<Cmd>bdelete<CR>', {
   desc = 'Delete the current buffer',
 })
 
-local DOTFILES_AUGROUP = vim.api.nvim_create_augroup('dotfiles', {})
-
 vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking text',
-  group = DOTFILES_AUGROUP,
+  group = common.DOTFILES_AUGROUP,
   callback = function()
     vim.hl.on_yank({ timeout = 300 })
   end,
@@ -102,7 +100,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 
 vim.api.nvim_create_autocmd('LspAttach', {
   desc = 'Enable LSP folding when available',
-  group = DOTFILES_AUGROUP,
+  group = common.DOTFILES_AUGROUP,
   callback = function(args)
     local client = vim.lsp.get_client_by_id(args.data.client_id)
     if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_foldingRange) then
@@ -124,7 +122,7 @@ setmetatable(PARSER_MAP, {
 
 vim.api.nvim_create_autocmd('FileType', {
   desc = 'Enable treesitter highlighting when parser is available',
-  group = DOTFILES_AUGROUP,
+  group = common.DOTFILES_AUGROUP,
   callback = function(args)
     local name = PARSER_MAP[args.match]
     if vim.treesitter.language.add(name) then
@@ -159,6 +157,10 @@ vim.keymap.set('n', '<Leader>a', function()
   vim.lsp.buf.code_action()
 end, { desc = 'Show code actions' })
 
+vim.keymap.set('n', '<Leader>f', function()
+  vim.lsp.buf.format()
+end, { desc = 'Show code actions' })
+
 vim.keymap.set('n', '<F2>', function()
   vim.lsp.buf.rename()
 end, { desc = 'Rename symbol under the cursor' })
@@ -167,25 +169,11 @@ vim.keymap.set('n', '<F12>', function()
   vim.lsp.buf.definition()
 end, { desc = 'Go to definition' })
 
-local shift_f12 = function()
-  if common.OS == common.OS_LINUX then
-    return '<F24>'
-  end
-  return '<S-F12>'
-end
-
-vim.keymap.set('n', shift_f12(), function()
+vim.keymap.set('n', common.shift_f12(), function()
   vim.lsp.buf.references()
 end, { desc = 'Show references' })
 
-local ctrl_shift_f12 = function()
-  if common.OS == common.OS_LINUX then
-    return '<F48>'
-  end
-  return '<C-S-F12>'
-end
-
-vim.keymap.set('n', ctrl_shift_f12(), function()
+vim.keymap.set('n', common.ctrl_shift_f12(), function()
   vim.lsp.buf.type_definition()
 end, { desc = 'Go to type definition' })
 
@@ -199,7 +187,7 @@ end
 
 vim.api.nvim_create_autocmd('PackChanged', {
   desc = 'Act on various vim.pack events',
-  group = DOTFILES_AUGROUP,
+  group = common.DOTFILES_AUGROUP,
   callback = function(args)
     if args.data.spec.name == 'nvim-treesitter' and args.data.kind == 'update' then
       vim.api.nvim_cmd({ cmd = 'TSUpdate' }, {})
@@ -214,6 +202,7 @@ vim.pack.add({
   { src = github_src('nvim-mini/mini.nvim') },
   { src = github_src('nvim-treesitter/nvim-treesitter') },
   { src = github_src('akinsho/bufferline.nvim') },
+  { src = github_src('mfussenegger/nvim-dap') },
 })
 
 require('catppuccin').setup({
@@ -257,15 +246,22 @@ require('conform').setup({
     sh = { 'shfmt' },
     bash = { 'shfmt' },
     python = { 'ruff_fix', 'ruff_format' },
+    xml = { 'yq_xml' },
   },
   default_format_opts = {
-    lsp_format = 'never',
+    lsp_format = 'fallback',
   },
-  formatters = {},
+  formatters = {
+    ['yq_xml'] = {
+      command = 'yq',
+      args = { '--input-format', 'xml', '--output-format', 'xml', '-P' },
+    },
+  },
   format_on_save = function(id)
-    if not vim.g.disable_autoformat and not vim.b[id].disable_autoformat then
-      return { timeout_ms = 500 }
+    if vim.g.disable_autoformat or vim.b[id].disable_autoformat then
+      return nil
     end
+    return { timeout_ms = 500 }
   end,
   notify_no_formatters = false,
 })
@@ -307,7 +303,7 @@ end, { desc = 'Toggle file explorer' })
 
 vim.api.nvim_create_autocmd('User', {
   pattern = 'MiniFilesBufferCreate',
-  group = DOTFILES_AUGROUP,
+  group = common.DOTFILES_AUGROUP,
   desc = 'Cursor keymaps for mini.files',
   callback = function(args)
     local buf_id = args.data.buf_id
@@ -363,4 +359,58 @@ require('bufferline').setup({
   },
 })
 
-vim.lsp.enable({ 'luals', 'clangd', 'python', 'deno' })
+vim.fn.sign_define('DapBreakpoint', { text = 'B', texthl = 'Character', linehl = '', numhl = '' })
+vim.fn.sign_define('DapBreakpointCondition', { text = 'C', texthl = 'Character', linehl = '', numhl = '' })
+vim.fn.sign_define('DapLogPoint', { text = 'L', texthl = 'Character', linehl = '', numhl = '' })
+vim.fn.sign_define('DapStopped', { text = '', texthl = '', linehl = 'DiffAdd', numhl = '' })
+vim.fn.sign_define('DapBreakpointRejected', { text = 'R', texthl = 'Character', linehl = '', numhl = '' })
+
+local dap = require('dap')
+
+vim.keymap.set('n', '<F5>', function()
+  dap.continue()
+end)
+
+vim.keymap.set('n', '<F9>', function()
+  dap.toggle_breakpoint()
+end)
+
+vim.keymap.set('n', common.ctrl_f5(), function()
+  dap.terminate()
+end)
+
+dap.listeners.after['event_initialized']['dotfiles'] = function()
+  vim.keymap.set('n', '<C-Left>', function()
+    dap.step_out()
+  end)
+  vim.keymap.set('n', '<C-Right>', function()
+    dap.step_into()
+  end)
+  vim.keymap.set('n', '<C-Up>', function()
+    dap.restart_frame()
+  end)
+  vim.keymap.set('n', '<C-Down>', function()
+    dap.step_over()
+  end)
+  vim.keymap.set('n', '<2-LeftMouse>', function()
+    require('dap.ui.widgets').preview()
+  end)
+end
+
+dap.listeners.after['event_terminated']['dotfiles'] = function()
+  vim.keymap.del('n', '<C-Left>')
+  vim.keymap.del('n', '<C-Right>')
+  vim.keymap.del('n', '<C-Up>')
+  vim.keymap.del('n', '<C-Down>')
+  vim.keymap.del('n', '<2-LeftMouse>')
+end
+
+require('pses').setup({
+  settings = {
+    CodeFormatting = {
+      Preset = 'OTBS',
+    },
+  },
+})
+
+vim.lsp.enable({ 'luals', 'clangd', 'python', 'deno', 'csharp' })

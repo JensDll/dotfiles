@@ -12,12 +12,4 @@ return {
       enable = true,
     },
   },
-  commands = {
-    ['deno.cache'] = function(cmd, ctx)
-      print('deno.cache command')
-    end,
-    ['deno.showReferences'] = function(cmd, ctx)
-      print('deno.showReferences command')
-    end,
-  },
 }
