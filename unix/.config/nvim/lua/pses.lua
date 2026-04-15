@@ -74,8 +74,8 @@ local augroup = vim.api.nvim_create_augroup('pses', {})
 ---@param callback fun(err?: string, session?: pses.session): nil
 local wait_for_session = function(path, callback)
   local callback_after_unlink = function(err, session)
-    vim.uv.fs_unlink(path, function()
-      callback(err, session)
+    vim.uv.fs_unlink(path, function(unlink_err)
+      callback(err or unlink_err, session)
     end)
   end
 
@@ -227,7 +227,6 @@ local setup_dap = function()
       request = 'launch',
       name = 'Current file',
       script = '${file}',
-      args = function() end,
     },
     {
       type = 'pses',

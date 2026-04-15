@@ -133,6 +133,6 @@ if [[ -r ${HOME}/.bash_aliases ]]; then
   source "${HOME}"/.bash_aliases
 fi
 
-export CPM_SOURCE_CACHE="${HOME}"/.cache/CPM
+export CPM_SOURCE_CACHE="${HOME}"/.cache/cpm
 export PATH
 export PROMPT_COMMAND
