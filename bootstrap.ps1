@@ -13,6 +13,7 @@ Setup environment variables.
 
 .PARAMETER DriveLetter
 The root path of various files and environment variables.
+For example a Dev Drive disk partition.
 #>
 [CmdletBinding()]
 param(
@@ -48,13 +49,19 @@ function Install-Environment() {
   if (Test-Path $vswhere) {
     $vsInstallDir = & $vswhere -prerelease -property installationPath | Select-Object -First 1
     [System.Environment]::SetEnvironmentVariable('VSINSTALLDIR', "${vsInstallDir}\", [System.EnvironmentVariableTarget]::User)
-    if ($path -notcontains "${vsInstallDir}\Common7\Tools\") {
-      $path += "${vsInstallDir}\Common7\Tools\"
+    if ($path -notcontains "${vsInstallDir}\Common7\Tools") {
+      $path += "${vsInstallDir}\Common7\Tools"
     }
   }
 
-  if ($path -notcontains "${DriveLetter}:\.local\bin\") {
-    $path += "${DriveLetter}:\.local\bin\"
+  $localBin = "${DriveLetter}:\.local\bin"
+  $configHome = "${DriveLetter}:\.config"
+  $dataHome = "${DriveLetter}:\.local\share"
+  $stateHome = "${DriveLetter}:\.local\state"
+  $cacheHome = "${DriveLetter}:\.cache"
+
+  if ($path -notcontains $localBin) {
+    $path += $localBin
   }
 
   [System.Environment]::SetEnvironmentVariable('Path', $path -join ';', [System.EnvironmentVariableTarget]::User)
@@ -62,17 +69,27 @@ function Install-Environment() {
   [System.Environment]::SetEnvironmentVariable('TMP', "${DriveLetter}:\tmp", [System.EnvironmentVariableTarget]::User)
   [System.Environment]::SetEnvironmentVariable('TEMP', "${DriveLetter}:\tmp", [System.EnvironmentVariableTarget]::User)
 
-  $cacheDir = "${DriveLetter}:\.cache"
+  [System.Environment]::SetEnvironmentVariable('XDG_CONFIG_HOME', $configHome, [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('XDG_DATA_HOME', $dataHome, [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('XDG_STATE_HOME', $stateHome, [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('XDG_CACHE_HOME', $cacheHome, [System.EnvironmentVariableTarget]::User)
 
-  [System.Environment]::SetEnvironmentVariable('XDG_CONFIG_HOME', "${DriveLetter}:\.config", [System.EnvironmentVariableTarget]::User)
-  [System.Environment]::SetEnvironmentVariable('XDG_DATA_HOME', "${DriveLetter}:\.local\share", [System.EnvironmentVariableTarget]::User)
-  [System.Environment]::SetEnvironmentVariable('XDG_STATE_HOME', "${DriveLetter}:\.local\state", [System.EnvironmentVariableTarget]::User)
-  [System.Environment]::SetEnvironmentVariable('XDG_CACHE_HOME', $cacheDir, [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('CPM_SOURCE_CACHE', "${cacheHome}\cpm", [System.EnvironmentVariableTarget]::User)
 
-  [System.Environment]::SetEnvironmentVariable('CPM_SOURCE_CACHE', "${cacheDir}\cpm", [System.EnvironmentVariableTarget]::User)
-  [System.Environment]::SetEnvironmentVariable('DENO_DIR', "${cacheDir}\deno", [System.EnvironmentVariableTarget]::User)
-  [System.Environment]::SetEnvironmentVariable('UV_CACHE_DIR', "${cacheDir}\uv", [System.EnvironmentVariableTarget]::User)
-  [System.Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_BINARY_CACHE ', "${cacheDir}\vcpkg", [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('DENO_DIR', "${cacheHome}\deno", [System.EnvironmentVariableTarget]::User)
+
+  [System.Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_BINARY_CACHE ', "${cacheHome}\vcpkg", [System.EnvironmentVariableTarget]::User)
+
+  [System.Environment]::SetEnvironmentVariable('DOTNET_CLI_TELEMETRY_OPTOUT ', 'true', [System.EnvironmentVariableTarget]::User)
+
+  [System.Environment]::SetEnvironmentVariable('UV_CACHE_DIR', "${cacheHome}\uv", [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('UV_PYTHON_BIN_DIR', $localBin, [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('UV_PYTHON_INSTALL_DIR', "${dataHome}\uv\python", [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('UV_TOOL_BIN_DIR', $localBin, [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('UV_TOOL_DIR', "${dataHome}\uv\tools", [System.EnvironmentVariableTarget]::User)
+
+  [System.Environment]::SetEnvironmentVariable('NUGET_HTTP_CACHE_PATH', "${cacheHome}\nuget\v3", [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('NUGET_PLUGINS_CACHE_PATH', "${cacheHome}\nuget\plugins", [System.EnvironmentVariableTarget]::User)
 }
 
 $installedAny = $false

@@ -25,6 +25,8 @@ vim.o.undofile = true
 
 vim.o.timeoutlen = 800
 
+vim.o.modeline = false
+
 vim.o.foldmethod = 'expr'
 vim.o.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 vim.o.foldlevel = vim.o.foldnestmax
@@ -379,7 +381,7 @@ vim.keymap.set('n', common.ctrl_f5(), function()
   dap.terminate()
 end)
 
-dap.listeners.after['event_initialized']['dotfiles'] = function()
+dap.listeners.after['event_initialized']['dotfiles'] = function(session)
   vim.keymap.set('n', '<C-Left>', function()
     dap.step_out()
   end)
@@ -395,14 +397,13 @@ dap.listeners.after['event_initialized']['dotfiles'] = function()
   vim.keymap.set('n', '<2-LeftMouse>', function()
     require('dap.ui.widgets').preview()
   end)
-end
-
-dap.listeners.after['event_terminated']['dotfiles'] = function()
-  vim.keymap.del('n', '<C-Left>')
-  vim.keymap.del('n', '<C-Right>')
-  vim.keymap.del('n', '<C-Up>')
-  vim.keymap.del('n', '<C-Down>')
-  vim.keymap.del('n', '<2-LeftMouse>')
+  session.on_close['dotfiles'] = function()
+    vim.keymap.del('n', '<C-Left>')
+    vim.keymap.del('n', '<C-Right>')
+    vim.keymap.del('n', '<C-Up>')
+    vim.keymap.del('n', '<C-Down>')
+    vim.keymap.del('n', '<2-LeftMouse>')
+  end
 end
 
 require('pses').setup({
