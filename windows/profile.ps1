@@ -7,9 +7,9 @@
 
   if ($branch -eq 'HEAD') {
     $branch = git rev-parse --short HEAD
-    return "{0}({1}){2}" -f $PSStyle.Foreground.Red, $branch, $PSStyle.Foreground.White
+    return '{0}({1}){2}' -f $PSStyle.Foreground.Red, $branch, $PSStyle.Foreground.White
   } else {
-    return "{0}({1}){2}" -f $PSStyle.Foreground.Cyan, $branch, $PSStyle.Foreground.White
+    return '{0}({1}){2}' -f $PSStyle.Foreground.Cyan, $branch, $PSStyle.Foreground.White
   }
 }
 
@@ -31,7 +31,7 @@ function prompt {
 
 
   if (Test-Path -Path env:VSCMD_ARG_TGT_ARCH) {
-    $arch = "{0}({1}){2}" -f $PSStyle.Foreground.Yellow, $env:VSCMD_ARG_TGT_ARCH, $PSStyle.Foreground.White
+    $arch = '{0}({1}){2}' -f $PSStyle.Foreground.Yellow, $env:VSCMD_ARG_TGT_ARCH, $PSStyle.Foreground.White
   } else {
     $arch = ''
   }
@@ -70,6 +70,7 @@ if (Test-Path -Path "${env:XDG_DATA_HOME}\omnisharp-win-x64-net6.0\") {
 
 if ($resolvedPath = Resolve-Path -Path '\opt\neovim\bin\' -ErrorAction SilentlyContinue) {
   $path += $resolvedPath
+  $env:GIT_EDITOR = 'nvim'
 }
 
 $env:path = $path -join ';'

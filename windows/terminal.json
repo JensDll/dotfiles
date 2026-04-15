@@ -96,6 +96,22 @@
         "name": "Windows PowerShell",
         "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
         "icon": "ms-appx:///ProfileIcons/{61c54bbd-c2c6-5271-96e7-009a87ff44bf}.png"
+      },
+      {
+        "guid": "{b1adf867-5205-49b6-84eb-46cc86042143}",
+        "name": "Arch Linux (tzcnt)",
+        "suppressApplicationTitle": true,
+        "commandline": "%SystemRoot%\\system32\\wsl.exe --distribution archlinux --user tzcnt",
+        "icon": "%LOCALAPPDATA%\\wsl\\{1c4485dd-9773-4628-bfd7-4031a85f8610}\\shortcut.ico",
+        "startingDirectory": "~"
+      },
+      {
+        "guid": "{4eaaab61-222b-4557-a480-2ed484f708ca}",
+        "name": "Arch Linux (root)",
+        "suppressApplicationTitle": true,
+        "commandline": "%SystemRoot%\\system32\\wsl.exe --distribution archlinux --user root",
+        "icon": "%LOCALAPPDATA%\\wsl\\{1c4485dd-9773-4628-bfd7-4031a85f8610}\\shortcut.ico",
+        "startingDirectory": "/"
       }
     ]
   },

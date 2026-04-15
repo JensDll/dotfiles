@@ -1,6 +1,3 @@
-[user]
-  name = jens
-  email = jens@doellmann.com
 [init]
   defaultBranch = main
 [alias]
