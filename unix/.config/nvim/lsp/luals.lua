@@ -1,3 +1,5 @@
+local common = require('common')
+
 local packages = vim.pack.get()
 
 ---@type vim.lsp.Config
@@ -5,19 +7,24 @@ return {
   cmd = { 'lua-language-server' },
   filetypes = { 'lua' },
   root_markers = {
-    '.luarc.json',
-    '.luarc.jsonc',
-    '.luacheckrc',
-    '.stylua.toml',
+    {
+      '.luarc.json',
+      '.luarc.jsonc',
+    },
     'stylua.toml',
-    'selene.toml',
-    'selene.yml',
     '.git',
   },
   settings = {
     Lua = {},
   },
   on_init = function(client)
+    if client.workspace_folders then
+      local path = client.workspace_folders[1].name
+      if path ~= common.config_path then
+        return
+      end
+    end
+
     local library = {
       vim.env.VIMRUNTIME,
     }

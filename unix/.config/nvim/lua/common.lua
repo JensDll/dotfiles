@@ -32,8 +32,6 @@ M.is_mac = function()
   return current_os == os_mac
 end
 
-M.augroup = vim.api.nvim_create_augroup('dotfiles', {})
-
 M.shift_f12 = function()
   if M.is_linux() then
     return '<F24>'
@@ -50,9 +48,13 @@ end
 
 M.ctrl_f5 = function()
   if M.is_linux() then
-    return '<F17>'
+    return '<F29>'
   end
   return '<C-F5>'
 end
+
+M.augroup = vim.api.nvim_create_augroup('dotfiles', {})
+
+M.config_path = vim.fn.resolve(vim.fn.stdpath('config'))
 
 return M

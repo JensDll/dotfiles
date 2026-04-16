@@ -1,6 +1,6 @@
 local M = {}
 
----@class pses.user_config
+---@class pses.opts
 ---@field path? string
 ---@field root_markers? string[]
 ---@field log_level? 'Trace'|'Debug'|'Information'|'Warning'|'Error'|'Critical'|'None'
@@ -296,21 +296,21 @@ local setup_dap = function()
   end
 end
 
----@param user_config? pses.user_config
-M.setup = function(user_config)
+---@param opts? pses.opts
+M.setup = function(opts)
   if vim.fn.executable('pwsh') == 0 then
     return
   end
 
   ---@diagnostic disable: need-check-nil
-  vim.validate('user_config.path', user_config.path, 'string', true)
-  vim.validate('user_config.root_markers', user_config.root_markers, 'table', true)
-  vim.validate('user_config.log_level', user_config.log_level, 'string', true)
-  vim.validate('user_config.log_path', user_config.log_path, 'string', true)
-  vim.validate('user_config.settings', user_config.settings, 'table', true)
+  vim.validate('opts.path', opts.path, 'string', true)
+  vim.validate('opts.root_markers', opts.root_markers, 'table', true)
+  vim.validate('opts.log_level', opts.log_level, 'string', true)
+  vim.validate('opts.log_path', opts.log_path, 'string', true)
+  vim.validate('opts.settings', opts.settings, 'table', true)
   ---@diagnostic disable: need-check-nil
 
-  config = vim.tbl_deep_extend('keep', user_config or {}, {
+  config = vim.tbl_deep_extend('keep', opts or {}, {
     path = vim.fs.joinpath(
       vim.env.XDG_DATA_HOME or vim.fs.joinpath(vim.env.HOME, '.local', 'share'),
       'PowerShellEditorServices'
