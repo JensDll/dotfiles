@@ -27,6 +27,10 @@ vim.o.timeoutlen = 800
 
 vim.o.modeline = false
 
+if common.is_windows() then
+  vim.o.showcmd = false
+end
+
 vim.o.foldmethod = 'expr'
 vim.o.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 vim.o.foldlevel = vim.o.foldnestmax
@@ -35,6 +39,8 @@ vim.cmd([[
   aunmenu PopUp.How-to\ disable\ mouse
   aunmenu PopUp.-2-
 ]])
+
+require('statusline').setup()
 
 vim.keymap.set('n', '<Esc>', '<Cmd>nohlsearch<CR>')
 
@@ -410,6 +416,8 @@ require('pses').setup({
   settings = {
     CodeFormatting = {
       Preset = 'OTBS',
+      WhitespaceBetweenParameters = true,
+      WhitespaceAfterSeparator = true,
     },
   },
 })
