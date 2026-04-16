@@ -56,19 +56,19 @@ if (Get-Command -Name dotnet -CommandType Application -ErrorAction SilentlyConti
 
 $path = ($env:path -split ';').Where{ $_ }
 
-if ($resolvedPath = Resolve-Path -Path "${env:XDG_DATA_HOME}\lua-language-server*\bin\" -ErrorAction SilentlyContinue) {
+if ($resolvedPath = Resolve-Path -Path "${env:XDG_DATA_HOME}\lua-language-server*\bin" -ErrorAction SilentlyContinue) {
   $path += $resolvedPath
 }
 
-if (Test-Path -Path "${env:ProgramFiles}\LLVM\bin\") {
-  $path += "${env:ProgramFiles}\LLVM\bin\"
+if (Test-Path -Path "${env:ProgramFiles}\LLVM\bin") {
+  $path += "${env:ProgramFiles}\LLVM\bin"
 }
 
-if (Test-Path -Path "${env:XDG_DATA_HOME}\omnisharp-win-x64-net6.0\") {
-  $path += "${env:XDG_DATA_HOME}\omnisharp-win-x64-net6.0\"
+if (Test-Path -Path "${env:XDG_DATA_HOME}\omnisharp-win-x64-net6.0") {
+  $path += "${env:XDG_DATA_HOME}\omnisharp-win-x64-net6.0"
 }
 
-if ($resolvedPath = Resolve-Path -Path '\opt\neovim\bin\' -ErrorAction SilentlyContinue) {
+if ($resolvedPath = Resolve-Path -Path '\opt\neovim\bin' -ErrorAction SilentlyContinue) {
   $path += $resolvedPath
   $env:GIT_EDITOR = 'nvim'
 }

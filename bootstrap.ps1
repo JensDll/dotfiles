@@ -23,6 +23,8 @@ param(
   [char]$DriveLetter = 'D'
 )
 
+Set-StrictMode -Version 3.0
+
 if (-not $IsWindows) {
   Write-Error 'This script is only for Windows.'
   return

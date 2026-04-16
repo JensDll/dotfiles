@@ -84,9 +84,7 @@ local wait_for_session = function(path, callback)
     poll:stop()
     poll:close()
     if err then
-      vim.uv.fs_unlink(path, function()
-        callback_after_unlink(err)
-      end)
+      callback_after_unlink(err)
       return
     end
     local file, open_err = io.open(path)
