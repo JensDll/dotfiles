@@ -27,4 +27,4 @@ Target = mkinitcpio-git
 [Action]
 Description = Installing kernel to boot...
 When = PostTransaction
-Exec = /usr/local/bin/arch-kernel-install --no-module --no-loader-conf
+Exec = /usr/local/bin/arch-kernel-install --no-loader-conf

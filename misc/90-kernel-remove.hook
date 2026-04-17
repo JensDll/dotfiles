@@ -12,4 +12,4 @@ Target = mkinitcpio-git
 [Action]
 Description = Removing kernel from boot...
 When = PreTransaction
-Exec = /usr/local/bin/arch-kernel-install --remove
+Exec = /usr/local/bin/arch-kernel-install --remove --no-module

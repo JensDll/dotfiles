@@ -23,8 +23,9 @@ Usage: ${program} [<kernel_build_dir>] [options]
   --no-loader-conf
   Do not install the systemd-boot loader config.
 
-  --remove
-  Remove the linux package kernel from boot.
+  --remove [<version>]
+  Remove the specified <version>, or pacman installed version, from boot and modules.
+  The options --no-module and --no-boot have the expected effect.
 EOF
   exit "${1:-2}"
 }
@@ -55,6 +56,10 @@ parse_parameters() {
       ;;
     -r | -re | -rem | -remo | -remov | -remove)
       remove=1
+      if [[ $# -gt 1 ]]; then
+        shift
+        version="$1"
+      fi
       ;;
     -*)
       echo "Unknown option: $1"
@@ -68,41 +73,43 @@ parse_parameters() {
     shift
   done
 
-  kernel_build_dir=${arguments[0]}
+  declare -r kernel_build_dir="${arguments[0]}"
+  declare -r makefile="${kernel_build_dir}"/Makefile
+
+  # shellcheck disable=SC2207
+  if [[ -n ${kernel_build_dir} ]]; then
+    version=$(make -f "${makefile}" -s kernelrelease)
+    image_name="${kernel_build_dir}/$(make -f "${makefile}" -s image_name)"
+  elif [[ -n ${version} ]]; then
+    image_name=/usr/lib/modules/"${version}"/vmlinuz
+  elif info=($(pacman -Q linuxs 2>/dev/null)); then
+    version="${info[1]%.*}-${info[1]##*.}"
+    image_name=/usr/lib/modules/"${version}"/vmlinuz
+    unset info
+  fi
+
+  if [[ -z ${version} ]]; then
+    echo "Failed to determine version!"
+    usage
+  fi
 }
 
 parse_parameters "$@"
 
-declare -r remove
-declare -r kernel_build_dir
-declare -r makefile="${kernel_build_dir}"/Makefile
 declare -r no_module
 declare -r no_boot
 declare -r no_loader_conf
+declare -r remove
+declare -r version
+declare -r image_name
+declare -r modules_dir=/usr/lib/modules/"${version:?}"
 declare -r machine_id=c926b349fcb441b28056b1018c44552d
 root_uuid=$(findmnt --mountpoint / --output UUID --noheadings)
 declare -r root_uuid
 
-# shellcheck disable=SC2207
-if info=($(pacman -Q linux 2>/dev/null)); then
-  declare -r package_version="${info[1]%.*}-${info[1]##*.}"
-  declare -r package_image_name=/usr/lib/modules/"${package_version}"/vmlinuz
-  unset info
-fi
-
-if [[ remove -eq 1 ]]; then
-  if [[ -z ${package_version} ]]; then
-    echo "Failed to determine linux package version!"
-    echo "Removing nothing..."
-    exit 1
-  fi
-  rm /boot/loader/entries/"${machine_id}"-"${package_version}".conf
-  rm -r /boot/"${machine_id:?}"/"${package_version}"
-  exit 0
-fi
-
 install_boot() {
   install -D "${image_name}" /boot/"${machine_id}"/"${version}"/linux
+
   install -D <(
     cat <<EOF
 title      Arch Linux (${version})
@@ -114,14 +121,31 @@ initrd     /${machine_id}/${version}/initrd
 options    root=UUID=${root_uuid} rw quiet
 EOF
   ) /boot/loader/entries/"${machine_id}"-"${version}".conf
+
+  if [[ no_loader_conf -eq 0 ]]; then
+    install -D <(
+      cat <<EOF
+timeout 20
+default ${machine_id}-*
+EOF
+    ) /boot/loader/loader.conf
+  fi
+
   mkinitcpio --kernel "${version}" --generate /boot/"${machine_id}"/"${version}"/initrd
 }
 
-if [[ -n ${kernel_build_dir} ]]; then
-  version=$(make -f "${makefile}" -s kernelrelease)
-  image_name="${kernel_build_dir}/$(make -f "${makefile}" -s image_name)"
-  declare -r modules_dir=/usr/lib/modules/"${version}"
+if [[ remove -eq 1 ]]; then
+  if [[ no_module -eq 0 ]]; then
+    rm -r "${modules_dir}"
+  fi
+  if [[ no_boot -eq 0 ]]; then
+    rm /boot/loader/entries/"${machine_id}"-"${version}".conf
+    rm -r /boot/"${machine_id:?}"/"${version}"
+  fi
+  exit 0
+fi
 
+if [[ -n ${kernel_build_dir} ]]; then
   if [[ no_module -eq 0 ]]; then
     install -Dm644 "${image_name}" "${modules_dir}"/vmlinuz
     ZSTD_CLEVEL=19 make -j -f "${makefile}" modules_install INSTALL_MOD_PATH=/usr INSTALL_MOD_STRIP=1
@@ -131,17 +155,10 @@ if [[ -n ${kernel_build_dir} ]]; then
   if [[ no_boot -eq 0 ]]; then
     install_boot
   fi
-elif [[ no_boot -eq 0 && -n ${package_version} ]]; then
-  version="${package_version}"
-  image_name="${package_image_name}"
-  install_boot
+
+  exit 0
 fi
 
-if [[ no_loader_conf -eq 0 ]]; then
-  install -D <(
-    cat <<EOF
-timeout 20
-default ${machine_id}-*
-EOF
-  ) /boot/loader/loader.conf
+if [[ no_boot -eq 0 && -n ${version} ]]; then
+  install_boot
 fi

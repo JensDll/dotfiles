@@ -29,7 +29,7 @@ push_back_prompt_command() {
     # is an array, append to it
     PROMPT_COMMAND+=("$1")
   else
-    if ! [[ "${PROMPT_COMMAND}" =~ \;[[:space:]]*$ ]]; then
+    if [[ ! "${PROMPT_COMMAND}" =~ \;[[:space:]]*$ ]]; then
       # does not end with ';', need to append it
       PROMPT_COMMAND+=';'
     fi
