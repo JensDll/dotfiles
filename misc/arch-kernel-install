@@ -31,7 +31,9 @@ EOF
 }
 
 parse_parameters() {
-  local -a arguments
+  local -a remove_args
+  local -a freeform_args
+  declare -n args_ref=freeform_args
 
   no_module=0
   no_boot=0
@@ -56,25 +58,25 @@ parse_parameters() {
       ;;
     -r | -re | -rem | -remo | -remov | -remove)
       remove=1
-      if [[ $# -gt 1 ]]; then
-        shift
-        version="$1"
-      fi
+      declare -n args_ref=remove_args
       ;;
     -*)
       echo "Unknown option: $1"
       usage
       ;;
     *)
-      arguments+=("$1")
+      args_ref+=("$1")
+      # shellcheck disable=SC2178
+      declare -n args_ref=freeform_args
       ;;
     esac
 
     shift
   done
 
-  declare -r kernel_build_dir="${arguments[0]}"
-  declare -r makefile="${kernel_build_dir}"/Makefile
+  declare -r kernel_build_dir="${freeform_args[0]}"
+  makefile="${kernel_build_dir}"/Makefile
+  version="${remove_args[0]}"
 
   # shellcheck disable=SC2207
   if [[ -n ${kernel_build_dir} ]]; then
@@ -82,7 +84,7 @@ parse_parameters() {
     image_name="${kernel_build_dir}/$(make -f "${makefile}" -s image_name)"
   elif [[ -n ${version} ]]; then
     image_name=/usr/lib/modules/"${version}"/vmlinuz
-  elif info=($(pacman -Q linuxs 2>/dev/null)); then
+  elif info=($(pacman -Q linux 2>/dev/null)); then
     version="${info[1]%.*}-${info[1]##*.}"
     image_name=/usr/lib/modules/"${version}"/vmlinuz
     unset info
@@ -104,6 +106,7 @@ declare -r version
 declare -r image_name
 declare -r modules_dir=/usr/lib/modules/"${version:?}"
 declare -r machine_id=c926b349fcb441b28056b1018c44552d
+declare -r makefile
 
 if [[ remove -eq 1 ]]; then
   if [[ no_module -eq 0 ]]; then
@@ -148,7 +151,7 @@ declare -r root_uuid
 
 if [[ -n ${kernel_build_dir} ]]; then
   if [[ no_module -eq 0 ]]; then
-    install -Dm644 "${image_name}" "${modules_dir}"/vmlinuz
+    install -D -m 644 "${image_name}" "${modules_dir}"/vmlinuz
     ZSTD_CLEVEL=19 make -j -f "${makefile}" modules_install INSTALL_MOD_PATH=/usr INSTALL_MOD_STRIP=1
     rm "${modules_dir}"/build
   fi
