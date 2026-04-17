@@ -33,7 +33,7 @@ EOF
 parse_parameters() {
   local -a remove_args
   local -a freeform_args
-  declare -n args_ref=freeform_args
+  local -n args_ref=freeform_args
 
   no_module=0
   no_boot=0
@@ -58,7 +58,7 @@ parse_parameters() {
       ;;
     -r | -re | -rem | -remo | -remov | -remove)
       remove=1
-      declare -n args_ref=remove_args
+      local -n args_ref=remove_args
       ;;
     -*)
       echo "Unknown option: $1"
@@ -67,14 +67,14 @@ parse_parameters() {
     *)
       args_ref+=("$1")
       # shellcheck disable=SC2178
-      declare -n args_ref=freeform_args
+      local -n args_ref=freeform_args
       ;;
     esac
 
     shift
   done
 
-  declare -r kernel_build_dir="${freeform_args[0]}"
+  kernel_build_dir="${freeform_args[0]}"
   makefile="${kernel_build_dir}"/Makefile
   version="${remove_args[0]}"
 
@@ -106,6 +106,7 @@ declare -r version
 declare -r image_name
 declare -r modules_dir=/usr/lib/modules/"${version:?}"
 declare -r machine_id=c926b349fcb441b28056b1018c44552d
+declare -r kernel_build_dir
 declare -r makefile
 
 if [[ remove -eq 1 ]]; then
