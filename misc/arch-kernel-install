@@ -104,8 +104,17 @@ declare -r version
 declare -r image_name
 declare -r modules_dir=/usr/lib/modules/"${version:?}"
 declare -r machine_id=c926b349fcb441b28056b1018c44552d
-root_uuid=$(findmnt --mountpoint / --output UUID --noheadings)
-declare -r root_uuid
+
+if [[ remove -eq 1 ]]; then
+  if [[ no_module -eq 0 ]]; then
+    rm -r "${modules_dir}"
+  fi
+  if [[ no_boot -eq 0 ]]; then
+    rm /boot/loader/entries/"${machine_id}"-"${version}".conf
+    rm -r /boot/"${machine_id:?}"/"${version}"
+  fi
+  exit 0
+fi
 
 install_boot() {
   install -D "${image_name}" /boot/"${machine_id}"/"${version}"/linux
@@ -134,16 +143,8 @@ EOF
   mkinitcpio --kernel "${version}" --generate /boot/"${machine_id}"/"${version}"/initrd
 }
 
-if [[ remove -eq 1 ]]; then
-  if [[ no_module -eq 0 ]]; then
-    rm -r "${modules_dir}"
-  fi
-  if [[ no_boot -eq 0 ]]; then
-    rm /boot/loader/entries/"${machine_id}"-"${version}".conf
-    rm -r /boot/"${machine_id:?}"/"${version}"
-  fi
-  exit 0
-fi
+root_uuid=$(findmnt --mountpoint / --output UUID --noheadings)
+declare -r root_uuid
 
 if [[ -n ${kernel_build_dir} ]]; then
   if [[ no_module -eq 0 ]]; then
@@ -159,6 +160,6 @@ if [[ -n ${kernel_build_dir} ]]; then
   exit 0
 fi
 
-if [[ no_boot -eq 0 && -n ${version} ]]; then
+if [[ no_boot -eq 0 ]]; then
   install_boot
 fi
