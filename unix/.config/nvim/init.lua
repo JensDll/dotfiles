@@ -167,7 +167,7 @@ end, { desc = 'Show code actions' })
 
 vim.keymap.set('n', '<Leader>f', function()
   vim.lsp.buf.format()
-end, { desc = 'Show code actions' })
+end, { desc = 'Format the current buffer through the language server' })
 
 vim.keymap.set('n', '<F2>', function()
   vim.lsp.buf.rename()
