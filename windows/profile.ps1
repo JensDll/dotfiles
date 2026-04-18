@@ -74,3 +74,11 @@ if ($resolvedPath = Resolve-Path -Path '\opt\neovim\bin' -ErrorAction SilentlyCo
 }
 
 $env:path = $path -join ';'
+
+function reboot {
+  shutdown.exe /r /t 0
+}
+
+function poweroff {
+  shutdown.exe /s /t 0
+}
