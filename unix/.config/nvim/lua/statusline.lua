@@ -55,8 +55,10 @@ local segments = {
       .iter(pairs(vim.diagnostic.count(win_buf_id())))
       :map(function(severity, count)
         local entry = config.diagnostic[severity]
-        return active and string.format('%%#%s#%s:%u%%*', entry.hl, entry.sign, count)
-          or string.format('%s:%u', entry.sign, count)
+        if active then
+          return string.format('%%#%s#%s:%u%%*', entry.hl, entry.sign, count)
+        end
+        return string.format('%s:%u', entry.sign, count)
       end)
       :join(' ')
   end,
@@ -72,7 +74,10 @@ function M.render()
   return vim
     .iter(ipairs(config.line))
     :map(function(_, value)
-      return type(value) == 'string' and value or segments[value]()
+      if type(value) == 'string' then
+        return value
+      end
+      return segments[value]()
     end)
     :join('')
 end
@@ -81,8 +86,8 @@ end
 function M.setup(opts)
   config = vim.tbl_deep_extend('keep', opts or {}, {
     line = {
-      M.TRUNCATION,
       M.FILENAME,
+      M.TRUNCATION,
       M.SEPARATION,
       M.DIAGNOSTIC,
       ' ',
