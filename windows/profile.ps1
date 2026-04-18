@@ -29,7 +29,6 @@ function prompt {
     $cwd = ''
   }
 
-
   if (Test-Path -Path env:VSCMD_ARG_TGT_ARCH) {
     $arch = '{0}({1}){2}' -f $PSStyle.Foreground.Yellow, $env:VSCMD_ARG_TGT_ARCH, $PSStyle.Foreground.White
   } else {

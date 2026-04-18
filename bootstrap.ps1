@@ -72,6 +72,8 @@ function Install-Environment() {
   [System.Environment]::SetEnvironmentVariable('TMP', "${DriveLetter}:\tmp", [System.EnvironmentVariableTarget]::User)
   [System.Environment]::SetEnvironmentVariable('TEMP', "${DriveLetter}:\tmp", [System.EnvironmentVariableTarget]::User)
 
+  [System.Environment]::SetEnvironmentVariable('LANG', 'en_US.UTF-8', [System.EnvironmentVariableTarget]::User)
+
   [System.Environment]::SetEnvironmentVariable('XDG_CONFIG_HOME', $configHome, [System.EnvironmentVariableTarget]::User)
   [System.Environment]::SetEnvironmentVariable('XDG_DATA_HOME', $dataHome, [System.EnvironmentVariableTarget]::User)
   [System.Environment]::SetEnvironmentVariable('XDG_STATE_HOME', $stateHome, [System.EnvironmentVariableTarget]::User)
