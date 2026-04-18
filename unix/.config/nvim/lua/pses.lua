@@ -308,7 +308,7 @@ M.setup = function(opts)
   vim.validate('opts.log_level', opts.log_level, 'string', true)
   vim.validate('opts.log_path', opts.log_path, 'string', true)
   vim.validate('opts.settings', opts.settings, 'table', true)
-  ---@diagnostic disable: need-check-nil
+  ---@diagnostic enable: need-check-nil
 
   config = vim.tbl_deep_extend('keep', opts or {}, {
     path = vim.fs.joinpath(

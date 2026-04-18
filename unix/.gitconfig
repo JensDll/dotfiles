@@ -3,3 +3,4 @@
 [alias]
   supdate = submodule update --remote --merge
   cls = clean -Xdf
+  ds = diff --staged
