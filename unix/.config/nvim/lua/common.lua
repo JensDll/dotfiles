@@ -55,6 +55,6 @@ end
 
 M.augroup = vim.api.nvim_create_augroup('dotfiles', {})
 
-M.config_path = vim.fn.resolve(vim.fn.stdpath('config'))
+M.config_path = vim.fs.normalize(vim.fn.resolve(vim.fn.stdpath('config')))
 
 return M
