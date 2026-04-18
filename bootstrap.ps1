@@ -36,6 +36,7 @@ function Install-Config() {
   Copy-Item -Path "${PSScriptRoot}\windows\terminal.json" -Destination `
     "${env:LOCALAPPDATA}\Packages\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\LocalState\settings.json"
   Copy-Item -Path "${PSScriptRoot}\windows\nuget.config" -Destination "${env:APPDATA}\NuGet\NuGet.Config"
+  Copy-Item -Path "${PSScriptRoot}\unix\.gitconfig" -Destination '~\.gitconfig'
   New-Item -ItemType SymbolicLink -Target "${PSScriptRoot}\unix\.config\nvim" `
     -Path "${DriveLetter}:\.config\nvim" -Force
 }
