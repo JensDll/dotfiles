@@ -1,0 +1,58 @@
+pkgname=neovim-nightly
+pkgver=0.13.0_dev_299+ga4ad469fb1
+pkgrel=1
+pkgdesc='Fork of Vim aiming to improve user experience, plugins, and GUIs'
+arch=(x86_64)
+url=https://neovim.io
+license=(Apache-2.0 LicenseRef-vim)
+depends=(
+  libluv
+  libutf8proc
+  libuv
+  lua51-lpeg
+  luajit
+  tree-sitter
+  tree-sitter-c
+  tree-sitter-lua
+  tree-sitter-markdown
+  tree-sitter-query
+  tree-sitter-vim
+  tree-sitter-vimdoc
+)
+makedepends=(
+  cmake
+  git
+  ninja
+)
+optdepends=(
+  'wl-clipboard: wayland clipboard provider'
+)
+source=(git+https://github.com/neovim/neovim.git#commit=a4ad469fb1f935aed6f84cfa9e663ab4f7ca1e02)
+sha512sums=(7960c71dd26a78020f403e221b136e5d42dd74796e5d562a636642d6ff58f9f9a742e1a9dd5fb5943d645d614134ac4c1e2f72dea43193abc81e65423ce4b408)
+
+build() {
+  cmake \
+    --install-prefix /usr/local \
+    -B build \
+    -S neovim \
+    -G Ninja \
+    -D CMAKE_BUILD_TYPE:STRING=Release \
+    -D ENABLE_UNIBILIUM:BOOL=OFF
+  cmake --build build
+}
+
+check() {
+  ./build/bin/nvim --version
+  ./build/bin/nvim --headless -u NONE -i NONE \
+    --cmd 'echo "Echo check\n"' \
+    --cmd q
+}
+
+package() {
+  cmake --install build --prefix "${pkgdir}"/usr/local
+  ln -s /usr/lib/tree_sitter "${pkgdir}"/usr/local/share/nvim/runtime/parser
+  install -D -m 644 neovim/LICENSE.txt -t "${pkgdir}"/usr/share/licenses/"${pkgname}"
+  install -D -m 644 <(
+    cat <<<'set runtimepath+=/usr/share/vim/vimfiles,/usr/share/vim/vimfiles/after'
+  ) "${pkgdir}"/etc/xdg/nvim/sysinit.vim
+}

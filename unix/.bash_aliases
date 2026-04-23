@@ -18,6 +18,12 @@ if ! has reboot; then
   alias reboot='sudo shutdown -r now'
 fi
 
+if has hyprshutdown; then
+  alias hpoweroff="hyprshutdown -t 'Shutting down...' --post-cmd 'systemctl poweroff'"
+  alias hsleep="hyprshutdown -t 'Sleeping...' --post-cmd 'systemctl sleep'"
+  alias hreboot="hyprshutdown -t 'Restarting...' --post-cmd 'systemctl reboot'"
+fi
+
 alias lt='tree --dirsfirst -C -L 1 -apug'
 
 alias grep='grep --color=auto'
