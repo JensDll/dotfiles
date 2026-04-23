@@ -1,0 +1,51 @@
+pkgname=hyprshutdown
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='A graceful shutdown utility for Hyprland'
+arch=(x86_64)
+url=https://github.com/hyprwm/hyprshutdown
+license=('BSD 3-Clause')
+depends=(
+  hyprtoolkit
+  hyprutils
+  pixman
+  libdrm
+  glaze
+)
+makedepends=(cmake ninja pkgconf clang lld)
+source=("${url}"/archive/refs/tags/v"${pkgver}".tar.gz)
+sha512sums=(a0bc604c2d1b73bb9c7bb7e70765629e9589502d1c96d0ec61b6a10886d93526d5c9aa0618044c87ca1f9a2f4724c2e8b8867d18615544b3164c2b8cfafdf4be)
+
+_src="$pkgname-$pkgver"
+
+build() {
+  cmake \
+    -B build \
+    -S "${_src}" \
+    -G Ninja \
+    -D CMAKE_BUILD_TYPE:STRING=Release \
+    -D CMAKE_C_COMPILER:STRING=clang \
+    -D CMAKE_CXX_COMPILER:STRING=clang++ \
+    -D CMAKE_LINKER_TYPE:STRING=LLD \
+    -D CMAKE_INTERPROCEDURAL_OPTIMIZATION:BOOL=ON
+  cmake --build build
+}
+
+package() {
+  cmake --install build --prefix "${pkgdir}"/usr/local
+  install -D -m 644 "${_src}"/LICENSE -t "${pkgdir}"/usr/share/licenses/"${pkgname}"
+  install -D -m 644 <(
+    cat <<EOF
+[Trigger]
+Operation = Upgrade
+Type = Package
+Target = hyprtoolkit
+Target = hyprutils
+
+[Action]
+Description = Rebuilding hyprshutdown...
+When = PostTransaction
+Exec = makepkg --cleanbuild --install --force --noconfirm --dir ${startdir}
+EOF
+  ) "${pkgdir}"/etc/pacman.d/hooks/90-rebuild-hyprshutdown.hook
+}
