@@ -28,7 +28,7 @@ local function win_buf_id()
 end
 
 local function win_is_active()
-  return tonumber(vim.g.statusline_winid or -1) == vim.api.nvim_get_current_win()
+  return vim.g.statusline_winid == vim.api.nvim_get_current_win()
 end
 
 local segments = {
