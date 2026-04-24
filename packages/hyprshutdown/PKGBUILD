@@ -4,10 +4,10 @@ pkgrel=1
 pkgdesc='A graceful shutdown utility for Hyprland'
 arch=(x86_64)
 url=https://github.com/hyprwm/hyprshutdown
-license=('BSD 3-Clause')
+license=('BSD-3-Clause')
 depends=(
   hyprtoolkit
-  hyprutils
+  'hyprutils>=0.11.0'
   pixman
   libdrm
   glaze
@@ -32,7 +32,7 @@ build() {
 }
 
 package() {
-  cmake --install build --prefix "${pkgdir}"/usr/local
+  cmake --install build --prefix "${pkgdir}"/usr
   install -D -m 644 "${_src}"/LICENSE -t "${pkgdir}"/usr/share/licenses/"${pkgname}"
   install -D -m 644 <(
     cat <<EOF

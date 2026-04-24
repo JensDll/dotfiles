@@ -27,12 +27,19 @@ makedepends=(
 optdepends=(
   'wl-clipboard: wayland clipboard provider'
 )
-source=(git+https://github.com/neovim/neovim.git#commit=a4ad469fb1f935aed6f84cfa9e663ab4f7ca1e02)
-sha512sums=(7960c71dd26a78020f403e221b136e5d42dd74796e5d562a636642d6ff58f9f9a742e1a9dd5fb5943d645d614134ac4c1e2f72dea43193abc81e65423ce4b408)
+source=(
+  git+https://github.com/neovim/neovim.git#commit=a4ad469fb1f935aed6f84cfa9e663ab4f7ca1e02?signed
+)
+sha512sums=(
+  7960c71dd26a78020f403e221b136e5d42dd74796e5d562a636642d6ff58f9f9a742e1a9dd5fb5943d645d614134ac4c1e2f72dea43193abc81e65423ce4b408
+)
+validpgpkeys=(
+  968479A1AFF927E37D1A566BB5690EEEBB952194
+)
 
 build() {
   cmake \
-    --install-prefix /usr/local \
+    --install-prefix /usr \
     -B build \
     -S neovim \
     -G Ninja \
@@ -49,8 +56,8 @@ check() {
 }
 
 package() {
-  cmake --install build --prefix "${pkgdir}"/usr/local
-  ln -s /usr/lib/tree_sitter "${pkgdir}"/usr/local/share/nvim/runtime/parser
+  cmake --install build --prefix "${pkgdir}"/usr
+  ln -s /usr/lib/tree_sitter "${pkgdir}"/usr/share/nvim/runtime/parser
   install -D -m 644 neovim/LICENSE.txt -t "${pkgdir}"/usr/share/licenses/"${pkgname}"
   install -D -m 644 <(
     cat <<<'set runtimepath+=/usr/share/vim/vimfiles,/usr/share/vim/vimfiles/after'

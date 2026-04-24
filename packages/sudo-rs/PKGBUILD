@@ -1,0 +1,61 @@
+pkgname=sudo-rs
+pkgver=0.2.13
+pkgrel=1
+pkgdesc='A memory safe implementation of sudo and su'
+arch=(x86_64)
+url=https://github.com/trifectatechfoundation/sudo-rs
+license=('Apache-2.0 AND MIT')
+depends=(
+  glibc
+  libgcc
+  pam
+)
+makedepends=(
+  cargo
+  git
+)
+provides=(
+  sudo
+)
+source=(
+  git+"${url}".git#tag=v"${pkgver}"?signed
+  sudoers-rs
+)
+sha512sums=(
+  9e4cc86aa2ea54feb24afe594da89f2a0fe4c21a8d5818c628b267e72dc85492609aa8b391ebcbad7eb8d19598cfb8e770669c153d7497f29700015211794738
+  fe47754f1cfb9b69e7d29405713a0029c8c537958758fe3f123bdfa7668792fd6fd27ceffa6643219da687203cf7056a25aacb4de7348c7c1722929897e44ef4
+)
+validpgpkeys=(
+  C2E4CAC4B12225DE1C3BB1C9289D082003D01E95
+)
+
+prepare() {
+  cd "${pkgname}"
+  cargo fetch --locked --target "$(rustc --print host-tuple)"
+}
+
+build() {
+  cd "${pkgname}"
+  cargo build --release --frozen
+}
+
+check() {
+  cd "${pkgname}"
+  cargo test --frozen
+}
+
+package() {
+  install -D -m 440 -t "${pkgdir}"/etc sudoers-rs
+
+  cd "${pkgname}"
+
+  install -D -m 4755 -t "${pkgdir}"/usr/bin target/release/sudo target/release/su
+  install -D -m 755 -t "${pkgdir}"/usr/bin target/release/visudo
+
+  install -D -m 644 -t "${pkgdir}"/usr/share/licenses/"${pkgname}" LICENSE-APACHE LICENSE-MIT
+
+  install -D -m 644 docs/man/su.1.man "${pkgdir}"/usr/share/man/man1/su.1
+  install -D -m 644 docs/man/sudoers.5.man "${pkgdir}"/usr/share/man/man5/sudoers.5
+  install -D -m 644 docs/man/sudo.8.man "${pkgdir}"/usr/share/man/man8/sudo.8
+  install -D -m 644 docs/man/visudo.8.man "${pkgdir}"/usr/share/man/man8/visudo.8
+}
