@@ -4,7 +4,7 @@ pkgrel=1
 pkgdesc='A memory safe implementation of sudo and su'
 arch=(x86_64)
 url=https://github.com/trifectatechfoundation/sudo-rs
-license=('Apache-2.0 AND MIT')
+license=('Apache-2.0 OR MIT')
 depends=(
   glibc
   libgcc
@@ -49,13 +49,13 @@ package() {
 
   cd "${pkgname}"
 
-  install -D -m 4755 -t "${pkgdir}"/usr/bin target/release/sudo target/release/su
-  install -D -m 755 -t "${pkgdir}"/usr/bin target/release/visudo
+  install -D -m 4755 -t "${pkgdir}"/usr/local/bin target/release/sudo target/release/su
+  install -D -m 755 -t "${pkgdir}"/usr/local/bin target/release/visudo
 
   install -D -m 644 -t "${pkgdir}"/usr/share/licenses/"${pkgname}" LICENSE-APACHE LICENSE-MIT
 
-  install -D -m 644 docs/man/su.1.man "${pkgdir}"/usr/share/man/man1/su.1
-  install -D -m 644 docs/man/sudoers.5.man "${pkgdir}"/usr/share/man/man5/sudoers.5
-  install -D -m 644 docs/man/sudo.8.man "${pkgdir}"/usr/share/man/man8/sudo.8
-  install -D -m 644 docs/man/visudo.8.man "${pkgdir}"/usr/share/man/man8/visudo.8
+  install -D -m 644 docs/man/su.1.man "${pkgdir}"/usr/local/share/man/man1/su.1
+  install -D -m 644 docs/man/sudoers.5.man "${pkgdir}"/usr/local/share/man/man5/sudoers.5
+  install -D -m 644 docs/man/sudo.8.man "${pkgdir}"/usr/local/share/man/man8/sudo.8
+  install -D -m 644 docs/man/visudo.8.man "${pkgdir}"/usr/local/share/man/man8/visudo.8
 }
