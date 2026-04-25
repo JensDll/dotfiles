@@ -19,9 +19,9 @@ if ! has reboot; then
 fi
 
 if has hyprshutdown; then
-  alias hpoweroff="hyprshutdown -t 'Shutting down...' --post-cmd 'systemctl poweroff'"
-  alias hsleep="hyprshutdown -t 'Sleeping...' --post-cmd 'systemctl sleep'"
-  alias hreboot="hyprshutdown -t 'Restarting...' --post-cmd 'systemctl reboot'"
+  alias hpoweroff="hyprshutdown -t 'Shutting down...' -p 'systemctl poweroff'"
+  alias hsleep="hyprshutdown -t 'Sleeping...' -p 'systemctl sleep'"
+  alias hreboot="hyprshutdown -t 'Restarting...' -p 'systemctl reboot'"
 fi
 
 alias lt='tree --dirsfirst -C -L 1 -apug'
