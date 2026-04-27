@@ -83,9 +83,9 @@ function Install-Environment() {
 
   [System.Environment]::SetEnvironmentVariable('DENO_DIR', "${cacheHome}\deno", [System.EnvironmentVariableTarget]::User)
 
-  [System.Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_BINARY_CACHE ', "${cacheHome}\vcpkg", [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_BINARY_CACHE', "${cacheHome}\vcpkg", [System.EnvironmentVariableTarget]::User)
 
-  [System.Environment]::SetEnvironmentVariable('DOTNET_CLI_TELEMETRY_OPTOUT ', 'true', [System.EnvironmentVariableTarget]::User)
+  [System.Environment]::SetEnvironmentVariable('DOTNET_CLI_TELEMETRY_OPTOUT', 'true', [System.EnvironmentVariableTarget]::User)
 
   [System.Environment]::SetEnvironmentVariable('UV_CACHE_DIR', "${cacheHome}\uv", [System.EnvironmentVariableTarget]::User)
   [System.Environment]::SetEnvironmentVariable('UV_PYTHON_BIN_DIR', $localBin, [System.EnvironmentVariableTarget]::User)
