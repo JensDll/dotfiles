@@ -251,6 +251,7 @@ require('conform').setup({
     javascript = { 'deno_fmt' },
     typescript = { 'deno_fmt' },
     json = { 'deno_fmt' },
+    jsonc = { 'deno_fmt' },
     sh = { 'shfmt' },
     bash = { 'shfmt' },
     python = { 'ruff_fix', 'ruff_format' },

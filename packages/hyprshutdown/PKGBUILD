@@ -34,18 +34,4 @@ build() {
 package() {
   cmake --install build --prefix "${pkgdir}"/usr
   install -D -m 644 "${_src}"/LICENSE -t "${pkgdir}"/usr/share/licenses/"${pkgname}"
-  install -D -m 644 <(
-    cat <<EOF
-[Trigger]
-Operation = Upgrade
-Type = Package
-Target = hyprtoolkit
-Target = hyprutils
-
-[Action]
-Description = Rebuilding hyprshutdown...
-When = PostTransaction
-Exec = makepkg --cleanbuild --install --force --noconfirm --dir ${startdir}
-EOF
-  ) "${pkgdir}"/etc/pacman.d/hooks/90-rebuild-hyprshutdown.hook
 }
