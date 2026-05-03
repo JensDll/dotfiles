@@ -112,11 +112,11 @@ u | ud | ude | udev)
   ;;
 a | ar | arc | arch)
   set -x
-  sudo install -m 644 -t /etc "${misc}"/mkinitcpio.conf "${misc}"/pacman.conf
-  sudo install -m 755 "${misc}"/arch-kernel-install /usr/local/bin/arch-kernel-install
-  sudo install -D -m 644 -t /etc/pacman.d/hooks/ \
-    "${misc}"/90-kernel-install.hook \
-    "${misc}"/90-kernel-remove.hook
+  sudo install -m 644 -t /etc/mkinitcpio.conf.d "${misc}"/90-mkinitcpio.conf
+  sudo install -m 644 -t /etc "${misc}"/pacman.conf
+  sudo install -m 755 -t /usr/local/bin "${misc}"/arch-kernel-install
+  sudo install -D -m 644 -t /etc/systemd/user.conf.d "${misc}"/default-timeout.conf
+  sudo install -D -m 644 -t /etc/pacman.d/hooks "${misc}"/*.hook
   for hook in /usr/share/libalpm/hooks/*mkinitcpio*; do
     sudo ln -s -f /dev/null /etc/pacman.d/hooks/"${hook##*/}"
   done
