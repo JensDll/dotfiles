@@ -53,6 +53,20 @@ M.ctrl_f5 = function()
   return '<C-F5>'
 end
 
+M.ctrl_f6 = function()
+  if M.is_linux() then
+    return '<F30>'
+  end
+  return '<C-F6>'
+end
+
+M.ctrl_f9 = function()
+  if M.is_linux() then
+    return '<F33>'
+  end
+  return '<C-F9>'
+end
+
 M.augroup = vim.api.nvim_create_augroup('dotfiles', {})
 
 M.config_path = vim.fs.normalize(vim.fn.resolve(vim.fn.stdpath('config')))

@@ -368,51 +368,6 @@ require('bufferline').setup({
   },
 })
 
-vim.fn.sign_define('DapBreakpoint', { text = 'B', texthl = 'Character', linehl = '', numhl = '' })
-vim.fn.sign_define('DapBreakpointCondition', { text = 'C', texthl = 'Character', linehl = '', numhl = '' })
-vim.fn.sign_define('DapLogPoint', { text = 'L', texthl = 'Character', linehl = '', numhl = '' })
-vim.fn.sign_define('DapStopped', { text = '', texthl = '', linehl = 'DiffAdd', numhl = '' })
-vim.fn.sign_define('DapBreakpointRejected', { text = 'R', texthl = 'Character', linehl = '', numhl = '' })
-
-local dap = require('dap')
-
-vim.keymap.set('n', '<F5>', function()
-  dap.continue()
-end)
-
-vim.keymap.set('n', '<F9>', function()
-  dap.toggle_breakpoint()
-end)
-
-vim.keymap.set('n', common.ctrl_f5(), function()
-  dap.terminate()
-end)
-
-dap.listeners.after['event_initialized']['dotfiles'] = function(session)
-  vim.keymap.set('n', '<C-Left>', function()
-    dap.step_out()
-  end)
-  vim.keymap.set('n', '<C-Right>', function()
-    dap.step_into()
-  end)
-  vim.keymap.set('n', '<C-Up>', function()
-    dap.restart_frame()
-  end)
-  vim.keymap.set('n', '<C-Down>', function()
-    dap.step_over()
-  end)
-  vim.keymap.set('n', '<2-LeftMouse>', function()
-    require('dap.ui.widgets').preview()
-  end)
-  session.on_close['dotfiles'] = function()
-    vim.keymap.del('n', '<C-Left>')
-    vim.keymap.del('n', '<C-Right>')
-    vim.keymap.del('n', '<C-Up>')
-    vim.keymap.del('n', '<C-Down>')
-    vim.keymap.del('n', '<2-LeftMouse>')
-  end
-end
-
 require('pses').setup({
   settings = {
     CodeFormatting = {
