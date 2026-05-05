@@ -1,3 +1,5 @@
+local common = require('common')
+
 local M = {}
 
 ---@class pses.opts
@@ -157,42 +159,6 @@ local start_or_attach_pses = function(command, buf)
   end)
 end
 
----@param args string
----@return string[]
-local parse_args = function(args)
-  args = vim.fn.trim(args) .. ' '
-
-  local result = {}
-  local i = 1
-
-  while i < string.len(args) do
-    i = string.find(args, '%S', i) --[[@as integer]]
-
-    local quote
-    if string.byte(args, i) == string.byte("'") then
-      quote = "'"
-    elseif string.byte(args, i) == string.byte('"') then
-      quote = '"'
-    end
-
-    if quote then
-      local next_i = string.find(args, quote, i + 1, true)
-      if not next_i then
-        table.insert(result, string.sub(args, i) .. quote)
-        return result
-      end
-      table.insert(result, string.sub(args, i, next_i))
-      i = next_i + 2
-    else
-      local next_i = string.find(args, '%s', i)
-      table.insert(result, string.sub(args, i, next_i - 1))
-      i = next_i + 1
-    end
-  end
-
-  return result
-end
-
 local setup_dap = function()
   local dap = require('dap')
 
@@ -234,7 +200,7 @@ local setup_dap = function()
       args = function()
         return coroutine.create(function(co)
           vim.ui.input({ prompt = 'Arguments: ' }, function(input)
-            coroutine.resume(co, parse_args(input))
+            coroutine.resume(co, common.parse_args_preserve_quotes(input))
           end)
         end)
       end,

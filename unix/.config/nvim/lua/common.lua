@@ -71,4 +71,76 @@ M.augroup = vim.api.nvim_create_augroup('dotfiles', {})
 
 M.config_path = vim.fs.normalize(vim.fn.resolve(vim.fn.stdpath('config')))
 
+---@param args string
+---@return string[]
+M.parse_args_preserve_quotes = function(args)
+  args = vim.fn.trim(args) .. ' '
+
+  local result = {}
+  local i = 1
+
+  while i < string.len(args) do
+    i = string.find(args, '%S', i) --[[@as integer]]
+
+    local quote
+    if string.byte(args, i) == string.byte("'") then
+      quote = "'"
+    elseif string.byte(args, i) == string.byte('"') then
+      quote = '"'
+    end
+
+    if quote then
+      local next_i = string.find(args, quote, i + 1, true)
+      if not next_i then
+        table.insert(result, string.sub(args, i) .. quote)
+        return result
+      end
+      table.insert(result, string.sub(args, i, next_i))
+      i = next_i + 2
+    else
+      local next_i = string.find(args, '%s', i)
+      table.insert(result, string.sub(args, i, next_i - 1))
+      i = next_i + 1
+    end
+  end
+
+  return result
+end
+
+---@param args string
+---@return string[]
+M.parse_args = function(args)
+  args = vim.fn.trim(args) .. ' '
+
+  local result = {}
+  local i = 1
+
+  while i < string.len(args) do
+    i = string.find(args, '%S', i) --[[@as integer]]
+
+    local quote
+    if string.byte(args, i) == string.byte("'") then
+      quote = "'"
+    elseif string.byte(args, i) == string.byte('"') then
+      quote = '"'
+    end
+
+    if quote then
+      local next_i = string.find(args, quote, i + 1, true)
+      if not next_i then
+        table.insert(result, string.sub(args, i + 1))
+        return result
+      end
+      table.insert(result, string.sub(args, i + 1, next_i - 1))
+      i = next_i + 2
+    else
+      local next_i = string.find(args, '%s', i)
+      table.insert(result, string.sub(args, i, next_i - 1))
+      i = next_i + 1
+    end
+  end
+
+  return result
+end
+
 return M

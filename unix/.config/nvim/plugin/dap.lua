@@ -25,7 +25,7 @@ vim.keymap.set('n', common.ctrl_f9(), function()
 end)
 
 ---@param buf integer
-local set_dap_keymap = function(buf)
+local set_keymap = function(buf)
   vim.keymap.set('n', '<C-Left>', function()
     dap.step_out()
   end, { buf = buf })
@@ -42,18 +42,18 @@ local set_dap_keymap = function(buf)
     dap.step_over()
   end, { buf = buf })
 
-  vim.keymap.set('n', 'K', function()
+  vim.keymap.set('n', '<Leader>k', function()
     dap_widgets.hover()
   end, { buf = buf })
 end
 
 ---@param buf integer
-local del_dap_keymap = function(buf)
+local del_keymap = function(buf)
   vim.keymap.del('n', '<C-Left>', { buf = buf })
   vim.keymap.del('n', '<C-Right>', { buf = buf })
   vim.keymap.del('n', '<C-Up>', { buf = buf })
   vim.keymap.del('n', '<C-Down>', { buf = buf })
-  vim.keymap.del('n', 'K', { buf = buf })
+  vim.keymap.del('n', '<Leader>k', { buf = buf })
 end
 
 ---@param filetype string
@@ -75,11 +75,11 @@ dap.listeners.after['event_initialized']['dotfiles'] = function(session)
     pattern = session.filetype,
     group = common.augroup,
     callback = function(args)
-      set_dap_keymap(args.buf)
+      set_keymap(args.buf)
     end,
   })
 
-  valid_buffers(session.filetype):each(set_dap_keymap)
+  valid_buffers(session.filetype):each(set_keymap)
 
   vim.api.nvim_create_user_command('DapSidebar', function()
     dap_widgets.sidebar(dap_widgets.scopes).open()
@@ -88,7 +88,7 @@ dap.listeners.after['event_initialized']['dotfiles'] = function(session)
   session.on_close['dotfiles'] = function()
     vim.api.nvim_del_user_command('DapSidebar')
     vim.api.nvim_del_autocmd(id)
-    valid_buffers(session.filetype):each(del_dap_keymap)
+    valid_buffers(session.filetype):each(del_keymap)
   end
 end
 
@@ -118,3 +118,46 @@ dap.adapters.cmake_preset = function(callback)
     })
   end)
 end
+
+local last_path = ''
+
+dap.configurations.cpp = {
+  {
+    type = 'lldb',
+    request = 'launch',
+    name = 'Launch executable',
+    program = function()
+      return coroutine.create(function(co)
+        vim.ui.input({ prompt = 'Path: ', completion = 'file', default = last_path }, function(path)
+          last_path = path
+          coroutine.resume(co, path)
+        end)
+      end)
+    end,
+  },
+  {
+    type = 'lldb',
+    request = 'launch',
+    name = 'Launch executable with args',
+    program = function()
+      return coroutine.create(function(co)
+        vim.ui.input({ prompt = 'Path: ', completion = 'file', default = last_path }, function(path)
+          last_path = path
+          coroutine.resume(co, path)
+        end)
+      end)
+    end,
+    args = function()
+      return coroutine.create(function(co)
+        vim.ui.input({ prompt = 'Arguments: ' }, function(input)
+          coroutine.resume(co, common.parse_args(input))
+        end)
+      end)
+    end,
+  },
+}
+
+dap.adapters.lldb = {
+  type = 'executable',
+  command = 'lldb-dap',
+}
