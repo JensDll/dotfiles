@@ -1,0 +1,10 @@
+hl.on('hyprland.start', function()
+  hl.exec_cmd('systemctl --user start hyprpolkitagent.service')
+  hl.exec_cmd('hyprpaper')
+  hl.exec_cmd('hypridle')
+  hl.exec_cmd('hyprsunset')
+end)
+
+hl.on('hyprland.shutdown', function()
+  hl.exec_cmd('systemctl --user stop hyprpolkitagent.service')
+end)

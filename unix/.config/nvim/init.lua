@@ -122,6 +122,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 local parser_map = setmetatable({
   ['sh'] = 'bash',
+  ['PKGBUILD'] = 'bash',
 }, {
   __index = function(_, key)
     return key
@@ -254,6 +255,7 @@ require('conform').setup({
     jsonc = { 'deno_fmt' },
     sh = { 'shfmt' },
     bash = { 'shfmt' },
+    PKGBUILD = { 'shfmt' },
     python = { 'ruff_fix', 'ruff_format' },
     xml = { 'yq_xml' },
   },
