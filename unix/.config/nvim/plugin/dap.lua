@@ -26,34 +26,39 @@ end)
 
 ---@param buf integer
 local set_keymap = function(buf)
-  vim.keymap.set('n', '<C-Left>', function()
+  vim.keymap.set('n', '<Leader><Left>', function()
     dap.step_out()
   end, { buf = buf })
 
-  vim.keymap.set('n', '<C-Right>', function()
+  vim.keymap.set('n', '<Leader><Right>', function()
     dap.step_into()
   end, { buf = buf })
 
-  vim.keymap.set('n', '<C-Up>', function()
+  vim.keymap.set('n', '<Leader><Up>', function()
     dap.restart_frame()
   end, { buf = buf })
 
-  vim.keymap.set('n', '<C-Down>', function()
+  vim.keymap.set('n', '<Leader><Down>', function()
     dap.step_over()
   end, { buf = buf })
 
   vim.keymap.set('n', '<Leader>k', function()
     dap_widgets.hover()
   end, { buf = buf })
+
+  vim.keymap.set('n', '<Leader>.', function()
+    dap_widgets.preview()
+  end, { buf = buf })
 end
 
 ---@param buf integer
 local del_keymap = function(buf)
-  vim.keymap.del('n', '<C-Left>', { buf = buf })
-  vim.keymap.del('n', '<C-Right>', { buf = buf })
-  vim.keymap.del('n', '<C-Up>', { buf = buf })
-  vim.keymap.del('n', '<C-Down>', { buf = buf })
+  vim.keymap.del('n', '<Leader><Left>', { buf = buf })
+  vim.keymap.del('n', '<Leader><Right>', { buf = buf })
+  vim.keymap.del('n', '<Leader><Up>', { buf = buf })
+  vim.keymap.del('n', '<Leader><Down>', { buf = buf })
   vim.keymap.del('n', '<Leader>k', { buf = buf })
+  vim.keymap.del('n', '<Leader>.', { buf = buf })
 end
 
 ---@param filetype string

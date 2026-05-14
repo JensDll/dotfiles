@@ -52,6 +52,11 @@ if common.is_linux() then
   })
 end
 
+vim.keymap.set('n', '<A-Up>', ':move .-2<CR>', { desc = 'Move current line up' })
+vim.keymap.set('n', '<A-Down>', ':move .+1<CR>', { desc = 'Move current line down' })
+vim.keymap.set('v', '<A-Up>', ":move '<-2<CR>gv", { desc = 'Move selected lines up' })
+vim.keymap.set('v', '<A-Down>', ":move '>+1<CR>gv", { desc = 'Move selected lines down' })
+
 vim.keymap.set('n', '<Leader>q', '<Cmd>quit<CR>', { desc = ':quit' })
 
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
@@ -251,6 +256,7 @@ require('conform').setup({
     cpp = { 'clang-format' },
     javascript = { 'deno_fmt' },
     typescript = { 'deno_fmt' },
+    css = { 'deno_fmt' },
     json = { 'deno_fmt' },
     jsonc = { 'deno_fmt' },
     sh = { 'shfmt' },
