@@ -15,12 +15,18 @@ hl.bind(super('f'), hl.dsp.exec_cmd('firefox'))
 hl.bind(super('d'), hl.dsp.exec_cmd('firefox --new-window ~/Documents'))
 hl.bind(super('c'), hl.dsp.exec_cmd('chromium'))
 hl.bind(super('q'), hl.dsp.window.close())
+hl.bind(super('p'), hl.dsp.exec_cmd('seahorse'))
+hl.bind(super('space'), hl.dsp.exec_cmd('hyprlauncher'))
+hl.bind(super('a'), hl.dsp.exec_cmd('pavucontrol'))
+hl.bind(super('v'), hl.dsp.exec_cmd('vlc'))
 
 for i = 1, 10 do
   local key = i % 10
   hl.bind(super(key), hl.dsp.focus({ workspace = i }))
   hl.bind(super_shift(key), hl.dsp.window.move({ workspace = i }))
 end
+
+hl.bind(super('s'), hl.dsp.exec_cmd('~/src/vin/out/build/debug/src/vin/vin --toggle'))
 
 hl.bind(super('left'), hl.dsp.focus({ workspace = 'e-1' }))
 hl.bind(super('right'), hl.dsp.focus({ workspace = 'e+1' }))

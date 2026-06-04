@@ -18,12 +18,15 @@ hl.config({
   },
   input = {
     kb_layout = 'gb',
-    sensitivity = -0.7,
+    sensitivity = -0.8,
   },
   animations = {
     enabled = false,
   },
   misc = {
     disable_hyprland_logo = true,
+  },
+  binds = {
+    hide_special_on_workspace_change = true,
   },
 })

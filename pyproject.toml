@@ -4,7 +4,7 @@ version = "0.1.0"
 requires-python = "~=3.14.0"
 
 [dependency-groups]
-dev = ["ruff==0.14.10", "ty==0.0.10"]
+dev = ["ruff==0.15.14", "ty==0.0.39"]
 
 [tool.ruff]
 line-length = 120
