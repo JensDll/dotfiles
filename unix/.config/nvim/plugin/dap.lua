@@ -166,3 +166,30 @@ dap.adapters.lldb = {
   type = 'executable',
   command = 'lldb-dap',
 }
+
+dap.configurations.python = {
+  {
+    type = 'debugpy',
+    request = 'launch',
+    name = 'Launch file',
+    program = '${file}',
+  },
+  {
+    type = 'debugpy',
+    request = 'launch',
+    name = 'Launch file with arguments',
+    program = '${file}',
+    args = function()
+      return coroutine.create(function(co)
+        vim.ui.input({ prompt = 'Arguments: ' }, function(input)
+          coroutine.resume(co, common.parse_args(input))
+        end)
+      end)
+    end,
+  },
+}
+
+dap.adapters.debugpy = {
+  type = 'executable',
+  command = 'debugpy-adapter',
+}

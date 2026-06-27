@@ -254,24 +254,28 @@ require('conform').setup({
     cmake = { 'gersemi' },
     c = { 'clang-format' },
     cpp = { 'clang-format' },
-    javascript = { 'deno_fmt' },
-    typescript = { 'deno_fmt' },
-    css = { 'deno_fmt' },
-    json = { 'deno_fmt' },
-    jsonc = { 'deno_fmt' },
     sh = { 'shfmt' },
     bash = { 'shfmt' },
     PKGBUILD = { 'shfmt' },
     python = { 'ruff_fix', 'ruff_format' },
-    xml = { 'yq_xml' },
+    javascript = { 'deno_fmt' },
+    typescript = { 'deno_fmt' },
+    markdown = { 'deno_fmt' },
+    json = { 'deno_fmt' },
+    jsonc = { 'deno_fmt' },
+    css = { 'deno_fmt' },
+    scss = { 'deno_fmt' },
+    html = { 'deno_fmt' },
+    yaml = { 'deno_fmt' },
+    xml = { 'deno_fmt_xml_with_html' },
   },
   default_format_opts = {
     lsp_format = 'fallback',
   },
   formatters = {
-    ['yq_xml'] = {
-      command = 'yq',
-      args = { '--input-format', 'xml', '--output-format', 'xml', '-P' },
+    ['deno_fmt_xml_with_html'] = {
+      command = 'deno',
+      args = { 'fmt', '--ext', 'html', '-' },
     },
   },
   format_on_save = function(id)
@@ -360,6 +364,7 @@ require('mini.icons').setup()
 require('mini.files').setup({
   options = {
     permanent_delete = false,
+    lsp_timeout = 0,
   },
   mappings = {
     show_help = '',
