@@ -35,7 +35,7 @@ EOF
 }
 
 parse_parameters() {
-  local -a arguments
+  local -a args
 
   yes=0
 
@@ -54,14 +54,14 @@ parse_parameters() {
       usage
       ;;
     *)
-      arguments+=("$1")
+      args+=("$1")
       ;;
     esac
 
     shift
   done
 
-  action=${arguments[0]:-home}
+  action=${args[0]:-home}
 }
 
 parse_parameters "$@"
@@ -117,6 +117,7 @@ a | ar | arc | arch)
   sudo install -m 755 -t /usr/local/bin "${misc}"/arch-kernel-install
   sudo install -D -m 644 -t /etc/systemd/user.conf.d "${misc}"/default-timeout.conf
   sudo install -D -m 644 -t /etc/pacman.d/hooks "${misc}"/*.hook
+  sudo install -D -m 644 -t /etc/pacman.d "${misc}"/mirrorlist
   for hook in /usr/share/libalpm/hooks/*mkinitcpio*; do
     sudo ln -s -f /dev/null /etc/pacman.d/hooks/"${hook##*/}"
   done

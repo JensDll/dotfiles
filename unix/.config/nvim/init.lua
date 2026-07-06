@@ -40,8 +40,6 @@ vim.cmd([[
   aunmenu PopUp.-2-
 ]])
 
-require('statusline').setup()
-
 vim.keymap.set('n', '<Esc>', '<Cmd>nohlsearch<CR>')
 
 vim.keymap.set({ 'n', 'x', 'i' }, '<C-s>', '<Cmd>write<CR>', { desc = 'Save changes' })
@@ -109,7 +107,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking text',
   group = common.augroup,
   callback = function()
-    vim.hl.on_yank({ timeout = 300 })
+    vim.hl.hl_op({ timeout = 300 })
   end,
 })
 
@@ -391,4 +389,6 @@ require('pses').setup({
   },
 })
 
-vim.lsp.enable({ 'luals', 'clangd', 'python', 'deno', 'csharp' })
+require('statusline').setup()
+
+vim.lsp.enable({ 'luals', 'clangd', 'python', 'deno', 'csharp', 'blueprint' })
