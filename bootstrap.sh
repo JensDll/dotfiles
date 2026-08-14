@@ -106,18 +106,28 @@ h | ho | hom | home)
   ;;
 u | ud | ude | udev)
   set -x
-  sudo cp "${misc}"/*.hwdb /usr/lib/udev/hwdb.d
+  sudo install -m 644 -t /etc/udev/hwdb.d "${misc}"/*.hwdb
+  sudo install -m 644 -t /etc/udev/rules.d "${misc}"/*.rules
   sudo systemd-hwdb update
   sudo udevadm trigger
   ;;
 a | ar | arc | arch)
   set -x
-  sudo install -m 644 -t /etc/mkinitcpio.conf.d "${misc}"/90-mkinitcpio.conf
+
   sudo install -m 644 -t /etc "${misc}"/pacman.conf
-  sudo install -m 755 -t /usr/local/bin "${misc}"/arch-kernel-install
+  sudo install -m 644 -t /etc "${misc}"/fstab
+
+  sudo install -m 644 -t /etc/mkinitcpio.conf.d "${misc}"/90-mkinitcpio.conf
+
+  sudo install -m 644 -t /etc/modules-load.d "${misc}"/zram.conf
+
   sudo install -D -m 644 -t /etc/systemd/user.conf.d "${misc}"/default-timeout.conf
-  sudo install -D -m 644 -t /etc/pacman.d/hooks "${misc}"/*.hook
+
   sudo install -D -m 644 -t /etc/pacman.d "${misc}"/mirrorlist
+  sudo install -D -m 644 -t /etc/pacman.d/hooks "${misc}"/*.hook
+
+  sudo install -m 755 -t /usr/local/bin "${misc}"/arch-kernel-install
+
   for hook in /usr/share/libalpm/hooks/*mkinitcpio*; do
     sudo ln -s -f /dev/null /etc/pacman.d/hooks/"${hook##*/}"
   done

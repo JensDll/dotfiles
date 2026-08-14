@@ -1,0 +1,3 @@
+UUID=452d2fb5-2291-44cb-bc1e-9c3968faa187 / btrfs rw,relatime,ssd,discard=async,space_cache=v2,subvol=/	0 1
+UUID=8806-2897 /boot vfat rw,relatime,fmask=0077,dmask=0077,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 2
+UUID=f6d75edf-dfd0-4f40-b125-e5045ee8a2ee none swap defaults,discard,pri=100,x-systemd.makefs 0 0

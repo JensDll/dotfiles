@@ -153,7 +153,7 @@ declare -r root_uuid
 if [[ -n ${kernel_build_dir} ]]; then
   if [[ no_module -eq 0 ]]; then
     install -D -m 644 "${image_name}" "${modules_dir}"/vmlinuz
-    ZSTD_CLEVEL=19 make -j -f "${makefile}" modules_install INSTALL_MOD_PATH=/usr INSTALL_MOD_STRIP=1
+    ZSTD_CLEVEL=19 make -j -f "${makefile}" modules_install MODLIB="${modules_dir}" INSTALL_MOD_STRIP=1
     rm "${modules_dir}"/build
   fi
 

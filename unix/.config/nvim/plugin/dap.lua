@@ -8,15 +8,15 @@ vim.fn.sign_define('DapLogPoint', { text = 'L', texthl = 'Character', linehl = '
 vim.fn.sign_define('DapStopped', { text = '', texthl = '', linehl = 'DiffAdd', numhl = '' })
 vim.fn.sign_define('DapBreakpointRejected', { text = 'R', texthl = 'Character', linehl = '', numhl = '' })
 
-vim.keymap.set('n', '<F5>', function()
+vim.keymap.set('n', '<Leader><PageDown>', function()
   dap.continue()
 end)
 
-vim.keymap.set('n', common.ctrl_f5(), function()
+vim.keymap.set('n', '<Leader><Delete>', function()
   dap.terminate()
 end)
 
-vim.keymap.set('n', '<F9>', function()
+vim.keymap.set('n', '<Leader><End>', function()
   dap.toggle_breakpoint()
 end)
 
