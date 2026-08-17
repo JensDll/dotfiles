@@ -17,19 +17,16 @@ usage() {
 Usage: ${program} <action> [options]
 
   <action> = home
-  The type of action to perform:
-    - home
-      Bootstrap the local unix directory into the user's home directory.
-    - udev
-      Keyboard rules.
-    - arch
-      Arch Linux related config.
+    The type of action to perform:
+      - home
+        Configuration in home from ./unix
+      - udev
+        Udev configuration in /etc/udev
+      - root
+        Miscellaneous configuration in /usr and /etc
 
   --? | --help
-  Print this message and exit.
-
-  --yes
-  Don't ask for permission.
+    Print this message and exit
 EOF
   exit "${1:-2}"
 }
@@ -45,9 +42,6 @@ parse_parameters() {
     case "${option}" in
     -\? | -h | -he | -hel | -help)
       usage 0
-      ;;
-    -y | -ye | -yes)
-      yes=1
       ;;
     -*)
       echo "Unknown option: $1"
@@ -66,18 +60,13 @@ parse_parameters() {
 
 parse_parameters "$@"
 declare -r action
-declare -r yes
 
-bootstrap_home() {
-  chmod 700 "${unix}"/.gnupg
-
+case "${action}" in
+h | ho | hom | home)
   rsync \
-    --no-perms \
     --archive \
     --verbose \
     --human-readable \
-    --safe-links \
-    --copy-links \
     --filter 'exclude /.config' \
     --filter 'exclude __pycache__/' \
     "${unix}"/ \
@@ -90,19 +79,6 @@ bootstrap_home() {
     ln -s -f config.ghostty.macos config.ghostty.macos.active
     popd
   fi
-}
-
-case "${action}" in
-h | ho | hom | home)
-  if [[ yes -eq 1 ]]; then
-    bootstrap_home
-  else
-    read -r -p 'This may overwrite existing files in your home directory. Are you sure? (Y/n) '
-    declare -rl yes_no="${REPLY:-y}"
-    if [[ ${yes_no} = y ]]; then
-      bootstrap_home
-    fi
-  fi
   ;;
 u | ud | ude | udev)
   set -x
@@ -111,7 +87,7 @@ u | ud | ude | udev)
   sudo systemd-hwdb update
   sudo udevadm trigger
   ;;
-a | ar | arc | arch)
+r | ro | roo | root)
   set -x
 
   sudo install -m 644 -t /etc "${misc}"/pacman.conf

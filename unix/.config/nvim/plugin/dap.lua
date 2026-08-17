@@ -20,7 +20,7 @@ vim.keymap.set('n', '<Leader><End>', function()
   dap.toggle_breakpoint()
 end)
 
-vim.keymap.set('n', common.ctrl_f9(), function()
+vim.keymap.set('n', '<Leader><Home>', function()
   dap.clear_breakpoints()
 end)
 

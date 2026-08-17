@@ -59,6 +59,8 @@ vim.keymap.set('n', '<Leader>q', '<Cmd>quit<CR>', { desc = ':quit' })
 
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
+vim.keymap.set('n', '<C-p>', '<C-i>', { desc = 'Jump to newer location' })
+
 vim.keymap.set('n', '<Leader>c', function()
   vim.ui.input({ completion = 'shellcmd', prompt = '$ ' }, function(command)
     if not command or command == '' then
