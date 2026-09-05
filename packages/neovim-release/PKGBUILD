@@ -1,5 +1,5 @@
 pkgname=neovim
-pkgver=0.13.0_dev_834+gd844a276bb
+pkgver=0.12.5
 pkgrel=1
 pkgdesc='Fork of Vim aiming to improve user experience, plugins, and GUIs'
 arch=(x86_64)
@@ -28,20 +28,17 @@ optdepends=(
   'wl-clipboard: wayland clipboard provider'
 )
 source=(
-  git+https://github.com/neovim/neovim.git#commit=d844a276bb0ca7fa721f2d688f8060a990d6ec36?signed
+  https://github.com/neovim/neovim/archive/refs/tags/v"${pkgver}".tar.gz
 )
 sha512sums=(
-  15db1f5d0e0c330e0045f1bf642569241ca0b10467d3f1ba1889a5194526281a325dc06051ae00037bb36f1e3f2a590e5bc6db0e7ac81bfef2763a1b1d13d966
-)
-validpgpkeys=(
-  968479A1AFF927E37D1A566BB5690EEEBB952194
+  94b681395a60ce06ec327c578f875b828256891d660c9e34f1f9c0b48577d2f85cbe0c2a8f377fba3b068782cc54dcaeda046045a2bdb7166340e12cf3d70354
 )
 
 prepare() {
   cmake \
     --install-prefix /usr \
     -B build \
-    -S neovim \
+    -S "neovim-${pkgver}" \
     -G Ninja \
     -D CMAKE_BUILD_TYPE:STRING=Release \
     -D CMAKE_C_COMPILER:STRING=clang \
@@ -64,7 +61,7 @@ check() {
 package() {
   cmake --install build --prefix "${pkgdir}"/usr
   ln -s /usr/lib/tree_sitter "${pkgdir}"/usr/share/nvim/runtime/parser
-  install -D -m 644 neovim/LICENSE.txt -t "${pkgdir}"/usr/share/licenses/"${pkgname}"
+  install -D -m 644 -t "${pkgdir}"/usr/share/licenses/"${pkgname}" neovim-"${pkgver}"/LICENSE.txt
   install -D -m 644 <(
     cat <<<'set runtimepath+=/usr/share/vim/vimfiles,/usr/share/vim/vimfiles/after'
   ) "${pkgdir}"/etc/xdg/nvim/sysinit.vim

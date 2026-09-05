@@ -9,13 +9,13 @@ usage() {
 Usage: ${program} <path> [<tree-ish>] [options]
 
   <path>
-  Path to the source.
+    Path to the source.
 
   <tree-ish>
-  Tree-ish git object for when <path> is a git repository.
+    Tree-ish git object for when <path> is a git repository.
 
   --? | --help
-  Print this message and exit.
+    Print this message and exit.
 EOF
   exit "${1:-2}"
 }

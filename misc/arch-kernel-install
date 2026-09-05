@@ -9,23 +9,23 @@ usage() {
 Usage: ${program} [<kernel_build_dir>] [options]
 
   <kernel_build_dir>
-  The kernel build directory.
+    The kernel build directory.
 
   --? | --help
-  Print this message and exit.
+    Print this message and exit.
 
   --no-module
-  Do not install modules.
+    Do not install modules.
 
   --no-boot
-  Do not install boot.
+    Do not install boot.
 
   --no-loader-conf
-  Do not install the systemd-boot loader config.
+    Do not install the systemd-boot loader config.
 
   --remove [<version>]
-  Remove the specified <version>, or pacman installed version, from boot and modules.
-  The options --no-module and --no-boot have the expected effect.
+    Remove the specified <version>, or pacman installed version, from boot and modules.
+    The options --no-module and --no-boot have the expected effect.
 EOF
   exit "${1:-2}"
 }
@@ -150,18 +150,10 @@ EOF
 root_uuid=$(findmnt --mountpoint / --output UUID --noheadings)
 declare -r root_uuid
 
-if [[ -n ${kernel_build_dir} ]]; then
-  if [[ no_module -eq 0 ]]; then
-    install -D -m 644 "${image_name}" "${modules_dir}"/vmlinuz
-    ZSTD_CLEVEL=19 make -j -f "${makefile}" modules_install MODLIB="${modules_dir}" INSTALL_MOD_STRIP=1
-    rm "${modules_dir}"/build
-  fi
-
-  if [[ no_boot -eq 0 ]]; then
-    install_boot
-  fi
-
-  exit 0
+if [[ -n ${kernel_build_dir} && no_module -eq 0 ]]; then
+  install -D -m 644 "${image_name}" "${modules_dir}"/vmlinuz
+  ZSTD_CLEVEL=19 make -j -f "${makefile}" modules_install MODLIB="${modules_dir}" INSTALL_MOD_STRIP=1
+  rm "${modules_dir}"/build
 fi
 
 if [[ no_boot -eq 0 ]]; then
