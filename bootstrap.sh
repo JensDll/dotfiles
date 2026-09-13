@@ -34,8 +34,6 @@ EOF
 parse_parameters() {
   local -a args
 
-  yes=0
-
   while [[ $# -gt 0 ]]; do
     local -l option="${1/#--/-}"
 

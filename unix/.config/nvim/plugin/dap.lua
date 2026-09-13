@@ -106,19 +106,30 @@ dap.configurations.cmake = {
 }
 
 dap.adapters.cmake_preset = function(callback)
-  vim.ui.input({ prompt = 'Preset: ' }, function(preset)
+  vim.ui.input({ prompt = 'preset [source] : ' }, function(input)
+    local result = vim.split(input, '%s+')
+
+    local preset = result[1]
+    local source = result[2]
+
+    local args = { '--debugger', '--debugger-pipe', '${pipe}' }
+
+    if preset then
+      table.insert(args, '--preset')
+      table.insert(args, preset)
+    end
+
+    if source then
+      table.insert(args, '-S')
+      table.insert(args, source)
+    end
+
     callback({
       type = 'pipe',
       pipe = '${pipe}',
       executable = {
         command = 'cmake',
-        args = {
-          '--preset',
-          preset,
-          '--debugger',
-          '--debugger-pipe',
-          '${pipe}',
-        },
+        args = args,
       },
     })
   end)
