@@ -120,7 +120,16 @@ if [[ remove -eq 1 ]]; then
   exit 0
 fi
 
-install_boot() {
+root_uuid=$(findmnt --mountpoint / --output UUID --noheadings)
+declare -r root_uuid
+
+if [[ -n ${kernel_build_dir} && no_module -eq 0 ]]; then
+  install -D -m 644 "${image_name}" "${modules_dir}"/vmlinuz
+  ZSTD_CLEVEL=19 make -j -f "${makefile}" modules_install MODLIB="${modules_dir}" INSTALL_MOD_STRIP=1
+  rm "${modules_dir}"/build
+fi
+
+if [[ no_boot -eq 0 ]]; then
   install -D "${image_name}" /boot/"${machine_id}"/"${version}"/linux
 
   install -D <(
@@ -135,27 +144,14 @@ options    root=UUID=${root_uuid} rw quiet
 EOF
   ) /boot/loader/entries/"${machine_id}"-"${version}".conf
 
-  if [[ no_loader_conf -eq 0 ]]; then
-    install -D <(
-      cat <<EOF
-timeout 20
-default ${machine_id}-*
-EOF
-    ) /boot/loader/loader.conf
-  fi
-
   mkinitcpio --kernel "${version}" --generate /boot/"${machine_id}"/"${version}"/initrd
-}
-
-root_uuid=$(findmnt --mountpoint / --output UUID --noheadings)
-declare -r root_uuid
-
-if [[ -n ${kernel_build_dir} && no_module -eq 0 ]]; then
-  install -D -m 644 "${image_name}" "${modules_dir}"/vmlinuz
-  ZSTD_CLEVEL=19 make -j -f "${makefile}" modules_install MODLIB="${modules_dir}" INSTALL_MOD_STRIP=1
-  rm "${modules_dir}"/build
 fi
 
-if [[ no_boot -eq 0 ]]; then
-  install_boot
+if [[ no_loader_conf -eq 0 ]]; then
+  install -D <(
+    cat <<EOF
+timeout 20
+default @saved
+EOF
+  ) /boot/loader/loader.conf
 fi
