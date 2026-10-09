@@ -1,3 +1,5 @@
+import re
+
 import lldb
 
 import lldbdash.commands
@@ -20,9 +22,7 @@ def register_dashboard(debugger: lldb.SBDebugger):
 
     debugger.HandleCommand(f"command container add --help 'The command container for the LLDB dashboard.' {container}")
 
-    debugger.HandleCommand("target stop-hook add --script-class lldbdash.dashboard.Dashboard")
-
-    stop_hook_id = get_stop_hook_id(debugger)
+    stop_hook_id = add_stop_hook(debugger)
 
     def on_toggle(prev_value: bool, value: bool):
         if not prev_value and value:
@@ -108,15 +108,14 @@ def register_settings(
     debugger.HandleCommand(f"command script add --class {list_command.handlers[0]} {settings_container} list")
 
 
-def get_stop_hook_id(debugger: lldb.SBDebugger):
+def add_stop_hook(debugger: lldb.SBDebugger) -> int:
     ci: lldb.SBCommandInterpreter = debugger.GetCommandInterpreter()
     result = lldb.SBCommandReturnObject()
-    ci.HandleCommand("target stop-hook list", result)
+    ci.HandleCommand("target stop-hook add --script-class lldbdash.dashboard.Dashboard", result)
     output: str = result.GetOutput()
-    lines = output.splitlines()
-    for i, line in enumerate(lines):
-        if line.endswith("lldbdash.dashboard.Dashboard"):
-            return int(lines[i - 2][-1])
+    pattern = re.compile(r"#(\d)")
+    if match := pattern.search(output):
+        return int(match.group(1))
     raise Exception(
-        'Failed to determine stop hook id from "target stop-hook list" output. Dashboard failed to initialize.'
+        'Failed to determine stop hook id from "target stop-hook add" output. Dashboard failed to initialize.'
     )
